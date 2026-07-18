@@ -1,4 +1,5 @@
 import { ApiError, api, apiFile } from "./api.ts";
+import { productIcon } from "./product-icons.ts";
 import "./styles.css";
 import type { AppState, ShoppingItem, ShoppingList, User } from "./types.ts";
 
@@ -289,7 +290,7 @@ function itemMarkup(item: ShoppingItem): string {
     <button class="check-button" type="button" data-toggle-item aria-label="${
       item.completedAt ? "Wieder auf die Liste setzen" : "Als erledigt markieren"
     }"><span aria-hidden="true">✓</span></button>
-    <button class="item-image ${item.imageId ? "" : "fallback"}" type="button" ${item.imageId ? "data-preview-image" : "data-edit-item"} aria-label="${escapeHtml(item.imageId ? `${item.name} Bild ansehen` : `${item.name} bearbeiten`)}">${item.imageId ? `<img src="/api/images/${escapeHtml(item.imageId)}" alt="">` : categoryIcons[item.category] || "🛒"}</button>
+    <button class="item-image ${item.imageId ? "" : "fallback"}" type="button" ${item.imageId ? "data-preview-image" : "data-edit-item"} aria-label="${escapeHtml(item.imageId ? `${item.name} Bild ansehen` : `${item.name} bearbeiten`)}">${item.imageId ? `<img src="/api/images/${escapeHtml(item.imageId)}" alt="">` : productIcon(item.name) || categoryIcons[item.category] || "🛒"}</button>
     <button class="item-copy" type="button" data-edit-item>
       <strong>${escapeHtml(item.name)}</strong>${item.note ? `<small>${escapeHtml(item.note)}</small>` : ""}
     </button>

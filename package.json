@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "format": "biome check --write .",
+    "icons:generate": "node scripts/generate-product-icons.ts",
     "check": "npm run typecheck && npm test && npm run lint && npm run test:browser && npm run build"
   },
   "dependencies": {

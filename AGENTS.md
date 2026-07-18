@@ -13,6 +13,7 @@ The stack is TypeScript on Node.js 26 with SQLite. Separate browser UI (`src/cli
 - `npm test` — run Node unit and integration tests.
 - `npm run test:browser` — run Playwright browser tests.
 - `npm run lint` — check formatting and static analysis with Biome.
+- `npm run icons:generate` — refresh German product symbols from pinned Unicode CLDR data.
 
 Keep setup reproducible and document required environment variables in `.env.example`.
 
