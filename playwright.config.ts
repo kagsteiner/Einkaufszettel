@@ -17,7 +17,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "node scripts/e2e-server.ts",
+    command: "tsx scripts/e2e-server.ts",
     reuseExistingServer: false,
     timeout: 20_000,
     url: "http://127.0.0.1:3012/api/health",

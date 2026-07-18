@@ -4,20 +4,20 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=26.0.0"
+    "node": ">=20.20.2"
   },
   "scripts": {
-    "dev": "node --env-file-if-exists=.env --watch-path=src scripts/dev.ts",
-    "start": "node --env-file-if-exists=.env src/server/main.ts",
-    "build": "npm run typecheck && node scripts/build-client.ts --production",
-    "build:client": "node scripts/build-client.ts",
-    "test": "node --test --test-concurrency=1 tests/*.test.ts",
-    "test:coverage": "node --experimental-test-coverage --test --test-concurrency=1 tests/*.test.ts",
+    "dev": "tsx watch --env-file-if-exists=.env scripts/dev.ts",
+    "start": "tsx --env-file-if-exists=.env src/server/main.ts",
+    "build": "npm run typecheck && tsx scripts/build-client.ts --production",
+    "build:client": "tsx scripts/build-client.ts",
+    "test": "tsx --test --test-concurrency=1 tests/*.test.ts",
+    "test:coverage": "tsx --experimental-test-coverage --test --test-concurrency=1 tests/*.test.ts",
     "test:browser": "npm run build:client && playwright test",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "format": "biome check --write .",
-    "icons:generate": "node scripts/generate-product-icons.ts",
+    "icons:generate": "tsx scripts/generate-product-icons.ts",
     "check": "npm run typecheck && npm test && npm run lint && npm run test:browser && npm run build"
   },
   "dependencies": {
@@ -30,6 +30,7 @@
     "@playwright/test": "^1.61.1",
     "@types/node": "^26.1.1",
     "esbuild": "^0.28.1",
+    "tsx": "^4.23.1",
     "typescript": "^7.0.2"
   }
 }
