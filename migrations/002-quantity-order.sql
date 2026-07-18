@@ -1,0 +1,1 @@
+ALTER TABLE quantity_parts ADD COLUMN sort_position INTEGER NOT NULL DEFAULT 0;

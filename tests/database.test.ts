@@ -40,7 +40,7 @@ test("all initial tables are created by the migration runner", () => {
   ]) {
     assert.ok(names.includes(requiredTable), `Tabelle ${requiredTable} fehlt`);
   }
-  assert.equal(database.prepare("SELECT count(*) AS count FROM schema_migrations").get()?.count, 1);
+  assert.equal(database.prepare("SELECT count(*) AS count FROM schema_migrations").get()?.count, 2);
 });
 
 test("foreign keys are active", () => {

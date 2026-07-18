@@ -20,6 +20,7 @@
     "check": "npm run typecheck && npm test && npm run lint && npm run build && npm run test:browser"
   },
   "dependencies": {
+    "argon2": "^0.44.0",
     "openai": "^6.48.0",
     "sharp": "^0.35.3"
   },

@@ -1,12 +1,21 @@
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { resolve } from "node:path";
+import { handleApiRequest } from "./api.ts";
+import { AuthService } from "./auth-service.ts";
 import { loadConfig } from "./config.ts";
 import { openDatabase } from "./database.ts";
+import { EventHub } from "./event-hub.ts";
+import { HouseholdService } from "./household-service.ts";
 import { applySecurityHeaders, sendJson, serveAppShell, servePublicFile } from "./http.ts";
+import { ShoppingService } from "./shopping-service.ts";
 
 const config = loadConfig();
 const database = await openDatabase(config.databasePath);
+const authService = new AuthService(database, config);
+const householdService = new HouseholdService(database);
+const shoppingService = new ShoppingService(database);
+const eventHub = new EventHub();
 const versionFile = resolve(config.publicDirectory, "version.json");
 let buildVersion = "unknown";
 
@@ -32,8 +41,18 @@ const server = createServer(async (request, response) => {
       sendJson(response, 200, { version: buildVersion });
       return;
     }
-    if (url.pathname.startsWith("/api/")) {
-      sendJson(response, 404, { error: "Nicht gefunden" });
+    if (
+      await handleApiRequest(
+        request,
+        response,
+        url.pathname,
+        authService,
+        householdService,
+        shoppingService,
+        eventHub,
+        config,
+      )
+    ) {
       return;
     }
     if (await servePublicFile(request, response, config.publicDirectory, url.pathname)) {
