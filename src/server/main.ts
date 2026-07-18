@@ -88,7 +88,14 @@ server.listen(config.port, () => {
   console.info(`Einkaufszettel läuft auf Port ${config.port} (${config.appEnvironment}).`);
 });
 
+let shuttingDown = false;
+
 function shutdown(): void {
+  if (shuttingDown) {
+    process.exit(130);
+  }
+  shuttingDown = true;
+  eventHub.close();
   server.close((error) => {
     database.close();
     process.exitCode = error ? 1 : 0;

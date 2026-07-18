@@ -9,6 +9,16 @@ export class EventHub {
   private readonly subscriptions = new Map<string, Set<Subscription>>();
   private revision = 0;
 
+  close(): void {
+    for (const householdSubscriptions of this.subscriptions.values()) {
+      for (const subscription of householdSubscriptions) {
+        clearInterval(subscription.heartbeat);
+        subscription.response.end();
+      }
+    }
+    this.subscriptions.clear();
+  }
+
   subscribe(householdId: string, request: IncomingMessage, response: ServerResponse): void {
     response.writeHead(200, {
       "Cache-Control": "no-store",
