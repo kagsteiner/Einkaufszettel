@@ -9,11 +9,14 @@ import {
   hashToken,
   normalizeDisplayName,
   normalizeEmail,
+  tokenMatches,
   validatePassword,
   verifyPassword,
 } from "./security.ts";
 
 const sessionLifetimeMilliseconds = 30 * 24 * 60 * 60 * 1_000;
+const dummyPasswordHash =
+  "$argon2id$v=19$m=65536,t=3,p=1$0OftY+Vh5hCeZMToNkiRsQ$ioGpHMWbCro+Qz25b9Lzv2ybAKECqnfBnIRg9GnDiD8";
 
 type UserRow = {
   id: string;
@@ -102,7 +105,8 @@ export class AuthService {
       .prepare(`${userQuery} WHERE u.email_normalized = ?`)
       .get(email.normalized) as UserRow | undefined;
 
-    if (!row || !(await verifyPassword(row.password_hash, password))) {
+    const passwordIsValid = await verifyPassword(row?.password_hash || dummyPasswordHash, password);
+    if (!row || !passwordIsValid) {
       throw unauthorized("E-Mail-Adresse oder Passwort ist nicht korrekt.");
     }
     return this.createSession(row, new Date().toISOString());
@@ -135,7 +139,7 @@ export class AuthService {
       .get(hashToken(sessionToken), new Date().toISOString()) as
       | { csrf_token_hash: string }
       | undefined;
-    if (!row || row.csrf_token_hash !== hashToken(csrfToken)) {
+    if (!row || !tokenMatches(row.csrf_token_hash, csrfToken)) {
       throw new AppError(403, "invalid_csrf", "Die Sicherheitsprüfung ist fehlgeschlagen.");
     }
   }
@@ -162,6 +166,7 @@ export class AuthService {
     const sessionToken = createOpaqueToken();
     const csrfToken = createOpaqueToken();
     const expiresAt = new Date(Date.parse(now) + sessionLifetimeMilliseconds).toISOString();
+    this.database.prepare("DELETE FROM sessions WHERE expires_at <= ?").run(now);
     this.database
       .prepare(
         `INSERT INTO sessions

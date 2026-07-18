@@ -10,6 +10,8 @@ export type AppConfig = Readonly<{
   origin: string | null;
   port: number;
   publicDirectory: string;
+  trustProxy: boolean;
+  uploadDirectory: string;
 }>;
 
 const appEnvironments = new Set<AppEnvironment>(["development", "production", "test"]);
@@ -31,6 +33,9 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
   if (appEnvironment === "production" && !origin) {
     throw new Error("APP_ORIGIN ist in der Produktionsumgebung erforderlich.");
   }
+  if (appEnvironment === "production" && !origin?.startsWith("https://")) {
+    throw new Error("APP_ORIGIN muss in der Produktionsumgebung HTTPS verwenden.");
+  }
   if (appEnvironment === "production" && !encryptionKey) {
     throw new Error("APP_ENCRYPTION_KEY ist in der Produktionsumgebung erforderlich.");
   }
@@ -44,6 +49,8 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
     origin,
     port,
     publicDirectory: resolve(environment.PUBLIC_DIRECTORY?.trim() || "dist/public"),
+    trustProxy: environment.TRUST_PROXY === "true",
+    uploadDirectory: resolve(environment.UPLOAD_DIRECTORY?.trim() || "data/uploads"),
   };
 }
 

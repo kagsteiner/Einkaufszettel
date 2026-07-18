@@ -18,7 +18,7 @@ Die Kernfunktionen bleiben auch ohne OpenAI-Zugang nutzbar. AI-Funktionen ergän
 
 Die Registrierung erfolgt mit E-Mail-Adresse, Anzeigename und Passwort. Eine Anmeldung über Google, Apple, Meta oder andere externe Identitätsanbieter ist nicht vorgesehen. Der Anzeigename ist für andere Haushaltsmitglieder sichtbar und muss nicht eindeutig sein. Er kann in den Einstellungen geändert werden.
 
-Passwörter werden niemals im Klartext oder reversibel gespeichert, sondern mit einem geeigneten Passwort-Hashverfahren und individuellem Salt gesichert. Nach erfolgreicher Anmeldung verwendet die Anwendung eine sichere serverseitige Sitzung mit `HttpOnly`-, `Secure`- und `SameSite`-Cookie.
+Passwörter werden niemals im Klartext oder reversibel gespeichert, sondern mit Argon2id und individuellem Salt gesichert. Nach erfolgreicher Anmeldung verwendet die Anwendung eine sichere serverseitige Sitzung mit `HttpOnly`-, `Secure`- und `SameSite`-Cookie; Sitzungstokens liegen in der Datenbank nur als Hash vor. Zustandsändernde HTTP-Anfragen werden zusätzlich gegen CSRF geschützt.
 
 Bei der Registrierung wird automatisch ein persönlicher Haushalt angelegt.
 
@@ -45,6 +45,10 @@ Hat der bisherige Haushalt weitere Mitglieder, wird diese Übertragung in V1 nic
 Ein Haushalt besitzt eine lineare Sammlung von Zetteln ohne Ordner oder weitere Unterstruktur. Benutzer können Zettel und Items anlegen, bearbeiten, löschen und beim Einkauf abhaken.
 
 Items können manuell hinzugefügt werden. Bilder stammen entweder aus einer mitgelieferten Bibliothek, der Kamera oder – soweit der Browser dies unterstützt – der Fotomediathek des Geräts.
+
+### Visuelles Konzept
+
+Die Hauptansicht wirkt wie ein klassischer Einkaufszettel, nicht wie ein Kachelraster. Jede Zeile besitzt links eine große Abhakfläche, daneben ein festes 44–48-Pixel-Bild oder Kategorie-Icon, in der Mitte Produktname und Zusatz und rechts die Menge. Eigene Fotos werden ausschnittfüllend dargestellt und lassen sich antippen. Erledigte Items stehen in einem einklappbaren Bereich am Ende. Kacheln sind nur für bildorientierte Auswahldialoge zulässig.
 
 ### Produktnamen und Duplikate
 
@@ -80,6 +84,8 @@ Beim Hinzufügen werden Items standardmäßig alphabetisch dargestellt. Im Einka
 
 Änderungen eines Haushalts sollen ohne manuelles Neuladen zeitnah auf allen verbundenen Geräten erscheinen. Schreiboperationen erfolgen über HTTP; der Server verteilt Aktualisierungen per Server-Sent Events. Nach einem Verbindungsabbruch lädt der Client den aktuellen Stand erneut.
 
+V1 ist bewusst online-only. Änderungen anderer Haushaltsmitglieder müssen im Supermarkt zeitnah ankommen; ein Offline-Datenmodell oder eine Offline-Warteschlange ist nicht vorgesehen.
+
 Gleichzeitige Änderungen einzelner Textfelder werden nach dem Prinzip „letzte gespeicherte Änderung gewinnt“ behandelt. Das Hinzufügen und Zusammenführen gleicher Items erfolgt atomar auf dem Server, damit parallele Eingaben keine Mengen verlieren.
 
 ## Vorrat
@@ -89,6 +95,8 @@ Vorratsprodukte werden wie Produktnamen normalisiert und innerhalb eines Haushal
 ## AI-gestützte Rezeptanalyse
 
 Ein Benutzer kann ein Rezept fotografieren oder ein vorhandenes Bild auswählen. Der Server sendet das Bild an ein bildfähiges OpenAI-Modell und fordert strukturierte Vorschläge für Produktname, Menge, Einheit und Zusatztext an.
+
+V1 verwendet das Modell `gpt-5.6-terra`. Das Bild wird serverseitig gedreht, verkleinert, ohne Metadaten nach WebP kodiert und als Base64-Data-URL mit Bilddetail `high` an die Responses API gesendet. Die Antwort verwendet ein striktes strukturiertes Schema.
 
 Das Ergebnis ist immer ein unverbindlicher Vorschlag:
 
@@ -114,21 +122,27 @@ Ein AI-Aufruf verwendet immer den Schlüssel des angemeldeten Benutzers, der den
 - Fehlt der Entwicklungsschlüssel, wird der persönliche Schlüssel des angemeldeten Benutzers verwendet.
 - In der Produktionsumgebung wird ausschließlich der persönliche Benutzerschlüssel verwendet. Ein dort versehentlich gesetztes `OPENAI_API_KEY` wird ignoriert.
 
-Standard-API-Keys werden nur auf dem Server verarbeitet und niemals an Browsercode oder andere Benutzer zurückgegeben. Gespeicherte Keys werden mit authentifizierter Verschlüsselung abgelegt und in der Oberfläche nur maskiert angezeigt. Der dafür erforderliche Hauptschlüssel liegt außerhalb der SQLite-Datenbank in der Produktionsumgebung. API Keys dürfen nicht im Klartext in Logs, Fehlermeldungen oder Backups erscheinen.
+Standard-API-Keys werden nur auf dem Server verarbeitet und niemals an Browsercode oder andere Benutzer zurückgegeben. Gespeicherte Keys werden mit AES-256-GCM, zufälliger Nonce und benutzergebundenen Zusatzdaten authentifiziert verschlüsselt und in der Oberfläche nur maskiert angezeigt. Der dafür erforderliche Hauptschlüssel liegt außerhalb der SQLite-Datenbank in der Produktionsumgebung. API Keys dürfen nicht im Klartext in Logs, Fehlermeldungen oder Backups erscheinen.
 
 ## Bilder und Datenschutz
 
 Uploads werden hinsichtlich Dateityp und Größe begrenzt. Bildmetadaten, insbesondere Standortinformationen, werden entfernt. Bilder erhalten nicht erratbare interne Kennungen und werden nur nach erfolgreicher Berechtigungsprüfung ausgeliefert; sie liegen nicht unter frei zugänglichen öffentlichen URLs.
 
-Rezeptbilder werden nach der Analyse gelöscht, sofern der Benutzer sie nicht ausdrücklich als Bild eines Zettels oder Items speichert. Die SQLite-Datenbank speichert Bildmetadaten und Referenzen; die eigentlichen Dateien können im geschützten Dateisystem des VPS liegen.
+Rezeptbilder werden für die Analyse nur im Arbeitsspeicher verarbeitet und nicht dauerhaft gespeichert. Bilder von Zetteln oder Items werden nach WebP konvertiert; die SQLite-Datenbank speichert Metadaten und Referenzen, die eigentlichen Dateien liegen im geschützten Dateisystem des VPS.
 
 ## Architektur
 
-Die Anwendung wird als responsive, browserbasierte TypeScript-Anwendung umgesetzt. Ein Node.js-Server stellt Benutzeroberfläche, HTTP-API und Server-Sent Events bereit. SQLite speichert Benutzer, Haushalte, Zettel, Items, Mengen, Einladungen und Sitzungen.
+Die Anwendung wird als responsive, browserbasierte TypeScript-Anwendung ohne Client-Framework umgesetzt. Ein Node.js-26-Server stellt Benutzeroberfläche, HTTP-API und Server-Sent Events bereit. SQLite speichert Benutzer, Haushalte, Zettel, Items, Mengen, Einladungen und Sitzungen.
 
 Die Architektur trennt Browseroberfläche, API, Domänenlogik und Persistenz. Datenbankänderungen erfolgen über versionierte Migrationen. SQLite läuft im WAL-Modus; schreibende Geschäftsoperationen verwenden Transaktionen. V1 ist für eine einzelne Serverinstanz auf einem VPS ausgelegt, nicht für horizontale Skalierung.
 
 Abhängigkeiten werden bewusst gering gehalten, sicherheitskritische Standardlösungen werden jedoch nicht selbst erfunden. Alle Produktionszugriffe erfolgen über HTTPS. Jede Serveroperation prüft die Sitzung und die Haushaltsmitgliedschaft. Eingaben werden validiert, Datenbankabfragen parametrisiert und sensible Endpunkte gegen Missbrauch begrenzt. Datenbank und Bilder werden regelmäßig gesichert; Wiederherstellungen müssen getestet werden.
+
+Die App besitzt ein Web-App-Manifest, aber keinen cache-basierten Service Worker. HTML und API-Antworten verwenden `no-store`; gehashte JavaScript- und CSS-Dateien dürfen unveränderlich gecacht werden. Beim Start, Wiederanzeigen, Online-Wechsel und SSE-Neuverbinden prüft der Client die Build-Version und lädt bei Abweichung vollständig neu. Ein späterer Push-Service-Worker darf keinen `fetch`- oder Cache-Handler enthalten.
+
+## Qualitätssicherung
+
+Unit- und Integrationstests verwenden `node:test` und echte temporäre SQLite-Datenbanken. OpenAI-Aufrufe werden über einen Fake-Analyzer getestet und benötigen weder Netzwerk noch API Key. Playwright führt den zentralen mobilen Ablauf mit Chromium- und WebKit-Emulation aus. `npm run check` umfasst Typprüfung, Tests, Linting, Produktions-Build und Browserlauf.
 
 ## Nicht Bestandteil von V1
 

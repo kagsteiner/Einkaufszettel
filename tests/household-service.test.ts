@@ -36,6 +36,7 @@ test("an invitation is restricted to its normalized email address", async () => 
 
   assert.equal(preview.householdName, "Mein Haushalt");
   assert.equal(preview.canMoveExistingData, true);
+  assert.equal(preview.existingListCount, 0);
   assert.throws(
     () => householdService.previewInvitation(inviter.user, invitation.token),
     /andere E-Mail-Adresse/,

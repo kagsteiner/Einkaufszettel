@@ -17,4 +17,8 @@ test("unit aliases normalize without converting physical units", () => {
     normalizeQuantity({ amount: "1", unit: "kg" }).normalizedUnit,
     normalizeQuantity({ amount: "1000", unit: "g" }).normalizedUnit,
   );
+  assert.equal(
+    normalizeQuantity({ amount: "2", unit: "Flaschen" }).normalizedUnit,
+    normalizeQuantity({ amount: "1", unit: "Flasche" }).normalizedUnit,
+  );
 });

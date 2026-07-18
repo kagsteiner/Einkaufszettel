@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { relative, resolve, sep } from "node:path";
 import { build } from "esbuild";
 
@@ -6,9 +6,11 @@ const projectRoot = resolve(import.meta.dirname, "..");
 const outputDirectory = resolve(projectRoot, "dist/public");
 const sourceDirectory = resolve(projectRoot, "src/client");
 const version = process.env.APP_VERSION?.trim() || `dev-${Date.now().toString(36)}`;
+const production = process.argv.includes("--production");
 
 await rm(outputDirectory, { force: true, recursive: true });
 await mkdir(outputDirectory, { recursive: true });
+await cp(resolve(projectRoot, "public"), outputDirectory, { recursive: true });
 
 const result = await build({
   absWorkingDir: projectRoot,
@@ -17,10 +19,10 @@ const result = await build({
   entryPoints: ["src/client/main.ts"],
   legalComments: "none",
   metafile: true,
-  minify: process.env.NODE_ENV === "production",
+  minify: production,
   outdir: "dist/public",
   platform: "browser",
-  sourcemap: process.env.NODE_ENV !== "production",
+  sourcemap: !production,
   target: ["safari17", "chrome120"],
 });
 
@@ -64,6 +66,14 @@ await Promise.all([
         display: "standalone",
         background_color: "#f4efe4",
         theme_color: "#26382e",
+        icons: [
+          {
+            src: "/icon.svg",
+            sizes: "any",
+            type: "image/svg+xml",
+            purpose: "any maskable",
+          },
+        ],
       },
       null,
       2,

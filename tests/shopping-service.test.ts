@@ -83,3 +83,21 @@ test("completed items are reactivated when added again", () => {
   assert.equal(merged.merge, "unchanged");
   assert.equal(merged.item.completedAt, null);
 });
+
+test("a recipe selection is applied atomically", () => {
+  const before = database
+    .prepare("SELECT count(*) AS count FROM items WHERE list_id = ?")
+    .get(listId)?.count;
+  assert.throws(
+    () =>
+      shopping.addRecipeItems(owner.user, listId, [
+        { amount: "1", category: "produce", name: "Birnen", note: null, unit: "Stück" },
+        { amount: "ungültig", category: "other", name: "Fehler", note: null, unit: "" },
+      ]),
+    /Menge/,
+  );
+  assert.equal(
+    database.prepare("SELECT count(*) AS count FROM items WHERE list_id = ?").get(listId)?.count,
+    before,
+  );
+});

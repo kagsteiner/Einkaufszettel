@@ -10,6 +10,7 @@ type MigrationRow = {
 };
 
 export type AppDatabase = DatabaseSync;
+const activeTransactions = new WeakSet<AppDatabase>();
 
 export async function openDatabase(
   databasePath: string,
@@ -85,7 +86,11 @@ export async function applyMigrations(
 }
 
 export function inTransaction<T>(database: AppDatabase, operation: () => T): T {
+  if (activeTransactions.has(database)) {
+    return operation();
+  }
   database.exec("BEGIN IMMEDIATE");
+  activeTransactions.add(database);
   try {
     const result = operation();
     database.exec("COMMIT");
@@ -93,5 +98,7 @@ export function inTransaction<T>(database: AppDatabase, operation: () => T): T {
   } catch (error) {
     database.exec("ROLLBACK");
     throw error;
+  } finally {
+    activeTransactions.delete(database);
   }
 }

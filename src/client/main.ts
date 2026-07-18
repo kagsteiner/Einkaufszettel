@@ -1,4 +1,4 @@
-import { ApiError, api } from "./api.ts";
+import { ApiError, api, apiFile } from "./api.ts";
 import "./styles.css";
 import type { AppState, ShoppingItem, ShoppingList, User } from "./types.ts";
 
@@ -22,12 +22,29 @@ const categoryIcons: Readonly<Record<string, string>> = {
   spices: "🌿",
   staples: "🍚",
 };
+const categoryLabels: Readonly<Record<string, string>> = {
+  bakery: "Brot & Backwaren",
+  canned: "Konserven",
+  dairy: "Milchprodukte",
+  drinks: "Getränke",
+  frozen: "Tiefkühlkost",
+  household: "Haushalt",
+  meat: "Fleisch & Alternativen",
+  other: "Sonstiges",
+  pet: "Tiernahrung",
+  produce: "Obst & Gemüse",
+  spices: "Gewürze",
+  staples: "Grundnahrungsmittel",
+};
 
 let currentUser: User | null = null;
 let currentState: AppState | null = null;
 let activeListId = localStorage.getItem("active-list-id");
+let sortMode: "alphabetical" | "store" =
+  localStorage.getItem("sort-mode") === "store" ? "store" : "alphabetical";
 let eventSource: EventSource | null = null;
 let refreshPending = false;
+let refreshQueued = false;
 
 void boot();
 
@@ -122,11 +139,20 @@ async function openApplication(): Promise<void> {
 
 async function refreshState(preserveFocus = true): Promise<void> {
   if (refreshPending) {
+    refreshQueued = true;
     return;
   }
   refreshPending = true;
   const focusedName = preserveFocus
     ? (document.activeElement as HTMLInputElement | null)?.name || null
+    : null;
+  const quickAddDraft = preserveFocus
+    ? Object.fromEntries(
+        [...document.querySelectorAll<HTMLInputElement>("[data-add-item] input")].map((input) => [
+          input.name,
+          input.value,
+        ]),
+      )
     : null;
   try {
     currentState = await api<AppState>("/api/state");
@@ -140,6 +166,14 @@ async function refreshState(preserveFocus = true): Promise<void> {
     if (focusedName) {
       document.querySelector<HTMLInputElement>(`[name="${focusedName}"]`)?.focus();
     }
+    if (quickAddDraft) {
+      for (const [name, value] of Object.entries(quickAddDraft)) {
+        const input = document.querySelector<HTMLInputElement>(`[data-add-item] [name="${name}"]`);
+        if (input) {
+          input.value = value;
+        }
+      }
+    }
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
       currentUser = null;
@@ -150,6 +184,10 @@ async function refreshState(preserveFocus = true): Promise<void> {
     showToast(messageFromError(error), "error");
   } finally {
     refreshPending = false;
+    if (refreshQueued) {
+      refreshQueued = false;
+      void refreshState(preserveFocus);
+    }
   }
 }
 
@@ -183,7 +221,6 @@ function renderApplication(): void {
       </nav>
       ${activeList ? listMarkup(activeList) : emptyListsMarkup()}
     </div>
-    <div class="toast-region" aria-live="polite" aria-atomic="true"></div>
   `;
   bindApplicationEvents(activeList);
 }
@@ -194,13 +231,13 @@ function listMarkup(list: ShoppingList): string {
   return `
     <main class="list-paper">
       <header class="list-heading">
-        <div><p class="eyebrow">Einkaufszettel</p><h1>${escapeHtml(list.name)}</h1></div>
-        <button class="quiet-button" type="button" data-list-menu>Bearbeiten</button>
+        <div class="list-title">${list.imageId ? `<img src="/api/images/${escapeHtml(list.imageId)}" alt="">` : ""}<div><p class="eyebrow">Einkaufszettel</p><h1>${escapeHtml(list.name)}</h1></div></div>
+        <div class="heading-actions"><button class="quiet-button sort-button" type="button" data-sort-mode aria-label="Sortierung wechseln">${sortMode === "alphabetical" ? "A–Z" : "Laden"}</button><label class="quiet-button recipe-button"><span class="desktop-label">Rezeptfoto</span><span class="mobile-label">Foto</span><input type="file" data-recipe-file accept="image/*,.heic,.heif"></label><button class="quiet-button" type="button" data-list-menu aria-label="Zettel bearbeiten"><span class="desktop-label">Bearbeiten</span><span class="mobile-label" aria-hidden="true">•••</span></button></div>
       </header>
       <section class="shopping-items" aria-label="Offene Produkte">
         ${
           activeItems.length
-            ? activeItems.map(itemMarkup).join("")
+            ? openItemsMarkup(activeItems)
             : `<div class="empty-note"><span aria-hidden="true">✓</span><strong>Alles erledigt</strong><p>Füge unten etwas hinzu, sobald euch wieder etwas einfällt.</p></div>`
         }
       </section>
@@ -220,18 +257,39 @@ function listMarkup(list: ShoppingList): string {
     </main>`;
 }
 
+function openItemsMarkup(items: ReadonlyArray<ShoppingItem>): string {
+  if (sortMode === "alphabetical") {
+    return [...items]
+      .sort((left, right) => left.name.localeCompare(right.name, "de", { sensitivity: "base" }))
+      .map(itemMarkup)
+      .join("");
+  }
+  const sections = new Map<string, ShoppingItem[]>();
+  for (const item of items) {
+    const section = sections.get(item.category) || [];
+    section.push(item);
+    sections.set(item.category, section);
+  }
+  return [...sections]
+    .map(
+      ([category, section]) =>
+        `<div class="category-heading">${escapeHtml(categoryLabels[category] || "Sonstiges")}</div>${section.map(itemMarkup).join("")}`,
+    )
+    .join("");
+}
+
 function itemMarkup(item: ShoppingItem): string {
   const quantities = item.quantities
     .map(
       (quantity) =>
-        `${escapeHtml(formatAmount(quantity.amount))}${quantity.unit ? ` ${escapeHtml(quantity.unit)}` : ""}`,
+        `${escapeHtml(formatAmount(quantity.amount))}${quantity.unit ? ` ${escapeHtml(formatUnit(quantity.unit, quantity.amount))}` : ""}`,
     )
     .join(" + ");
   return `<article class="shopping-row ${item.completedAt ? "completed" : ""}" data-item-id="${escapeHtml(item.id)}">
     <button class="check-button" type="button" data-toggle-item aria-label="${
       item.completedAt ? "Wieder auf die Liste setzen" : "Als erledigt markieren"
     }"><span aria-hidden="true">✓</span></button>
-    <button class="item-image fallback" type="button" data-edit-item aria-label="${escapeHtml(item.name)} bearbeiten">${categoryIcons[item.category] || "🛒"}</button>
+    <button class="item-image ${item.imageId ? "" : "fallback"}" type="button" ${item.imageId ? "data-preview-image" : "data-edit-item"} aria-label="${escapeHtml(item.imageId ? `${item.name} Bild ansehen` : `${item.name} bearbeiten`)}">${item.imageId ? `<img src="/api/images/${escapeHtml(item.imageId)}" alt="">` : categoryIcons[item.category] || "🛒"}</button>
     <button class="item-copy" type="button" data-edit-item>
       <strong>${escapeHtml(item.name)}</strong>${item.note ? `<small>${escapeHtml(item.note)}</small>` : ""}
     </button>
@@ -269,9 +327,20 @@ function bindApplicationEvents(activeList: ShoppingList | null): void {
       void openListDialog(activeList);
     }
   });
+  app.querySelector<HTMLButtonElement>("[data-sort-mode]")?.addEventListener("click", () => {
+    sortMode = sortMode === "alphabetical" ? "store" : "alphabetical";
+    localStorage.setItem("sort-mode", sortMode);
+    renderApplication();
+  });
   app.querySelector<HTMLFormElement>("[data-add-item]")?.addEventListener("submit", (event) => {
     if (activeList) {
       void submitItem(event, activeList.id);
+    }
+  });
+  app.querySelector<HTMLInputElement>("[data-recipe-file]")?.addEventListener("change", (event) => {
+    const file = (event.currentTarget as HTMLInputElement).files?.[0];
+    if (file && activeList) {
+      void analyzeRecipe(file, activeList.id);
     }
   });
   for (const button of app.querySelectorAll<HTMLButtonElement>("[data-toggle-item]")) {
@@ -286,6 +355,15 @@ function bindApplicationEvents(activeList: ShoppingList | null): void {
       const item = activeList?.items.find((candidate) => candidate.id === id);
       if (item) {
         openItemDialog(item);
+      }
+    });
+  }
+  for (const button of app.querySelectorAll<HTMLButtonElement>("[data-preview-image]")) {
+    button.addEventListener("click", () => {
+      const id = button.closest<HTMLElement>("[data-item-id]")?.dataset.itemId;
+      const item = activeList?.items.find((candidate) => candidate.id === id);
+      if (item?.imageId) {
+        openImagePreview(item);
       }
     });
   }
@@ -352,6 +430,8 @@ async function openListDialog(list?: ShoppingList): Promise<void> {
     <form method="dialog" class="dialog-form" data-list-form>
       <div class="dialog-heading"><div><p class="eyebrow">Zettel</p><h2>${list ? "Zettel bearbeiten" : "Neuer Zettel"}</h2></div><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div>
       <label>Name<input name="name" maxlength="80" value="${escapeHtml(list?.name || "")}" required></label>
+      <label>Bild (optional)<input name="image" type="file" accept="image/*,.heic,.heif"></label>
+      ${list?.imageId ? `<label class="check-label"><input type="checkbox" name="removeImage"> Vorhandenes Bild entfernen</label>` : ""}
       <p class="form-error" role="alert"></p>
       <div class="dialog-actions">
         ${list ? `<button class="danger-button" type="button" data-delete-list>Löschen</button>` : ""}
@@ -362,7 +442,9 @@ async function openListDialog(list?: ShoppingList): Promise<void> {
     event.preventDefault();
     void (async () => {
       try {
-        const name = new FormData(event.currentTarget as HTMLFormElement).get("name");
+        const form = event.currentTarget as HTMLFormElement;
+        const formData = new FormData(form);
+        const name = formData.get("name");
         const payload = await api<{ list: { id: string } }>(
           list ? `/api/lists/${list.id}` : "/api/lists",
           {
@@ -370,6 +452,19 @@ async function openListDialog(list?: ShoppingList): Promise<void> {
             method: list ? "PATCH" : "POST",
           },
         );
+        const imageFile = formData.get("image");
+        if (imageFile instanceof File && imageFile.size > 0) {
+          const uploaded = await apiFile<{ image: { id: string } }>("/api/images", imageFile);
+          await api(`/api/lists/${payload.list.id}/image`, {
+            body: { imageId: uploaded.image.id },
+            method: "PUT",
+          });
+        } else if (list && formData.get("removeImage")) {
+          await api(`/api/lists/${payload.list.id}/image`, {
+            body: { imageId: null },
+            method: "PUT",
+          });
+        }
         activeListId = payload.list.id;
         dialog.close();
         await refreshState(false);
@@ -408,6 +503,14 @@ function openItemDialog(item: ShoppingItem): void {
       <div class="dialog-heading"><div><p class="eyebrow">Produkt</p><h2>Eintrag bearbeiten</h2></div><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div>
       <label>Name<input name="name" maxlength="120" value="${escapeHtml(item.name)}" required></label>
       <label>Notiz<textarea name="note" maxlength="500" rows="2">${escapeHtml(item.note || "")}</textarea></label>
+      <label>Einkaufsbereich<select name="category">${Object.entries(categoryLabels)
+        .map(
+          ([value, label]) =>
+            `<option value="${escapeHtml(value)}" ${item.category === value ? "selected" : ""}>${escapeHtml(label)}</option>`,
+        )
+        .join("")}</select></label>
+      <label>Foto<input name="image" type="file" accept="image/*,.heic,.heif"></label>
+      ${item.imageId ? `<label class="check-label"><input type="checkbox" name="removeImage"> Vorhandenes Foto entfernen</label>` : ""}
       <fieldset><legend>Mengen</legend>${quantityInputs}</fieldset>
       <p class="form-error" role="alert"></p>
       <div class="dialog-actions"><button class="danger-button" type="button" data-delete-item>Löschen</button><button class="primary-button" type="submit">Speichern</button></div>
@@ -425,14 +528,29 @@ function openItemDialog(item: ShoppingItem): void {
         }))
         .filter((quantity) => quantity.amount);
       try {
+        const formData = new FormData(form);
         await api(`/api/items/${item.id}`, {
           body: {
-            name: new FormData(form).get("name"),
-            note: new FormData(form).get("note"),
+            name: formData.get("name"),
+            note: formData.get("note"),
+            category: formData.get("category"),
             quantities,
           },
           method: "PATCH",
         });
+        const imageFile = formData.get("image");
+        if (imageFile instanceof File && imageFile.size > 0) {
+          const uploaded = await apiFile<{ image: { id: string } }>("/api/images", imageFile);
+          await api(`/api/items/${item.id}/image`, {
+            body: { imageId: uploaded.image.id },
+            method: "PUT",
+          });
+        } else if (formData.get("removeImage")) {
+          await api(`/api/items/${item.id}/image`, {
+            body: { imageId: null },
+            method: "PUT",
+          });
+        }
         dialog.close();
         await refreshState(false);
       } catch (error) {
@@ -455,6 +573,100 @@ function openItemDialog(item: ShoppingItem): void {
     })();
   });
   dialog.showModal();
+}
+
+function openImagePreview(item: ShoppingItem): void {
+  if (!item.imageId) {
+    return;
+  }
+  const dialog = createDialog(
+    `<section class="image-preview"><div class="dialog-heading"><h2>${escapeHtml(item.name)}</h2><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div><img src="/api/images/${escapeHtml(item.imageId)}" alt="${escapeHtml(item.name)}"><button class="secondary-button" type="button" data-edit-from-preview>Eintrag bearbeiten</button></section>`,
+  );
+  dialog
+    .querySelector<HTMLButtonElement>("[data-edit-from-preview]")
+    ?.addEventListener("click", () => {
+      dialog.close();
+      openItemDialog(item);
+    });
+  dialog.showModal();
+}
+
+async function analyzeRecipe(file: File, listId: string): Promise<void> {
+  const loading = createDialog(
+    `<section class="analysis-loading"><span class="spinner dark" aria-hidden="true"></span><h2>Terra liest das Rezept …</h2><p>Das kann einen Moment dauern. Am Zettel wird noch nichts verändert.</p></section>`,
+  );
+  loading.showModal();
+  try {
+    const result = await apiFile<{
+      analysis: {
+        ingredients: Array<{
+          amount: string | null;
+          category: string;
+          inPantry: boolean;
+          name: string;
+          note: string | null;
+          unit: string | null;
+        }>;
+        title: string;
+      };
+    }>("/api/ai/recipe-analysis", file);
+    loading.close();
+    const { analysis } = result;
+    const rows = analysis.ingredients
+      .map(
+        (ingredient, index) => `<fieldset class="ingredient-preview" data-ingredient="${index}">
+          <label class="ingredient-select"><input type="checkbox" name="selected" value="${index}" ${ingredient.inPantry ? "" : "checked"}><span>${ingredient.inPantry ? "Im Vorrat" : "Hinzufügen"}</span></label>
+          <label>Produkt<input name="name-${index}" value="${escapeHtml(ingredient.name)}" maxlength="120" required></label>
+          <div class="quantity-edit-row"><label>Menge<input name="amount-${index}" value="${escapeHtml(ingredient.amount || "")}" inputmode="decimal"></label><label>Einheit<input name="unit-${index}" value="${escapeHtml(ingredient.unit || "")}" maxlength="40"></label></div>
+          <label>Notiz<input name="note-${index}" value="${escapeHtml(ingredient.note || "")}" maxlength="500"></label>
+          <input type="hidden" name="category-${index}" value="${escapeHtml(ingredient.category)}">
+        </fieldset>`,
+      )
+      .join("");
+    const dialog = createDialog(`<form class="dialog-form recipe-preview" data-recipe-preview>
+      <div class="dialog-heading"><div><p class="eyebrow">Terra-Vorschlag</p><h2>${escapeHtml(analysis.title)}</h2></div><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div>
+      <p class="settings-copy">Prüfe Namen und Mengen. Vorräte sind zunächst abgewählt.</p>
+      <div class="ingredient-list">${rows}</div>
+      <p class="form-error" role="alert"></p>
+      <div class="dialog-actions"><button class="primary-button" type="submit">Auswahl hinzufügen</button></div>
+    </form>`);
+    dialog
+      .querySelector<HTMLFormElement>("[data-recipe-preview]")
+      ?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        void (async () => {
+          const form = event.currentTarget as HTMLFormElement;
+          const selected = [...form.querySelectorAll<HTMLInputElement>("[name=selected]:checked")];
+          if (selected.length === 0) {
+            setDialogError(dialog, "Wähle mindestens eine Zutat aus.");
+            return;
+          }
+          const formData = new FormData(form);
+          const items = selected.map((checkbox) => {
+            const index = checkbox.value;
+            return {
+              amount: String(formData.get(`amount-${index}`) || "").trim() || null,
+              category: formData.get(`category-${index}`),
+              name: formData.get(`name-${index}`),
+              note: String(formData.get(`note-${index}`) || "").trim() || null,
+              unit: String(formData.get(`unit-${index}`) || "").trim() || null,
+            };
+          });
+          try {
+            await api(`/api/lists/${listId}/recipe-items`, { body: { items }, method: "POST" });
+            dialog.close();
+            await refreshState(false);
+            showToast(`${items.length} ${items.length === 1 ? "Zutat" : "Zutaten"} übernommen.`);
+          } catch (error) {
+            setDialogError(dialog, messageFromError(error));
+          }
+        })();
+      });
+    dialog.showModal();
+  } catch (error) {
+    loading.close();
+    showToast(messageFromError(error), "error");
+  }
 }
 
 function openSettingsDialog(): void {
@@ -506,6 +718,7 @@ async function saveProfile(event: SubmitEvent, dialog: HTMLDialogElement): Promi
     currentUser = (await api<{ user: User }>("/api/session")).user;
     dialog.close();
     await refreshState(false);
+    openEventStream();
     showToast("Name gespeichert.");
   } catch (error) {
     setDialogError(dialog, messageFromError(error));
@@ -610,11 +823,17 @@ async function handleInvitationPath(): Promise<void> {
   const token = decodeURIComponent(match[1]);
   try {
     const result = await api<{
-      invitation: { canMoveExistingData: boolean; expiresAt: string; householdName: string };
+      invitation: {
+        canMoveExistingData: boolean;
+        existingListCount: number;
+        existingPantryCount: number;
+        expiresAt: string;
+        householdName: string;
+      };
     }>(`/api/invitations/${encodeURIComponent(token)}`);
     const invitation = result.invitation;
     const dialog = createDialog(
-      `<form class="dialog-form" data-accept-invite><div class="dialog-heading"><div><p class="eyebrow">Einladung</p><h2>${escapeHtml(invitation.householdName)}</h2></div></div><p>Du wurdest eingeladen, diesem Haushalt beizutreten.</p>${invitation.canMoveExistingData ? `<label class="check-label"><input type="checkbox" name="moveExistingData" checked> Meine bisherigen Zettel und Vorräte mitnehmen</label>` : ""}<p class="form-error" role="alert"></p><div class="dialog-actions"><button class="secondary-button" type="button" data-decline>Später</button><button class="primary-button" type="submit">Beitreten</button></div></form>`,
+      `<form class="dialog-form" data-accept-invite><div class="dialog-heading"><div><p class="eyebrow">Einladung</p><h2>${escapeHtml(invitation.householdName)}</h2></div></div><p>Du wurdest eingeladen, diesem Haushalt beizutreten.</p>${invitation.canMoveExistingData ? `<div class="transfer-summary"><strong>Dein bisheriger Haushalt</strong><span>${invitation.existingListCount} Zettel · ${invitation.existingPantryCount} Vorratsprodukte</span></div><label class="check-label"><input type="checkbox" name="moveExistingData" checked> Meine bisherigen Zettel und Vorräte mitnehmen</label>` : ""}<p class="form-error" role="alert"></p><div class="dialog-actions"><button class="secondary-button" type="button" data-decline>Später</button><button class="primary-button" type="submit">Beitreten</button></div></form>`,
     );
     dialog
       .querySelector<HTMLButtonElement>("[data-decline]")
@@ -652,7 +871,10 @@ function openEventStream(): void {
   closeEventStream();
   eventSource = new EventSource("/api/events");
   eventSource.addEventListener("state-changed", () => void refreshState());
-  eventSource.addEventListener("ready", () => void refreshState());
+  eventSource.addEventListener("ready", () => {
+    void verifyVersion();
+    void refreshState();
+  });
 }
 
 function closeEventStream(): void {
@@ -678,15 +900,17 @@ function createDialog(content: string): HTMLDialogElement {
 }
 
 function showToast(message: string, kind: "default" | "error" = "default"): void {
-  const region = document.querySelector<HTMLElement>(".toast-region");
-  if (!region) {
-    return;
-  }
+  document.querySelector(".toast-region")?.remove();
+  const region = document.createElement("div");
+  region.className = "toast-region";
+  region.setAttribute("aria-live", "polite");
+  region.setAttribute("aria-atomic", "true");
   const toast = document.createElement("div");
   toast.className = `toast ${kind}`;
   toast.textContent = message;
-  region.replaceChildren(toast);
-  window.setTimeout(() => toast.remove(), 3_500);
+  region.append(toast);
+  document.body.append(region);
+  window.setTimeout(() => region.remove(), 3_500);
 }
 
 function setDialogError(dialog: HTMLDialogElement, message: string): void {
@@ -721,6 +945,21 @@ function setBusy(button: HTMLButtonElement | null, busy: boolean): void {
 
 function formatAmount(amount: string): string {
   return amount.replace(".", ",");
+}
+
+function formatUnit(unit: string, amount: string): string {
+  if (Number(amount) === 1) {
+    return unit;
+  }
+  return (
+    {
+      Dose: "Dosen",
+      Flasche: "Flaschen",
+      Packung: "Packungen",
+      Tasse: "Tassen",
+      Zehe: "Zehen",
+    }[unit] || unit
+  );
 }
 
 function escapeHtml(value: string): string {

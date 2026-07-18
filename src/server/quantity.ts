@@ -2,9 +2,14 @@ import { invalidInput } from "./errors.ts";
 
 const unitAliases: Readonly<Record<string, { normalized: string; display: string }>> = {
   "": { normalized: "", display: "" },
+  becher: { normalized: "becher", display: "Becher" },
+  dose: { normalized: "dose", display: "Dose" },
+  dosen: { normalized: "dose", display: "Dose" },
   el: { normalized: "el", display: "EL" },
   essloeffel: { normalized: "el", display: "EL" },
   esslöffel: { normalized: "el", display: "EL" },
+  flasche: { normalized: "flasche", display: "Flasche" },
+  flaschen: { normalized: "flasche", display: "Flasche" },
   g: { normalized: "g", display: "g" },
   gramm: { normalized: "g", display: "g" },
   kg: { normalized: "kg", display: "kg" },
@@ -23,6 +28,8 @@ const unitAliases: Readonly<Record<string, { normalized: string; display: string
   tl: { normalized: "tl", display: "TL" },
   teeloeffel: { normalized: "tl", display: "TL" },
   teelöffel: { normalized: "tl", display: "TL" },
+  zehe: { normalized: "zehe", display: "Zehe" },
+  zehen: { normalized: "zehe", display: "Zehe" },
 };
 
 export type QuantityInput = Readonly<{ amount: unknown; unit?: unknown }>;

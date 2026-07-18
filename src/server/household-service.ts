@@ -27,6 +27,8 @@ type PantryRow = {
 
 export type InvitationPreview = Readonly<{
   canMoveExistingData: boolean;
+  existingListCount: number;
+  existingPantryCount: number;
   expiresAt: string;
   householdName: string;
 }>;
@@ -83,6 +85,8 @@ export class HouseholdService {
     return {
       canMoveExistingData:
         invitation.household_id !== user.householdId && this.countMembers(user.householdId) === 1,
+      existingListCount: this.countRows("shopping_lists", user.householdId),
+      existingPantryCount: this.countRows("pantry_items", user.householdId),
       expiresAt: invitation.expires_at,
       householdName: invitation.household_name,
     };
@@ -164,6 +168,13 @@ export class HouseholdService {
   private countMembers(householdId: string): number {
     const row = this.database
       .prepare("SELECT count(*) AS count FROM household_members WHERE household_id = ?")
+      .get(householdId) as { count: number };
+    return row.count;
+  }
+
+  private countRows(table: "pantry_items" | "shopping_lists", householdId: string): number {
+    const row = this.database
+      .prepare(`SELECT count(*) AS count FROM ${table} WHERE household_id = ?`)
       .get(householdId) as { count: number };
     return row.count;
   }

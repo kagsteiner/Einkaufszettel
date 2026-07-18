@@ -5,6 +5,10 @@ import { AppError } from "./errors.ts";
 import type { EventHub } from "./event-hub.ts";
 import type { HouseholdService } from "./household-service.ts";
 import { sendJson } from "./http.ts";
+import type { ImageService } from "./image-service.ts";
+import { maximumImageBytes } from "./image-service.ts";
+import type { RateLimiter } from "./rate-limiter.ts";
+import type { RecipeService } from "./recipe-service.ts";
 import type { SettingsService } from "./settings-service.ts";
 import type { ShoppingService } from "./shopping-service.ts";
 
@@ -20,7 +24,10 @@ export async function handleApiRequest(
   householdService: HouseholdService,
   shoppingService: ShoppingService,
   settingsService: SettingsService,
+  imageService: ImageService,
+  recipeService: RecipeService,
   eventHub: EventHub,
+  rateLimiter: RateLimiter,
   config: AppConfig,
 ): Promise<boolean> {
   if (!pathname.startsWith("/api/")) {
@@ -30,6 +37,7 @@ export async function handleApiRequest(
   try {
     if (request.method === "POST" && pathname === "/api/auth/register") {
       assertSameOrigin(request, config);
+      rateLimiter.consume(`auth:${clientAddress(request, config)}`, 10, 15 * 60 * 1_000);
       const body = await readJson(request);
       const credentials = await authService.register({
         displayName: body.displayName,
@@ -43,6 +51,7 @@ export async function handleApiRequest(
 
     if (request.method === "POST" && pathname === "/api/auth/login") {
       assertSameOrigin(request, config);
+      rateLimiter.consume(`auth:${clientAddress(request, config)}`, 10, 15 * 60 * 1_000);
       const body = await readJson(request);
       const credentials = await authService.login({ email: body.email, password: body.password });
       setSessionCookies(response, credentials, config);
@@ -68,6 +77,19 @@ export async function handleApiRequest(
     if (request.method === "GET" && pathname === "/api/events") {
       const user = authService.authenticate(sessionToken);
       eventHub.subscribe(user.householdId, request, response);
+      return true;
+    }
+
+    const imageMatch = pathname.match(/^\/api\/images\/([^/]+)$/);
+    if (request.method === "GET" && imageMatch?.[1]) {
+      const user = authService.authenticate(sessionToken);
+      const image = await imageService.readImage(user, imageMatch[1]);
+      response.writeHead(200, {
+        "Cache-Control": "private, no-store",
+        "Content-Length": image.buffer.length,
+        "Content-Type": image.mimeType,
+      });
+      response.end(image.buffer);
       return true;
     }
 
@@ -131,6 +153,31 @@ export async function handleApiRequest(
       return true;
     }
 
+    if (request.method === "POST" && pathname === "/api/images") {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      rateLimiter.consume(`upload:${user.id}`, 60, 60 * 60 * 1_000);
+      const contentType = requestContentType(request);
+      const image = await imageService.storeImage(
+        user,
+        await readRequestBody(request, maximumImageBytes),
+        contentType,
+      );
+      sendJson(response, 201, { image });
+      return true;
+    }
+
+    if (request.method === "POST" && pathname === "/api/ai/recipe-analysis") {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      rateLimiter.consume(`ai:${user.id}`, 20, 60 * 60 * 1_000);
+      const analysis = await recipeService.analyzeRecipe(
+        user,
+        await readRequestBody(request, maximumImageBytes),
+        requestContentType(request),
+      );
+      sendJson(response, 200, { analysis });
+      return true;
+    }
+
     if (request.method === "PATCH" && pathname === "/api/settings/profile") {
       const user = authenticateWrite(request, authService, sessionToken, config);
       const body = await readJson(request);
@@ -165,6 +212,26 @@ export async function handleApiRequest(
       sendJson(response, 200, { list });
       return true;
     }
+
+    const listImageMatch = pathname.match(/^\/api\/lists\/([^/]+)\/image$/);
+    if (request.method === "PUT" && listImageMatch?.[1]) {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      const body = await readJson(request);
+      shoppingService.setListImage(user, listImageMatch[1], body.imageId);
+      eventHub.publish(user.householdId);
+      sendJson(response, 200, { ok: true });
+      return true;
+    }
+
+    const recipeItemsMatch = pathname.match(/^\/api\/lists\/([^/]+)\/recipe-items$/);
+    if (request.method === "POST" && recipeItemsMatch?.[1]) {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      const body = await readJson(request);
+      const results = shoppingService.addRecipeItems(user, recipeItemsMatch[1], body.items);
+      eventHub.publish(user.householdId);
+      sendJson(response, 200, { results });
+      return true;
+    }
     if (request.method === "DELETE" && listMatch?.[1]) {
       const user = authenticateWrite(request, authService, sessionToken, config);
       shoppingService.deleteList(user, listMatch[1]);
@@ -197,6 +264,16 @@ export async function handleApiRequest(
         throw new AppError(400, "invalid_input", "Der Erledigt-Status ist ungültig.");
       }
       const item = shoppingService.setCompleted(user, itemCompletedMatch[1], body.completed);
+      eventHub.publish(user.householdId);
+      sendJson(response, 200, { item });
+      return true;
+    }
+
+    const itemImageMatch = pathname.match(/^\/api\/items\/([^/]+)\/image$/);
+    if (request.method === "PUT" && itemImageMatch?.[1]) {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      const body = await readJson(request);
+      const item = shoppingService.setItemImage(user, itemImageMatch[1], body.imageId);
       eventHub.publish(user.householdId);
       sendJson(response, 200, { item });
       return true;
@@ -267,24 +344,15 @@ function authenticateWrite(
 }
 
 async function readJson(request: IncomingMessage): Promise<Record<string, unknown>> {
-  const contentType = request.headers["content-type"]?.split(";", 1)[0]?.trim();
+  const contentType = requestContentType(request);
   if (contentType !== "application/json") {
     throw new AppError(415, "unsupported_media_type", "Erwartet wird application/json.");
   }
 
-  const chunks: Buffer[] = [];
-  let size = 0;
-  for await (const chunk of request) {
-    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-    size += buffer.length;
-    if (size > maximumJsonBytes) {
-      throw new AppError(413, "body_too_large", "Die Anfrage ist zu groß.");
-    }
-    chunks.push(buffer);
-  }
-
   try {
-    const value = JSON.parse(Buffer.concat(chunks).toString("utf8")) as unknown;
+    const value = JSON.parse(
+      (await readRequestBody(request, maximumJsonBytes)).toString("utf8"),
+    ) as unknown;
     if (!value || typeof value !== "object" || Array.isArray(value)) {
       throw new Error("object expected");
     }
@@ -292,6 +360,38 @@ async function readJson(request: IncomingMessage): Promise<Record<string, unknow
   } catch {
     throw new AppError(400, "invalid_json", "Die Anfrage enthält kein gültiges JSON.");
   }
+}
+
+async function readRequestBody(request: IncomingMessage, maximumBytes: number): Promise<Buffer> {
+  const declaredLength = Number(request.headers["content-length"] || "0");
+  if (Number.isFinite(declaredLength) && declaredLength > maximumBytes) {
+    throw new AppError(413, "body_too_large", "Die Anfrage ist zu groß.");
+  }
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of request) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    size += buffer.length;
+    if (size > maximumBytes) {
+      throw new AppError(413, "body_too_large", "Die Anfrage ist zu groß.");
+    }
+    chunks.push(buffer);
+  }
+  return Buffer.concat(chunks);
+}
+
+function requestContentType(request: IncomingMessage): string {
+  return request.headers["content-type"]?.split(";", 1)[0]?.trim().toLowerCase() || "";
+}
+
+function clientAddress(request: IncomingMessage, config: AppConfig): string {
+  if (config.trustProxy) {
+    const forwarded = request.headers["x-forwarded-for"]?.toString().split(",", 1)[0]?.trim();
+    if (forwarded) {
+      return forwarded;
+    }
+  }
+  return request.socket.remoteAddress || "unknown";
 }
 
 function assertSameOrigin(request: IncomingMessage, config: AppConfig): void {

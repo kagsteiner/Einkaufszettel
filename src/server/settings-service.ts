@@ -25,6 +25,13 @@ export class SettingsService {
     if (typeof value !== "string") {
       throw invalidInput("Bitte gib einen OpenAI API Key ein.");
     }
+    if (!this.config.encryptionKey) {
+      throw new AppError(
+        503,
+        "encryption_key_missing",
+        "Der Server ist noch nicht zum sicheren Speichern persönlicher API Keys konfiguriert.",
+      );
+    }
     const apiKey = value.trim();
     const encrypted = encryptApiKey(apiKey, user.id, this.config.encryptionKey);
     const lastFour = apiKey.slice(-4);

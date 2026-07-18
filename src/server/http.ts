@@ -17,7 +17,7 @@ const contentTypes: Readonly<Record<string, string>> = {
   ".webp": "image/webp",
 };
 
-export function applySecurityHeaders(response: ServerResponse): void {
+export function applySecurityHeaders(response: ServerResponse, production = false): void {
   response.setHeader(
     "Content-Security-Policy",
     [
@@ -33,10 +33,14 @@ export function applySecurityHeaders(response: ServerResponse): void {
     ].join("; "),
   );
   response.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  response.setHeader("Cross-Origin-Resource-Policy", "same-origin");
   response.setHeader("Referrer-Policy", "no-referrer");
   response.setHeader("X-Content-Type-Options", "nosniff");
   response.setHeader("X-Frame-Options", "DENY");
   response.setHeader("Permissions-Policy", "camera=(self), microphone=(), geolocation=()");
+  if (production) {
+    response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  }
 }
 
 export function sendJson(response: ServerResponse, status: number, body: unknown): void {

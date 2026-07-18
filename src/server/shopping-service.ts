@@ -202,6 +202,15 @@ export class ShoppingService {
     return { id: listId, name };
   }
 
+  setListImage(user: AuthenticatedUser, listId: string, imageId: unknown): void {
+    this.assertListAccess(user, listId);
+    const normalizedImageId = normalizeImageId(imageId);
+    this.assertImageAccess(user, normalizedImageId);
+    this.database
+      .prepare("UPDATE shopping_lists SET image_id = ?, updated_at = ? WHERE id = ?")
+      .run(normalizedImageId, new Date().toISOString(), listId);
+  }
+
   addItem(
     user: AuthenticatedUser,
     listId: string,
@@ -278,6 +287,34 @@ export class ShoppingService {
     });
   }
 
+  addRecipeItems(
+    user: AuthenticatedUser,
+    listId: string,
+    values: unknown,
+  ): Array<{ item: ShoppingItem; merge: "created" | "increased" | "appended" | "unchanged" }> {
+    if (!Array.isArray(values) || values.length < 1 || values.length > 100) {
+      throw invalidInput("Wähle zwischen einem und 100 Rezeptbestandteilen aus.");
+    }
+    return inTransaction(this.database, () =>
+      values.map((value) => {
+        if (!value || typeof value !== "object" || Array.isArray(value)) {
+          throw invalidInput("Ein Rezeptbestandteil ist ungültig.");
+        }
+        const ingredient = value as Record<string, unknown>;
+        const amount = ingredient.amount;
+        return this.addItem(user, listId, {
+          category: ingredient.category,
+          name: ingredient.name,
+          note: ingredient.note,
+          quantities:
+            amount === null || amount === undefined || amount === ""
+              ? undefined
+              : [{ amount, unit: ingredient.unit }],
+        });
+      }),
+    );
+  }
+
   setCompleted(user: AuthenticatedUser, itemId: string, completed: boolean): ShoppingItem {
     const item = this.assertItemAccess(user, itemId);
     const now = new Date().toISOString();
@@ -324,6 +361,16 @@ export class ShoppingService {
       }
       return this.getItem(user, itemId);
     });
+  }
+
+  setItemImage(user: AuthenticatedUser, itemId: string, imageId: unknown): ShoppingItem {
+    const item = this.assertItemAccess(user, itemId);
+    const normalizedImageId = normalizeImageId(imageId);
+    this.assertImageAccess(user, normalizedImageId);
+    this.database
+      .prepare("UPDATE items SET image_id = ?, updated_by_user_id = ?, updated_at = ? WHERE id = ?")
+      .run(normalizedImageId, user.id, new Date().toISOString(), item.id);
+    return this.getItem(user, itemId);
   }
 
   deleteItem(user: AuthenticatedUser, itemId: string): void {
@@ -392,6 +439,18 @@ export class ShoppingService {
       throw new AppError(404, "item_not_found", "Produkt nicht gefunden.");
     }
     return row;
+  }
+
+  private assertImageAccess(user: AuthenticatedUser, imageId: string | null): void {
+    if (imageId === null) {
+      return;
+    }
+    const row = this.database
+      .prepare("SELECT 1 FROM images WHERE id = ? AND household_id = ?")
+      .get(imageId, user.householdId);
+    if (!row) {
+      throw new AppError(404, "image_not_found", "Bild nicht gefunden.");
+    }
   }
 
   private getItem(user: AuthenticatedUser, itemId: string): ShoppingItem {
@@ -527,4 +586,14 @@ function toItem(row: ItemRow, quantities: QuantityRow[]): ShoppingItem {
 
 function isUniqueConstraintError(error: unknown): boolean {
   return error instanceof Error && error.message.includes("UNIQUE constraint failed");
+}
+
+function normalizeImageId(value: unknown): string | null {
+  if (value === null) {
+    return null;
+  }
+  if (typeof value !== "string" || !/^[0-9a-f-]{36}$/i.test(value)) {
+    throw invalidInput("Die Bildreferenz ist ungültig.");
+  }
+  return value;
 }

@@ -1,4 +1,10 @@
-import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  randomBytes,
+  timingSafeEqual,
+} from "node:crypto";
 import argon2 from "argon2";
 import { invalidInput } from "./errors.ts";
 
@@ -73,6 +79,12 @@ export function createOpaqueToken(): string {
 
 export function hashToken(token: string): string {
   return createHash("sha256").update(token, "utf8").digest("base64url");
+}
+
+export function tokenMatches(expectedHash: string, token: string): boolean {
+  const actual = Buffer.from(hashToken(token), "utf8");
+  const expected = Buffer.from(expectedHash, "utf8");
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
 
 export function encryptApiKey(apiKey: string, userId: string, masterKey: Buffer | null): string {

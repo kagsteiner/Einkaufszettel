@@ -51,6 +51,40 @@ export async function api<T>(
   return (await response.json()) as T;
 }
 
+export async function apiFile<T>(path: string, file: File): Promise<T> {
+  const csrfToken = readCookie("zettel_csrf");
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  const inferredType =
+    extension === "heic" ? "image/heic" : extension === "heif" ? "image/heif" : "";
+  const headers = new Headers({
+    Accept: "application/json",
+    "Content-Type": file.type || inferredType || "application/octet-stream",
+  });
+  if (csrfToken) {
+    headers.set("X-CSRF-Token", csrfToken);
+  }
+  const response = await fetch(path, {
+    body: file,
+    cache: "no-store",
+    credentials: "same-origin",
+    headers,
+    method: "POST",
+  });
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as {
+      error?: { code?: unknown; message?: unknown };
+    } | null;
+    throw new ApiError(
+      response.status,
+      typeof payload?.error?.code === "string" ? payload.error.code : "upload_failed",
+      typeof payload?.error?.message === "string"
+        ? payload.error.message
+        : "Das Bild konnte nicht hochgeladen werden.",
+    );
+  }
+  return (await response.json()) as T;
+}
+
 function readCookie(name: string): string | null {
   for (const part of document.cookie.split(";")) {
     const [cookieName, ...value] = part.trim().split("=");

@@ -8,6 +8,9 @@ import { openDatabase } from "./database.ts";
 import { EventHub } from "./event-hub.ts";
 import { HouseholdService } from "./household-service.ts";
 import { applySecurityHeaders, sendJson, serveAppShell, servePublicFile } from "./http.ts";
+import { ImageService } from "./image-service.ts";
+import { RateLimiter } from "./rate-limiter.ts";
+import { RecipeService } from "./recipe-service.ts";
 import { SettingsService } from "./settings-service.ts";
 import { ShoppingService } from "./shopping-service.ts";
 
@@ -17,7 +20,10 @@ const authService = new AuthService(database, config);
 const householdService = new HouseholdService(database);
 const shoppingService = new ShoppingService(database);
 const settingsService = new SettingsService(database, config);
+const imageService = new ImageService(database, config);
+const recipeService = new RecipeService(database, imageService, settingsService);
 const eventHub = new EventHub();
+const rateLimiter = new RateLimiter();
 const versionFile = resolve(config.publicDirectory, "version.json");
 let buildVersion = "unknown";
 
@@ -31,7 +37,7 @@ try {
 }
 
 const server = createServer(async (request, response) => {
-  applySecurityHeaders(response);
+  applySecurityHeaders(response, config.appEnvironment === "production");
 
   try {
     const url = new URL(request.url || "/", "http://localhost");
@@ -52,7 +58,10 @@ const server = createServer(async (request, response) => {
         householdService,
         shoppingService,
         settingsService,
+        imageService,
+        recipeService,
         eventHub,
+        rateLimiter,
         config,
       )
     ) {
