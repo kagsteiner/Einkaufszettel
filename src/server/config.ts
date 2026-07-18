@@ -22,7 +22,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
     throw new Error("APP_ENV muss development, production oder test sein.");
   }
 
-  const port = Number(environment.PORT || "3000");
+  const port = Number(environment.PORT || "3011");
   if (!Number.isInteger(port) || port < 1 || port > 65_535) {
     throw new Error("PORT muss eine ganze Zahl zwischen 1 und 65535 sein.");
   }

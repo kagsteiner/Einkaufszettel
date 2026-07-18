@@ -12,7 +12,7 @@ export default defineConfig({
   retries: 0,
   testDir: "tests/browser",
   use: {
-    baseURL: "http://127.0.0.1:3011",
+    baseURL: "http://127.0.0.1:3012",
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
   },
@@ -20,7 +20,7 @@ export default defineConfig({
     command: "node scripts/e2e-server.ts",
     reuseExistingServer: false,
     timeout: 20_000,
-    url: "http://127.0.0.1:3011/api/health",
+    url: "http://127.0.0.1:3012/api/health",
   },
   workers: 1,
 });
