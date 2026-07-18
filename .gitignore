@@ -1,0 +1,21 @@
+.obsidian/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated output
+node_modules/
+dist/
+build/
+coverage/
+
+# Local databases and user uploads
+*.db
+*.db-shm
+*.db-wal
+uploads/
+
+# Operating-system metadata
+.DS_Store
