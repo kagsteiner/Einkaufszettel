@@ -96,9 +96,11 @@ test("completed items are reactivated with only the newly requested quantity", (
 });
 
 test("a recipe selection is applied atomically", () => {
-  const before = database
-    .prepare("SELECT count(*) AS count FROM items WHERE list_id = ?")
-    .get(listId)?.count;
+  const before = (
+    database.prepare("SELECT count(*) AS count FROM items WHERE list_id = ?").get(listId) as {
+      count: number;
+    }
+  ).count;
   assert.throws(
     () =>
       shopping.addRecipeItems(owner.user, listId, [
@@ -108,7 +110,11 @@ test("a recipe selection is applied atomically", () => {
     /Menge/,
   );
   assert.equal(
-    database.prepare("SELECT count(*) AS count FROM items WHERE list_id = ?").get(listId)?.count,
+    (
+      database.prepare("SELECT count(*) AS count FROM items WHERE list_id = ?").get(listId) as {
+        count: number;
+      }
+    ).count,
     before,
   );
 });

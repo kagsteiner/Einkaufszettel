@@ -73,8 +73,11 @@ test("a solo user can move lists and merge pantry data when joining", () => {
     ["salz", "öl"],
   );
   assert.equal(
-    database.prepare("SELECT count(*) AS count FROM households WHERE id = ?").get(sourceHouseholdId)
-      ?.count,
+    (
+      database
+        .prepare("SELECT count(*) AS count FROM households WHERE id = ?")
+        .get(sourceHouseholdId) as { count: number }
+    ).count,
     0,
   );
 });

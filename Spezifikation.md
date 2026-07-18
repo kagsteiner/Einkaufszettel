@@ -132,7 +132,7 @@ Rezeptbilder werden für die Analyse nur im Arbeitsspeicher verarbeitet und nich
 
 ## Architektur
 
-Die Anwendung wird als responsive, browserbasierte TypeScript-Anwendung ohne Client-Framework umgesetzt. Ein Node.js-26-Server stellt Benutzeroberfläche, HTTP-API und Server-Sent Events bereit. SQLite speichert Benutzer, Haushalte, Zettel, Items, Mengen, Einladungen und Sitzungen.
+Die Anwendung wird als responsive, browserbasierte TypeScript-Anwendung ohne Client-Framework umgesetzt. Ein Node.js-20.20.2-Server stellt Benutzeroberfläche, HTTP-API und Server-Sent Events bereit. SQLite speichert Benutzer, Haushalte, Zettel, Items, Mengen, Einladungen und Sitzungen.
 
 Die Architektur trennt Browseroberfläche, API, Domänenlogik und Persistenz. Datenbankänderungen erfolgen über versionierte Migrationen. SQLite läuft im WAL-Modus; schreibende Geschäftsoperationen verwenden Transaktionen. V1 ist für eine einzelne Serverinstanz auf einem VPS ausgelegt, nicht für horizontale Skalierung.
 

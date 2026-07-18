@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import Database from "better-sqlite3";
 
 type MigrationRow = {
   version: number;
@@ -9,7 +9,7 @@ type MigrationRow = {
   checksum: string;
 };
 
-export type AppDatabase = DatabaseSync;
+export type AppDatabase = Database.Database;
 const activeTransactions = new WeakSet<AppDatabase>();
 
 export async function openDatabase(
@@ -20,16 +20,15 @@ export async function openDatabase(
     await mkdir(dirname(databasePath), { recursive: true, mode: 0o700 });
   }
 
-  const database = new DatabaseSync(databasePath);
+  const database = new Database(databasePath);
   try {
     database.exec(
-      "PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000; PRAGMA synchronous = NORMAL;",
+      "PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000; PRAGMA synchronous = NORMAL; PRAGMA trusted_schema = OFF;",
     );
     if (databasePath !== ":memory:") {
       database.exec("PRAGMA journal_mode = WAL;");
     }
     await applyMigrations(database, migrationDirectory);
-    database.enableDefensive(true);
     return database;
   } catch (error) {
     database.close();

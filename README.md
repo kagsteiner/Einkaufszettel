@@ -4,7 +4,7 @@ Mobile, gemeinsame Einkaufszettel für einen Haushalt – als kleine TypeScript-
 
 ## Lokal starten
 
-Voraussetzung ist Node.js 26 oder neuer.
+Voraussetzung ist Node.js 20.20.2 oder neuer.
 
 ```bash
 npm install

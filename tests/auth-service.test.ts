@@ -36,15 +36,19 @@ test("registration creates a personal household and a hashed session", async () 
     .get(credentials.user.id) as { password_hash: string };
   assert.notEqual(storedUser.password_hash, "ein sicheres Passwort");
   assert.equal(
-    database
-      .prepare("SELECT count(*) AS count FROM sessions WHERE token_hash = ?")
-      .get(hashToken(credentials.sessionToken))?.count,
+    (
+      database
+        .prepare("SELECT count(*) AS count FROM sessions WHERE token_hash = ?")
+        .get(hashToken(credentials.sessionToken)) as { count: number }
+    ).count,
     1,
   );
   assert.equal(
-    database
-      .prepare("SELECT count(*) AS count FROM sessions WHERE token_hash = ?")
-      .get(credentials.sessionToken)?.count,
+    (
+      database
+        .prepare("SELECT count(*) AS count FROM sessions WHERE token_hash = ?")
+        .get(credentials.sessionToken) as { count: number }
+    ).count,
     0,
   );
 });
