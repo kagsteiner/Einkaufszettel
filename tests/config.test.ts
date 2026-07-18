@@ -3,8 +3,11 @@ import { test } from "node:test";
 import { loadConfig } from "../src/server/config.ts";
 
 test("production ignores the local OpenAI fallback", () => {
+  const encryptionKey = Buffer.alloc(32, 9).toString("base64");
   const config = loadConfig({
+    APP_ENCRYPTION_KEY: encryptionKey,
     APP_ENV: "production",
+    APP_ORIGIN: "https://zettel.example",
     OPENAI_API_KEY: "must-not-be-used",
     PORT: "8080",
   });
@@ -25,4 +28,5 @@ test("invalid configuration fails before the server starts", () => {
   assert.throws(() => loadConfig({ PORT: "0" }), /PORT/);
   assert.throws(() => loadConfig({ APP_ENV: "staging" }), /APP_ENV/);
   assert.throws(() => loadConfig({ APP_ENCRYPTION_KEY: "too-short" }), /APP_ENCRYPTION_KEY/);
+  assert.throws(() => loadConfig({ APP_ENV: "production" }), /APP_ORIGIN/);
 });

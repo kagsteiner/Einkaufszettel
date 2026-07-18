@@ -8,6 +8,7 @@ import { openDatabase } from "./database.ts";
 import { EventHub } from "./event-hub.ts";
 import { HouseholdService } from "./household-service.ts";
 import { applySecurityHeaders, sendJson, serveAppShell, servePublicFile } from "./http.ts";
+import { SettingsService } from "./settings-service.ts";
 import { ShoppingService } from "./shopping-service.ts";
 
 const config = loadConfig();
@@ -15,6 +16,7 @@ const database = await openDatabase(config.databasePath);
 const authService = new AuthService(database, config);
 const householdService = new HouseholdService(database);
 const shoppingService = new ShoppingService(database);
+const settingsService = new SettingsService(database, config);
 const eventHub = new EventHub();
 const versionFile = resolve(config.publicDirectory, "version.json");
 let buildVersion = "unknown";
@@ -49,6 +51,7 @@ const server = createServer(async (request, response) => {
         authService,
         householdService,
         shoppingService,
+        settingsService,
         eventHub,
         config,
       )

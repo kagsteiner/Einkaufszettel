@@ -171,6 +171,37 @@ export class ShoppingService {
     return { id, name };
   }
 
+  updateList(
+    user: AuthenticatedUser,
+    listId: string,
+    nameValue: unknown,
+  ): { id: string; name: string } {
+    this.assertListAccess(user, listId);
+    let name: string;
+    try {
+      name = cleanRequiredText(nameValue, "Der Zettelname", 80);
+    } catch (error) {
+      throw invalidInput(error instanceof Error ? error.message : "Der Zettelname ist ungültig.");
+    }
+    try {
+      this.database
+        .prepare(
+          "UPDATE shopping_lists SET name = ?, normalized_name = ?, updated_at = ? WHERE id = ?",
+        )
+        .run(name, normalizeComparableText(name), new Date().toISOString(), listId);
+    } catch (error) {
+      if (isUniqueConstraintError(error)) {
+        throw new AppError(
+          409,
+          "list_exists",
+          "Ein Zettel mit diesem Namen ist bereits vorhanden.",
+        );
+      }
+      throw error;
+    }
+    return { id: listId, name };
+  }
+
   addItem(
     user: AuthenticatedUser,
     listId: string,
@@ -256,6 +287,43 @@ export class ShoppingService {
       )
       .run(completed ? now : null, user.id, now, item.id);
     return this.getItem(user, itemId);
+  }
+
+  updateItem(
+    user: AuthenticatedUser,
+    itemId: string,
+    input: { category?: unknown; name?: unknown; note?: unknown; quantities?: unknown },
+  ): ShoppingItem {
+    return inTransaction(this.database, () => {
+      const existing = this.assertItemAccess(user, itemId);
+      const name = input.name === undefined ? existing.name : cleanItemName(input.name);
+      const note = input.note === undefined ? existing.note : cleanNote(input.note);
+      const category =
+        input.category === undefined ? existing.category : normalizeCategory(input.category);
+      const quantities =
+        input.quantities === undefined ? null : normalizeQuantities(input.quantities);
+      const now = new Date().toISOString();
+      try {
+        this.database
+          .prepare(
+            `UPDATE items SET name = ?, normalized_name = ?, note = ?, category = ?,
+             updated_by_user_id = ?, updated_at = ? WHERE id = ?`,
+          )
+          .run(name, normalizeComparableText(name), note, category, user.id, now, itemId);
+      } catch (error) {
+        if (isUniqueConstraintError(error)) {
+          throw new AppError(409, "item_exists", "Dieses Produkt steht bereits auf dem Zettel.");
+        }
+        throw error;
+      }
+      if (quantities) {
+        this.database.prepare("DELETE FROM quantity_parts WHERE item_id = ?").run(itemId);
+        for (const quantity of quantities) {
+          this.insertQuantity(itemId, quantity, now);
+        }
+      }
+      return this.getItem(user, itemId);
+    });
   }
 
   deleteItem(user: AuthenticatedUser, itemId: string): void {

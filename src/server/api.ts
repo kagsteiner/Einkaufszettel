@@ -5,6 +5,7 @@ import { AppError } from "./errors.ts";
 import type { EventHub } from "./event-hub.ts";
 import type { HouseholdService } from "./household-service.ts";
 import { sendJson } from "./http.ts";
+import type { SettingsService } from "./settings-service.ts";
 import type { ShoppingService } from "./shopping-service.ts";
 
 const sessionCookieName = "zettel_session";
@@ -18,6 +19,7 @@ export async function handleApiRequest(
   authService: AuthService,
   householdService: HouseholdService,
   shoppingService: ShoppingService,
+  settingsService: SettingsService,
   eventHub: EventHub,
   config: AppConfig,
 ): Promise<boolean> {
@@ -129,7 +131,40 @@ export async function handleApiRequest(
       return true;
     }
 
+    if (request.method === "PATCH" && pathname === "/api/settings/profile") {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      const body = await readJson(request);
+      const profile = settingsService.updateDisplayName(user, body.displayName);
+      eventHub.publish(user.householdId);
+      sendJson(response, 200, { profile });
+      return true;
+    }
+
+    if (request.method === "PUT" && pathname === "/api/settings/openai-key") {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      const body = await readJson(request);
+      const openAiKey = settingsService.saveOpenAiApiKey(user, body.apiKey);
+      sendJson(response, 200, { openAiKey });
+      return true;
+    }
+
+    if (request.method === "DELETE" && pathname === "/api/settings/openai-key") {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      settingsService.deleteOpenAiApiKey(user);
+      response.writeHead(204, { "Cache-Control": "no-store" });
+      response.end();
+      return true;
+    }
+
     const listMatch = pathname.match(/^\/api\/lists\/([^/]+)$/);
+    if (request.method === "PATCH" && listMatch?.[1]) {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      const body = await readJson(request);
+      const list = shoppingService.updateList(user, listMatch[1], body.name);
+      eventHub.publish(user.householdId);
+      sendJson(response, 200, { list });
+      return true;
+    }
     if (request.method === "DELETE" && listMatch?.[1]) {
       const user = authenticateWrite(request, authService, sessionToken, config);
       shoppingService.deleteList(user, listMatch[1]);
@@ -168,6 +203,19 @@ export async function handleApiRequest(
     }
 
     const itemMatch = pathname.match(/^\/api\/items\/([^/]+)$/);
+    if (request.method === "PATCH" && itemMatch?.[1]) {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      const body = await readJson(request);
+      const item = shoppingService.updateItem(user, itemMatch[1], {
+        category: body.category,
+        name: body.name,
+        note: body.note,
+        quantities: body.quantities,
+      });
+      eventHub.publish(user.householdId);
+      sendJson(response, 200, { item });
+      return true;
+    }
     if (request.method === "DELETE" && itemMatch?.[1]) {
       const user = authenticateWrite(request, authService, sessionToken, config);
       shoppingService.deleteItem(user, itemMatch[1]);

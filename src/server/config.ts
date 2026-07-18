@@ -27,6 +27,13 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
 
   const encryptionKey = parseEncryptionKey(environment.APP_ENCRYPTION_KEY);
   const appEnvironment = rawEnvironment as AppEnvironment;
+  const origin = parseOrigin(environment.APP_ORIGIN);
+  if (appEnvironment === "production" && !origin) {
+    throw new Error("APP_ORIGIN ist in der Produktionsumgebung erforderlich.");
+  }
+  if (appEnvironment === "production" && !encryptionKey) {
+    throw new Error("APP_ENCRYPTION_KEY ist in der Produktionsumgebung erforderlich.");
+  }
 
   return {
     appEnvironment,
@@ -34,10 +41,30 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
     developmentOpenAiApiKey:
       appEnvironment === "development" ? environment.OPENAI_API_KEY?.trim() || null : null,
     encryptionKey,
-    origin: environment.APP_ORIGIN?.trim().replace(/\/$/, "") || null,
+    origin,
     port,
     publicDirectory: resolve(environment.PUBLIC_DIRECTORY?.trim() || "dist/public"),
   };
+}
+
+function parseOrigin(value: string | undefined): string | null {
+  if (!value?.trim()) {
+    return null;
+  }
+  try {
+    const url = new URL(value.trim());
+    if (
+      url.pathname !== "/" ||
+      url.search ||
+      url.hash ||
+      !["http:", "https:"].includes(url.protocol)
+    ) {
+      throw new Error("invalid origin");
+    }
+    return url.origin;
+  } catch {
+    throw new Error("APP_ORIGIN muss eine gültige HTTP(S)-Origin ohne Pfad sein.");
+  }
 }
 
 function parseEncryptionKey(value: string | undefined): Buffer | null {
