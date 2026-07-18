@@ -380,22 +380,22 @@ async function submitItem(event: SubmitEvent, listId: string): Promise<void> {
     return;
   }
   try {
-    const result = await api<{ merge: "appended" | "created" | "increased" | "unchanged" }>(
-      `/api/lists/${encodeURIComponent(listId)}/items`,
-      {
-        body: {
-          name: values.get("name"),
-          quantities: amount ? [{ amount, unit }] : undefined,
-        },
-        method: "POST",
+    const result = await api<{
+      merge: "appended" | "created" | "increased" | "reactivated" | "unchanged";
+    }>(`/api/lists/${encodeURIComponent(listId)}/items`, {
+      body: {
+        name: values.get("name"),
+        quantities: amount ? [{ amount, unit }] : undefined,
       },
-    );
+      method: "POST",
+    });
     form.reset();
     await refreshState(false);
     const messages = {
       appended: "Zusätzliche Einheit ergänzt – bitte kurz prüfen.",
       created: "Zum Zettel hinzugefügt.",
       increased: "Vorhandene Menge wurde erhöht.",
+      reactivated: "Erneut mit der neuen Menge auf den Zettel gesetzt.",
       unchanged: "Das Produkt stand bereits auf dem Zettel.",
     };
     showToast(messages[result.merge]);

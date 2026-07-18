@@ -75,13 +75,24 @@ test("household authorization is enforced for list and item writes", () => {
   assert.throws(() => shopping.deleteList(outsider.user, listId), /nicht gefunden/);
 });
 
-test("completed items are reactivated when added again", () => {
-  const created = shopping.addItem(owner.user, listId, { name: "Brot" });
+test("completed items are reactivated with only the newly requested quantity", () => {
+  const created = shopping.addItem(owner.user, listId, {
+    name: "Eier",
+    quantities: [{ amount: "5", unit: "Stück" }],
+  });
   assert.ok(shopping.setCompleted(owner.user, created.item.id, true).completedAt);
 
-  const merged = shopping.addItem(owner.user, listId, { name: "brot" });
-  assert.equal(merged.merge, "unchanged");
-  assert.equal(merged.item.completedAt, null);
+  const [reactivated] = shopping.addRecipeItems(owner.user, listId, [
+    { amount: "3", category: "dairy", name: "eier", note: null, unit: "Stück" },
+  ]);
+
+  assert.ok(reactivated);
+  assert.equal(reactivated.merge, "reactivated");
+  assert.equal(reactivated.item.completedAt, null);
+  assert.deepEqual(
+    reactivated.item.quantities.map(({ amount, unit }) => ({ amount, unit })),
+    [{ amount: "3", unit: "Stück" }],
+  );
 });
 
 test("a recipe selection is applied atomically", () => {

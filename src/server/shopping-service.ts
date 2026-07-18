@@ -215,7 +215,10 @@ export class ShoppingService {
     user: AuthenticatedUser,
     listId: string,
     input: { category?: unknown; name: unknown; note?: unknown; quantities?: unknown },
-  ): { item: ShoppingItem; merge: "created" | "increased" | "appended" | "unchanged" } {
+  ): {
+    item: ShoppingItem;
+    merge: "created" | "increased" | "appended" | "reactivated" | "unchanged";
+  } {
     const name = cleanItemName(input.name);
     const note = cleanNote(input.note);
     const category = normalizeCategory(input.category);
@@ -256,6 +259,11 @@ export class ShoppingService {
         return { item: this.getItem(user, itemId), merge: "created" };
       }
 
+      const wasCompleted = existing.completed_at !== null;
+      if (wasCompleted) {
+        this.database.prepare("DELETE FROM quantity_parts WHERE item_id = ?").run(existing.id);
+      }
+
       let increased = false;
       let appended = false;
       for (const quantity of quantities) {
@@ -282,7 +290,13 @@ export class ShoppingService {
         .run(note, user.id, now, existing.id);
       return {
         item: this.getItem(user, existing.id),
-        merge: appended ? "appended" : increased ? "increased" : "unchanged",
+        merge: wasCompleted
+          ? "reactivated"
+          : appended
+            ? "appended"
+            : increased
+              ? "increased"
+              : "unchanged",
       };
     });
   }
@@ -291,7 +305,10 @@ export class ShoppingService {
     user: AuthenticatedUser,
     listId: string,
     values: unknown,
-  ): Array<{ item: ShoppingItem; merge: "created" | "increased" | "appended" | "unchanged" }> {
+  ): Array<{
+    item: ShoppingItem;
+    merge: "created" | "increased" | "appended" | "reactivated" | "unchanged";
+  }> {
     if (!Array.isArray(values) || values.length < 1 || values.length > 100) {
       throw invalidInput("Wähle zwischen einem und 100 Rezeptbestandteilen aus.");
     }
