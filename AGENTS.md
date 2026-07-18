@@ -2,18 +2,17 @@
 
 ## Project Structure & Module Organization
 
-This repository is specification-first. `Spezifikation.md` defines the mobile-first experience, shared shopping lists, authentication, SQLite storage, and planned OpenAI-assisted recipe import. `.obsidian/` contains editor metadata, not product code.
+`Spezifikation.md` defines the mobile-first experience, shared shopping lists, authentication, SQLite storage, and OpenAI-assisted recipe import. Runtime code lives in `src/`, tests in `tests/`, browser assets in `public/`, build helpers in `scripts/`, and schema migrations in `migrations/`. `.obsidian/` is editor metadata, not product code.
 
-The intended stack is TypeScript, Node.js, and SQLite. Keep runtime code under `src/`, tests as `*.test.ts` or under `tests/`, static images under `public/`, and migrations under `migrations/`. Separate UI, API, domain logic, and persistence.
+The stack is TypeScript on Node.js 26 with SQLite. Separate browser UI (`src/client`), HTTP/API code (`src/server`), domain logic, and persistence.
 
 ## Build, Test, and Development Commands
 
-No package manifest or executable application exists yet, so there are no build or test commands. When bootstrapping, expose the workflow through `package.json`:
-
 - `npm run dev` — start the local development server.
 - `npm run build` — type-check and create the production build.
-- `npm test` — run the complete automated test suite.
-- `npm run lint` — check formatting and static-analysis rules.
+- `npm test` — run Node unit and integration tests.
+- `npm run test:browser` — run Playwright browser tests.
+- `npm run lint` — check formatting and static analysis with Biome.
 
 Keep setup reproducible and document required environment variables in `.env.example`.
 

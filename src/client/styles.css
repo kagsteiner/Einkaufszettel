@@ -1,0 +1,148 @@
+:root {
+  color: #1e2b24;
+  background: #26382e;
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100dvh;
+  background: radial-gradient(circle at 20% 0%, rgb(255 255 255 / 9%), transparent 34rem), #26382e;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+#app {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+}
+
+.welcome-card {
+  width: min(100%, 29rem);
+  position: relative;
+  overflow: hidden;
+  padding: clamp(2rem, 8vw, 3.5rem) clamp(1.4rem, 7vw, 3rem);
+  border-radius: 1.5rem;
+  background:
+    linear-gradient(rgb(91 71 42 / 5%) 1px, transparent 1px) 0 1.85rem / 100% 1.85rem,
+    #f7f1e5;
+  box-shadow: 0 1.5rem 4rem rgb(5 15 10 / 35%);
+}
+
+.welcome-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 1.55rem;
+  width: 1px;
+  background: rgb(174 75 58 / 28%);
+}
+
+.brand-mark {
+  width: 3.25rem;
+  height: 3.25rem;
+  display: grid;
+  place-items: center;
+  margin-bottom: 2rem;
+  border-radius: 50%;
+  color: #f7f1e5;
+  background: #d5664e;
+  font-size: 1.5rem;
+  font-weight: 800;
+  box-shadow: 0 0.3rem 0 #a84836;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  color: #69776d;
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.3rem, 11vw, 4rem);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 0.96;
+}
+
+.intro {
+  max-width: 23rem;
+  margin: 1.25rem 0 2rem;
+  color: #536158;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.paper-preview {
+  display: grid;
+  gap: 0.25rem;
+  margin-inline: -0.25rem;
+}
+
+.preview-row {
+  min-height: 3rem;
+  display: grid;
+  grid-template-columns: 1.7rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.25rem;
+  border-bottom: 1px solid rgb(68 85 74 / 14%);
+}
+
+.preview-row strong {
+  color: #667269;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.check {
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 2px solid #738077;
+  border-radius: 50%;
+}
+
+.status-line {
+  min-height: 1.25rem;
+  margin: 1.4rem 0 0;
+  color: #758178;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 420px) {
+  #app {
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .welcome-card {
+    min-height: 100dvh;
+    border-radius: 0;
+    padding-top: max(3rem, env(safe-area-inset-top));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto;
+  }
+}

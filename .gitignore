@@ -10,12 +10,15 @@ node_modules/
 dist/
 build/
 coverage/
+playwright-report/
+test-results/
 
 # Local databases and user uploads
 *.db
 *.db-shm
 *.db-wal
 uploads/
+data/
 
 # Operating-system metadata
 .DS_Store

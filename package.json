@@ -1,0 +1,33 @@
+{
+  "name": "einkaufszettel",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=26.0.0"
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env --watch-path=src scripts/dev.ts",
+    "start": "node --env-file-if-exists=.env src/server/main.ts",
+    "build": "npm run typecheck && node scripts/build-client.ts",
+    "build:client": "node scripts/build-client.ts",
+    "test": "node --test --test-concurrency=1 tests/*.test.ts",
+    "test:coverage": "node --experimental-test-coverage --test --test-concurrency=1 tests/*.test.ts",
+    "test:browser": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "check": "npm run typecheck && npm test && npm run lint && npm run build && npm run test:browser"
+  },
+  "dependencies": {
+    "openai": "^6.48.0",
+    "sharp": "^0.35.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.4",
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^26.1.1",
+    "esbuild": "^0.28.1",
+    "typescript": "^7.0.2"
+  }
+}
