@@ -38,7 +38,7 @@ const [javaScriptPath, javaScriptMetadata] = javaScriptOutput;
 const toPublicPath = (filePath: string): string => {
   const absolutePath = resolve(projectRoot, filePath);
   const path = relative(outputDirectory, absolutePath).split(sep).join("/");
-  return `/${path}`;
+  return path;
 };
 
 const template = await readFile(resolve(sourceDirectory, "index.html"), "utf8");
@@ -62,13 +62,13 @@ await Promise.all([
         name: "Einkaufszettel",
         short_name: "Einkauf",
         description: "Der gemeinsame Einkaufszettel für den Haushalt.",
-        start_url: "/",
+        start_url: "./",
         display: "standalone",
         background_color: "#f4efe4",
         theme_color: "#26382e",
         icons: [
           {
-            src: "/icon.svg",
+            src: "icon.svg",
             sizes: "any",
             type: "image/svg+xml",
             purpose: "any maskable",

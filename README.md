@@ -30,6 +30,6 @@ OpenAI wird in automatisierten Tests gefälscht; Tests benötigen weder Netzwerk
 
 ## Produktion
 
-Setze mindestens `APP_ENV=production`, eine HTTPS-`APP_ORIGIN`, `DATABASE_PATH`, `UPLOAD_DIRECTORY` und `APP_ENCRYPTION_KEY`. Der Server erwartet HTTPS-Terminierung durch einen Reverse Proxy. `TRUST_PROXY=true` ist nur korrekt, wenn der Proxy eingehende `X-Forwarded-For`-Header zuverlässig ersetzt.
+Setze mindestens `APP_ENV=production`, eine HTTPS-`APP_ORIGIN`, `DATABASE_PATH`, `UPLOAD_DIRECTORY` und `APP_ENCRYPTION_KEY`. Für einen Betrieb unter einem Unterpfad wie `/zettel` setze zusätzlich `APP_BASE_PATH=/zettel`. Der Server erwartet HTTPS-Terminierung durch einen Reverse Proxy. `TRUST_PROXY=true` ist nur korrekt, wenn der Proxy eingehende `X-Forwarded-For`-Header zuverlässig ersetzt.
 
 SQLite-Migrationen laufen beim Start. Sichere Datenbank und Upload-Verzeichnis gemeinsam und teste die Wiederherstellung. Es gibt absichtlich keinen cache-basierten Service Worker; HTML und API bleiben `no-store`, während gehashte Assets langfristig gecacht werden dürfen.

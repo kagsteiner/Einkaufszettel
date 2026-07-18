@@ -10,6 +10,10 @@ export class ApiError extends Error {
   }
 }
 
+export function applicationPath(path: string): string {
+  return new URL(path.replace(/^\/+/, ""), document.baseURI).pathname;
+}
+
 export async function api<T>(
   path: string,
   options: { body?: unknown; method?: "DELETE" | "GET" | "PATCH" | "POST" | "PUT" } = {},
@@ -26,7 +30,7 @@ export async function api<T>(
     }
   }
 
-  const response = await fetch(path, {
+  const response = await fetch(applicationPath(path), {
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
     cache: "no-store",
     credentials: "same-origin",
@@ -63,7 +67,7 @@ export async function apiFile<T>(path: string, file: File): Promise<T> {
   if (csrfToken) {
     headers.set("X-CSRF-Token", csrfToken);
   }
-  const response = await fetch(path, {
+  const response = await fetch(applicationPath(path), {
     body: file,
     cache: "no-store",
     credentials: "same-origin",

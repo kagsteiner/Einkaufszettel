@@ -70,7 +70,7 @@ const server = createServer(async (request, response) => {
     if (await servePublicFile(request, response, config.publicDirectory, url.pathname)) {
       return;
     }
-    await serveAppShell(request, response, config.publicDirectory);
+    await serveAppShell(request, response, config.publicDirectory, config.basePath);
   } catch (error) {
     console.error(
       "Unbehandelter Serverfehler",

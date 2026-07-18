@@ -1,0 +1,152 @@
+# =============================================================================
+# srv706843.hstgr.cloud - Main VPS Domain
+# =============================================================================
+# Apps hosted on this domain:
+#   - Admin/Comment app at "/" (port 3003)
+#   - AIdventure at "/aidventure/" (port 3006)
+#   - Genpassword at "/genpassword/" (port 3004)
+#   - Polar Goalie at "/goalie/" (port 3010)
+#   - Storytellers at "/storytellers/" (port 3001)
+#   - Second Roll at "/secondroll/" (port 3033)
+#   - Wortwelt at "/wortwelt/" (port 3002)
+#   - Signet at "/signet/" (port 3005)
+#   - Zettel at "/zettel/" (port 3011)
+# =============================================================================
+
+# HTTPS Server (Port 443)
+server {
+    server_name srv706843.hstgr.cloud;
+
+    # SSL Configuration (managed by Certbot)
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/srv706843.hstgr.cloud/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/srv706843.hstgr.cloud/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    # Zettel -> Port 3011
+    # The trailing slash strips the /zettel prefix before forwarding it to the app.
+    location = /zettel {
+        return 308 /zettel/;
+    }
+
+    location ^~ /zettel/ {
+        proxy_pass http://127.0.0.1:3011/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Connection "";
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+    }
+
+    # Admin/Comment App -> Port 3003
+    location / {
+        proxy_pass http://127.0.0.1:3003;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # AIdventure -> Port 3006
+    # WebSocket upgrade headers required for real-time game communication
+    # Long timeouts needed — world generation can take several minutes
+    location /aidventure/ {
+        proxy_pass http://127.0.0.1:3006/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+    }
+
+    # Genpassword -> Port 3004
+    # Trailing slash in proxy_pass strips "/genpassword" prefix
+    location /genpassword/ {
+        proxy_pass http://127.0.0.1:3004/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Polar Goalie -> Port 3010
+    # Trailing slash in proxy_pass strips "/goalie" prefix
+    location /goalie/ {
+        proxy_pass http://127.0.0.1:3010/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Storytellers -> Port 3001
+    # Trailing slash in proxy_pass strips "/storytellers" prefix
+    location /storytellers/ {
+        proxy_pass http://127.0.0.1:3001/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Second Roll (Backgammon Quiz) -> Port 3033
+    # Trailing slash in proxy_pass strips "/secondroll" prefix
+    location /secondroll/ {
+        proxy_pass http://127.0.0.1:3033/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Wortwelt -> Port 3002
+    # Trailing slash in proxy_pass strips "/wortwelt" prefix
+    location /wortwelt/ {
+        proxy_pass http://127.0.0.1:3002/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Signet -> Port 3005
+    # Trailing slash in proxy_pass strips "/signet" prefix
+    # X-Script-Name lets the app set <base> and cookie path so assets load under /signet/
+    location /signet/ {
+        proxy_pass http://127.0.0.1:3005/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Script-Name /signet;
+    }
+}
+
+# HTTP Server (Port 80) - Redirects to HTTPS
+server {
+    listen 80;
+    server_name srv706843.hstgr.cloud;
+
+    if ($host = srv706843.hstgr.cloud) {
+        return 301 https://$host$request_uri;
+    }
+
+    return 404;
+}
+

@@ -4,6 +4,7 @@ export type AppEnvironment = "development" | "production" | "test";
 
 export type AppConfig = Readonly<{
   appEnvironment: AppEnvironment;
+  basePath: string;
   databasePath: string;
   developmentOpenAiApiKey: string | null;
   encryptionKey: Buffer | null;
@@ -29,6 +30,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
 
   const encryptionKey = parseEncryptionKey(environment.APP_ENCRYPTION_KEY);
   const appEnvironment = rawEnvironment as AppEnvironment;
+  const basePath = parseBasePath(environment.APP_BASE_PATH);
   const origin = parseOrigin(environment.APP_ORIGIN);
   if (appEnvironment === "production" && !origin) {
     throw new Error("APP_ORIGIN ist in der Produktionsumgebung erforderlich.");
@@ -42,6 +44,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
 
   return {
     appEnvironment,
+    basePath,
     databasePath: resolve(environment.DATABASE_PATH?.trim() || "data/einkaufszettel.db"),
     developmentOpenAiApiKey:
       appEnvironment === "development" ? environment.OPENAI_API_KEY?.trim() || null : null,
@@ -52,6 +55,19 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
     trustProxy: environment.TRUST_PROXY === "true",
     uploadDirectory: resolve(environment.UPLOAD_DIRECTORY?.trim() || "data/uploads"),
   };
+}
+
+function parseBasePath(value: string | undefined): string {
+  const basePath = value?.trim() || "";
+  if (!basePath || basePath === "/") {
+    return "";
+  }
+  if (!/^\/[a-zA-Z0-9][a-zA-Z0-9._~-]*(?:\/[a-zA-Z0-9][a-zA-Z0-9._~-]*)*$/.test(basePath)) {
+    throw new Error(
+      "APP_BASE_PATH muss ein Pfad wie /zettel ohne abschließenden Schrägstrich sein.",
+    );
+  }
+  return basePath;
 }
 
 function parseOrigin(value: string | undefined): string | null {

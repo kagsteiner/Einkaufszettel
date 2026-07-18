@@ -24,6 +24,11 @@ test("development accepts an exact 32-byte encryption key", () => {
   assert.deepEqual(config.encryptionKey, encryptionKey);
 });
 
+test("a base path supports deployment below a reverse-proxy subdirectory", () => {
+  assert.equal(loadConfig({ APP_BASE_PATH: "/zettel" }).basePath, "/zettel");
+  assert.throws(() => loadConfig({ APP_BASE_PATH: "/zettel/" }), /APP_BASE_PATH/);
+});
+
 test("invalid configuration fails before the server starts", () => {
   assert.throws(() => loadConfig({ PORT: "0" }), /PORT/);
   assert.throws(() => loadConfig({ APP_ENV: "staging" }), /APP_ENV/);

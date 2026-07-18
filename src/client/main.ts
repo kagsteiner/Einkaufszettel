@@ -1,4 +1,4 @@
-import { ApiError, api, apiFile } from "./api.ts";
+import { ApiError, api, apiFile, applicationPath } from "./api.ts";
 import { productIcon } from "./product-icons.ts";
 import "./styles.css";
 import type { AppState, ShoppingItem, ShoppingList, User } from "./types.ts";
@@ -232,7 +232,7 @@ function listMarkup(list: ShoppingList): string {
   return `
     <main class="list-paper">
       <header class="list-heading">
-        <div class="list-title">${list.imageId ? `<img src="/api/images/${escapeHtml(list.imageId)}" alt="">` : ""}<div><p class="eyebrow">Einkaufszettel</p><h1>${escapeHtml(list.name)}</h1></div></div>
+        <div class="list-title">${list.imageId ? `<img src="${escapeHtml(applicationPath(`/api/images/${list.imageId}`))}" alt="">` : ""}<div><p class="eyebrow">Einkaufszettel</p><h1>${escapeHtml(list.name)}</h1></div></div>
         <div class="heading-actions"><button class="quiet-button sort-button" type="button" data-sort-mode aria-label="Sortierung wechseln">${sortMode === "alphabetical" ? "A–Z" : "Laden"}</button><label class="quiet-button recipe-button"><span class="desktop-label">Rezeptfoto</span><span class="mobile-label">Foto</span><input type="file" data-recipe-file accept="image/*,.heic,.heif"></label><button class="quiet-button" type="button" data-list-menu aria-label="Zettel bearbeiten"><span class="desktop-label">Bearbeiten</span><span class="mobile-label" aria-hidden="true">•••</span></button></div>
       </header>
       <section class="shopping-items" aria-label="Offene Produkte">
@@ -290,7 +290,7 @@ function itemMarkup(item: ShoppingItem): string {
     <button class="check-button" type="button" data-toggle-item aria-label="${
       item.completedAt ? "Wieder auf die Liste setzen" : "Als erledigt markieren"
     }"><span aria-hidden="true">✓</span></button>
-    <button class="item-image ${item.imageId ? "" : "fallback"}" type="button" ${item.imageId ? "data-preview-image" : "data-edit-item"} aria-label="${escapeHtml(item.imageId ? `${item.name} Bild ansehen` : `${item.name} bearbeiten`)}">${item.imageId ? `<img src="/api/images/${escapeHtml(item.imageId)}" alt="">` : productIcon(item.name) || categoryIcons[item.category] || "🛒"}</button>
+    <button class="item-image ${item.imageId ? "" : "fallback"}" type="button" ${item.imageId ? "data-preview-image" : "data-edit-item"} aria-label="${escapeHtml(item.imageId ? `${item.name} Bild ansehen` : `${item.name} bearbeiten`)}">${item.imageId ? `<img src="${escapeHtml(applicationPath(`/api/images/${item.imageId}`))}" alt="">` : productIcon(item.name) || categoryIcons[item.category] || "🛒"}</button>
     <button class="item-copy" type="button" data-edit-item>
       <strong>${escapeHtml(item.name)}</strong>${item.note ? `<small>${escapeHtml(item.note)}</small>` : ""}
     </button>
@@ -581,7 +581,7 @@ function openImagePreview(item: ShoppingItem): void {
     return;
   }
   const dialog = createDialog(
-    `<section class="image-preview"><div class="dialog-heading"><h2>${escapeHtml(item.name)}</h2><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div><img src="/api/images/${escapeHtml(item.imageId)}" alt="${escapeHtml(item.name)}"><button class="secondary-button" type="button" data-edit-from-preview>Eintrag bearbeiten</button></section>`,
+    `<section class="image-preview"><div class="dialog-heading"><h2>${escapeHtml(item.name)}</h2><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div><img src="${escapeHtml(applicationPath(`/api/images/${item.imageId}`))}" alt="${escapeHtml(item.name)}"><button class="secondary-button" type="button" data-edit-from-preview>Eintrag bearbeiten</button></section>`,
   );
   dialog
     .querySelector<HTMLButtonElement>("[data-edit-from-preview]")
@@ -817,7 +817,12 @@ async function logout(dialog: HTMLDialogElement): Promise<void> {
 }
 
 async function handleInvitationPath(): Promise<void> {
-  const match = window.location.pathname.match(/^\/einladung\/([^/]+)$/);
+  const basePath = new URL(document.baseURI).pathname.replace(/\/$/, "");
+  const invitationPath =
+    basePath && window.location.pathname.startsWith(basePath)
+      ? window.location.pathname.slice(basePath.length)
+      : window.location.pathname;
+  const match = invitationPath.match(/^\/einladung\/([^/]+)$/);
   if (!match?.[1]) {
     return;
   }
@@ -852,7 +857,7 @@ async function handleInvitationPath(): Promise<void> {
               body: { moveExistingData },
               method: "POST",
             });
-            window.history.replaceState(null, "", "/");
+            window.history.replaceState(null, "", applicationPath("/"));
             currentUser = (await api<{ user: User }>("/api/session")).user;
             dialog.close();
             await refreshState(false);
@@ -870,7 +875,7 @@ async function handleInvitationPath(): Promise<void> {
 
 function openEventStream(): void {
   closeEventStream();
-  eventSource = new EventSource("/api/events");
+  eventSource = new EventSource(applicationPath("/api/events"));
   eventSource.addEventListener("state-changed", () => void refreshState());
   eventSource.addEventListener("ready", () => {
     void verifyVersion();
@@ -974,7 +979,7 @@ function escapeHtml(value: string): string {
 
 async function verifyVersion(): Promise<void> {
   try {
-    const response = await fetch("/api/version", { cache: "no-store" });
+    const response = await fetch(applicationPath("/api/version"), { cache: "no-store" });
     const payload = (await response.json()) as { version?: unknown };
     const currentVersion = document.documentElement.dataset.version;
     if (typeof payload.version === "string" && payload.version !== currentVersion) {

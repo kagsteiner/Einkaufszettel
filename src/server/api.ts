@@ -122,7 +122,7 @@ export async function handleApiRequest(
       sendJson(response, 201, {
         invitation: {
           expiresAt: invitation.expiresAt,
-          url: `${origin}/einladung/${encodeURIComponent(invitation.token)}`,
+          url: `${origin}${config.basePath}/einladung/${encodeURIComponent(invitation.token)}`,
         },
       });
       return true;
@@ -450,7 +450,7 @@ function serializeCookie(
 ): string {
   const attributes = [
     `${name}=${encodeURIComponent(value)}`,
-    "Path=/",
+    `Path=${config.basePath || "/"}`,
     `Max-Age=${maxAge}`,
     httpOnly ? "SameSite=Lax" : "SameSite=Strict",
   ];

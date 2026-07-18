@@ -4,8 +4,9 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   const documentResponse = await page.goto("/");
   expect(documentResponse?.headers()["cache-control"]).toBe("no-store");
   const scriptSource = await page.locator('script[type="module"]').getAttribute("src");
-  expect(scriptSource).toMatch(/^\/assets\/main-[A-Z0-9]+\.js$/i);
-  const assetResponse = await page.request.get(scriptSource || "");
+  expect(scriptSource).toMatch(/^assets\/main-[A-Z0-9]+\.js$/i);
+  const assetPath = scriptSource ? new URL(scriptSource, page.url()).pathname : "";
+  const assetResponse = await page.request.get(assetPath);
   expect(assetResponse.headers()["cache-control"]).toContain("immutable");
   const versionResponse = await page.request.get("/api/version");
   expect(versionResponse.headers()["cache-control"]).toBe("no-store");

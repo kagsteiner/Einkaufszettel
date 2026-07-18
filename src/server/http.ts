@@ -103,15 +103,19 @@ export async function serveAppShell(
   request: IncomingMessage,
   response: ServerResponse,
   publicDirectory: string,
+  basePath: string,
 ): Promise<void> {
   if (request.method !== "GET") {
     sendJson(response, 404, { error: "Nicht gefunden" });
     return;
   }
-  const html = await readFile(resolve(publicDirectory, "index.html"));
+  const html = (await readFile(resolve(publicDirectory, "index.html"), "utf8")).replaceAll(
+    "__APP_BASE_PATH__",
+    `${basePath || ""}/`,
+  );
   response.writeHead(200, {
     "Cache-Control": "no-store",
-    "Content-Length": html.length,
+    "Content-Length": Buffer.byteLength(html),
     "Content-Type": "text/html; charset=utf-8",
   });
   response.end(html);
