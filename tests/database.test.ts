@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { after, before, test } from "node:test";
+import { AuthService } from "../src/server/auth-service.ts";
+import { loadConfig } from "../src/server/config.ts";
 import type { AppDatabase } from "../src/server/database.ts";
 import { openDatabase } from "../src/server/database.ts";
+import { ShoppingService } from "../src/server/shopping-service.ts";
 
 let database: AppDatabase;
 let temporaryDirectory: string;
@@ -30,6 +33,7 @@ test("all initial tables are created by the migration runner", () => {
     "households",
     "images",
     "invitations",
+    "item_purchase_events",
     "items",
     "pantry_items",
     "quantity_parts",
@@ -45,7 +49,7 @@ test("all initial tables are created by the migration runner", () => {
     .get() as {
     count: number;
   };
-  assert.equal(migrationCount.count, 2);
+  assert.equal(migrationCount.count, 3);
 });
 
 test("foreign keys are active", () => {
@@ -58,4 +62,35 @@ test("foreign keys are active", () => {
         .run("missing-household", "missing-user", new Date().toISOString()),
     /FOREIGN KEY constraint failed/,
   );
+});
+
+test("the purchase-history migration seeds already completed items", async () => {
+  const legacyMigrationDirectory = resolve(temporaryDirectory, "legacy-migrations");
+  await mkdir(legacyMigrationDirectory);
+  for (const migration of ["001-initial.sql", "002-quantity-order.sql"]) {
+    await copyFile(resolve("migrations", migration), resolve(legacyMigrationDirectory, migration));
+  }
+  const legacyDatabasePath = resolve(temporaryDirectory, "legacy.db");
+  const legacyDatabase = await openDatabase(legacyDatabasePath, legacyMigrationDirectory);
+  const auth = new AuthService(legacyDatabase, loadConfig({ APP_ENV: "test", PORT: "3000" }));
+  const user = await auth.register({
+    displayName: "Migrationstest",
+    email: "migration@example.com",
+    password: "Ein langes Passwort für Migrationen",
+  });
+  const legacyShopping = new ShoppingService(legacyDatabase);
+  const legacyListId = legacyShopping.createList(user.user, "Altbestand").id;
+  const legacyItem = legacyShopping.addItem(user.user, legacyListId, { name: "Reis" }).item;
+  const completedAt = "2026-07-18T10:00:00.000Z";
+  legacyDatabase
+    .prepare("UPDATE items SET completed_at = ?, updated_at = ? WHERE id = ?")
+    .run(completedAt, completedAt, legacyItem.id);
+  legacyDatabase.close();
+
+  const migratedDatabase = await openDatabase(legacyDatabasePath);
+  const event = migratedDatabase
+    .prepare("SELECT purchased_at FROM item_purchase_events WHERE item_id = ?")
+    .get(legacyItem.id) as { purchased_at: string };
+  assert.equal(event.purchased_at, completedAt);
+  migratedDatabase.close();
 });

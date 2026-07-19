@@ -5,6 +5,10 @@ export default defineConfig({
   fullyParallel: false,
   outputDir: "test-results",
   projects: [
+    {
+      name: "chromium-compact",
+      use: { hasTouch: true, isMobile: true, viewport: { height: 700, width: 320 } },
+    },
     { name: "chromium-mobile", use: { ...devices["Pixel 7"] } },
     { name: "webkit-mobile", use: { ...devices["iPhone 14"] } },
   ],

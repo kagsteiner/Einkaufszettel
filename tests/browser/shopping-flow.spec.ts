@@ -55,6 +55,21 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   expect(paperGeometry.headingRules).toBeCloseTo(2, 2);
   expect(paperGeometry.rowOffsetRules).toBeCloseTo(2, 2);
   expect(paperGeometry.rowRules).toBeCloseTo(1, 2);
+  const headingFits = await page.locator(".list-heading").evaluate((heading) => {
+    const actions = heading.querySelector<HTMLElement>(".heading-actions");
+    const title = heading.querySelector<HTMLElement>(".list-title");
+    if (!actions || !title) {
+      throw new Error("Zetteltitel oder Aktionen fehlen.");
+    }
+    const headingRect = heading.getBoundingClientRect();
+    const actionsRect = actions.getBoundingClientRect();
+    const titleRect = title.getBoundingClientRect();
+    return {
+      actionsInside: actionsRect.right <= headingRect.right + 1,
+      noOverlap: titleRect.right <= actionsRect.left + 1,
+    };
+  });
+  expect(headingFits).toEqual({ actionsInside: true, noOverlap: true });
 
   await page.route("**/api/ai/recipe-analysis", async (route) => {
     await route.fulfill({
@@ -101,6 +116,47 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   });
   expect(ingredientGeometry.selectionBottom).toBeLessThan(ingredientGeometry.productTop);
   await recipeDialog.getByRole("button", { name: "Schließen" }).click();
+
+  let recurringItems: unknown = null;
+  await page.route("**/api/lists/*/recurring-items", async (route) => {
+    if (route.request().method() === "POST") {
+      recurringItems = route.request().postDataJSON();
+      await route.fulfill({ body: JSON.stringify({ items: [] }), contentType: "application/json" });
+      return;
+    }
+    await route.fulfill({
+      body: JSON.stringify({
+        suggestions: [
+          {
+            category: "drinks",
+            dueAt: new Date(Date.now() + 24 * 60 * 60 * 1_000).toISOString(),
+            itemId: "hafermilch-history",
+            lastPurchasedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1_000).toISOString(),
+            name: "Hafermilch",
+            note: null,
+            quantities: [{ amount: "2", id: "quantity", unit: "l" }],
+          },
+        ],
+      }),
+      contentType: "application/json",
+    });
+  });
+  await page.locator("[data-recurring-items]").click();
+  const recurringDialog = page.getByRole("dialog");
+  await expect(recurringDialog.getByRole("heading", { name: "Was ist dran?" })).toBeVisible();
+  await expect(recurringDialog.getByText("morgen fällig", { exact: true })).toBeVisible();
+  await recurringDialog.getByLabel("Menge").first().fill("3");
+  await recurringDialog.getByRole("button", { name: "Auswahl hinzufügen" }).click();
+  await expect(page.getByText("1 Produkt hinzugefügt.", { exact: true })).toBeVisible();
+  expect(recurringItems).toEqual({
+    items: [
+      {
+        itemId: "hafermilch-history",
+        name: "Hafermilch",
+        quantities: [{ amount: "3", unit: "l" }],
+      },
+    ],
+  });
 
   await page.getByRole("button", { name: "Als erledigt markieren" }).click();
   await expect(page.getByText("1 erledigt", { exact: true })).toBeVisible();

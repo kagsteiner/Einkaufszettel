@@ -21,6 +21,7 @@ const categories = [
   "other",
 ] as const;
 const categorySet = new Set<string>(categories);
+const dayMilliseconds = 24 * 60 * 60 * 1_000;
 
 type ItemRow = {
   category: string;
@@ -53,6 +54,16 @@ export type ShoppingItem = Readonly<{
   note: string | null;
   quantities: ReadonlyArray<Readonly<{ amount: string; id: string; unit: string }>>;
   updatedAt: string;
+}>;
+
+export type RecurringSuggestion = Readonly<{
+  category: string;
+  dueAt: string;
+  itemId: string;
+  lastPurchasedAt: string;
+  name: string;
+  note: string | null;
+  quantities: ShoppingItem["quantities"];
 }>;
 
 export class ShoppingService {
@@ -332,15 +343,120 @@ export class ShoppingService {
     );
   }
 
-  setCompleted(user: AuthenticatedUser, itemId: string, completed: boolean): ShoppingItem {
-    const item = this.assertItemAccess(user, itemId);
-    const now = new Date().toISOString();
-    this.database
+  getRecurringSuggestions(
+    user: AuthenticatedUser,
+    listId: string,
+    now = new Date(),
+  ): RecurringSuggestion[] {
+    this.assertListAccess(user, listId);
+    const eventRows = this.database
       .prepare(
-        "UPDATE items SET completed_at = ?, updated_by_user_id = ?, updated_at = ? WHERE id = ?",
+        `WITH ranked_events AS (
+           SELECT e.item_id, e.purchased_at,
+                  ROW_NUMBER() OVER (
+                    PARTITION BY e.item_id ORDER BY e.purchased_at DESC
+                  ) AS event_rank
+           FROM item_purchase_events e
+           JOIN items i ON i.id = e.item_id
+           WHERE i.list_id = ? AND i.completed_at IS NOT NULL
+         )
+         SELECT item_id, purchased_at
+         FROM ranked_events
+         WHERE event_rank <= 5
+         ORDER BY item_id, purchased_at`,
       )
-      .run(completed ? now : null, user.id, now, item.id);
-    return this.getItem(user, itemId);
+      .all(listId) as Array<{ item_id: string; purchased_at: string }>;
+    const purchaseTimesByItem = new Map<string, number[]>();
+    for (const event of eventRows) {
+      const timestamp = Date.parse(event.purchased_at);
+      if (!Number.isFinite(timestamp)) {
+        continue;
+      }
+      const purchaseTimes = purchaseTimesByItem.get(event.item_id) || [];
+      purchaseTimes.push(timestamp);
+      purchaseTimesByItem.set(event.item_id, purchaseTimes);
+    }
+
+    const latestAllowedDueTime = now.getTime() + dayMilliseconds;
+    const suggestions: RecurringSuggestion[] = [];
+    for (const [itemId, purchaseTimes] of purchaseTimesByItem) {
+      if (purchaseTimes.length < 2) {
+        continue;
+      }
+      const firstPurchase = purchaseTimes[0];
+      const lastPurchase = purchaseTimes.at(-1);
+      if (firstPurchase === undefined || lastPurchase === undefined) {
+        continue;
+      }
+      const averageInterval = (lastPurchase - firstPurchase) / (purchaseTimes.length - 1);
+      if (averageInterval <= 0) {
+        continue;
+      }
+      const dueTime = lastPurchase + averageInterval;
+      if (dueTime > latestAllowedDueTime) {
+        continue;
+      }
+      const item = this.getItem(user, itemId);
+      suggestions.push({
+        category: item.category,
+        dueAt: new Date(dueTime).toISOString(),
+        itemId,
+        lastPurchasedAt: new Date(lastPurchase).toISOString(),
+        name: item.name,
+        note: item.note,
+        quantities: item.quantities,
+      });
+    }
+    return suggestions.sort((left, right) => Date.parse(left.dueAt) - Date.parse(right.dueAt));
+  }
+
+  addRecurringItems(user: AuthenticatedUser, listId: string, values: unknown): ShoppingItem[] {
+    if (!Array.isArray(values) || values.length < 1 || values.length > 100) {
+      throw invalidInput("Wähle zwischen einem und 100 fälligen Produkten aus.");
+    }
+    return inTransaction(this.database, () => {
+      const dueItemIds = new Set(
+        this.getRecurringSuggestions(user, listId).map((suggestion) => suggestion.itemId),
+      );
+      const selectedItemIds = new Set<string>();
+      return values.map((value) => {
+        if (!value || typeof value !== "object" || Array.isArray(value)) {
+          throw invalidInput("Ein fälliges Produkt ist ungültig.");
+        }
+        const selection = value as Record<string, unknown>;
+        const itemId = selection.itemId;
+        if (typeof itemId !== "string" || selectedItemIds.has(itemId) || !dueItemIds.has(itemId)) {
+          throw invalidInput("Ein ausgewähltes Produkt ist nicht mehr fällig.");
+        }
+        selectedItemIds.add(itemId);
+        this.updateItem(user, itemId, {
+          name: selection.name,
+          quantities: selection.quantities,
+        });
+        return this.setCompleted(user, itemId, false);
+      });
+    });
+  }
+
+  setCompleted(user: AuthenticatedUser, itemId: string, completed: boolean): ShoppingItem {
+    return inTransaction(this.database, () => {
+      const item = this.assertItemAccess(user, itemId);
+      if ((item.completed_at !== null) === completed) {
+        return this.getItem(user, itemId);
+      }
+      const now = new Date().toISOString();
+      if (completed) {
+        this.database
+          .prepare("INSERT INTO item_purchase_events (id, item_id, purchased_at) VALUES (?, ?, ?)")
+          .run(randomUUID(), item.id, now);
+      }
+      this.database
+        .prepare(
+          "UPDATE items SET completed_at = ?, updated_by_user_id = ?, updated_at = ? WHERE id = ?",
+        )
+        .run(completed ? now : null, user.id, now, item.id);
+      return this.getItem(user, itemId);
+    });
   }
 
   updateItem(

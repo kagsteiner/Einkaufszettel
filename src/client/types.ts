@@ -28,6 +28,16 @@ export type ShoppingList = Readonly<{
   updatedAt: string;
 }>;
 
+export type RecurringSuggestion = Readonly<{
+  category: string;
+  dueAt: string;
+  itemId: string;
+  lastPurchasedAt: string;
+  name: string;
+  note: string | null;
+  quantities: ReadonlyArray<Quantity>;
+}>;
+
 export type AppState = Readonly<{
   household: {
     id: string;

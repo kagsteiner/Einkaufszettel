@@ -74,6 +74,12 @@ Beispiele:
 
 Wird ein vorhandenes Item erneut hinzugefügt, aktualisiert die Anwendung dessen Menge nach diesen Regeln und informiert den Benutzer. Bei unterschiedlichen Einheiten weist sie darauf hin, dass eine zusätzliche Mengenangabe ergänzt wurde. Ungewöhnliche Kombinationen kann der Benutzer anschließend bearbeiten.
 
+### Regelmäßige Einkäufe
+
+Beim Abhaken eines Items speichert die Anwendung ein Kaufereignis. Pro Item und Zettel berechnet sie aus den letzten fünf Kaufzeitpunkten den durchschnittlichen Abstand. Sobald der nächste erwartete Kauf höchstens 24 Stunden entfernt oder bereits überfällig ist, erscheint das Item unter „Was ist dran?“ als Vorschlag. Für eine Berechnung sind mindestens zwei Käufe erforderlich.
+
+Alle fälligen Vorschläge sind zunächst ausgewählt. Namen und die zuletzt verwendeten Mengen können vor dem Hinzufügen bearbeitet werden. Die bestätigten Items werden atomar auf ihrem bisherigen Zettel reaktiviert. Das Zurücksetzen eines erledigten Items auf „offen“ entfernt die bestehende Kaufhistorie nicht.
+
 ## Sortierung
 
 Die Anwendung kennt eine zur Entwicklungszeit definierte Reihenfolge typischer Supermarktbereiche, beispielsweise Obst und Gemüse, Milchprodukte, Brot, Fleisch, Grundnahrungsmittel, Konserven, Gewürze, Getränke, Tiernahrung, Haushalt, Tiefkühlkost und Sonstiges.
@@ -132,7 +138,7 @@ Rezeptbilder werden für die Analyse nur im Arbeitsspeicher verarbeitet und nich
 
 ## Architektur
 
-Die Anwendung wird als responsive, browserbasierte TypeScript-Anwendung ohne Client-Framework umgesetzt. Ein Node.js-20.20.2-Server stellt Benutzeroberfläche, HTTP-API und Server-Sent Events bereit. SQLite speichert Benutzer, Haushalte, Zettel, Items, Mengen, Einladungen und Sitzungen.
+Die Anwendung wird als responsive, browserbasierte TypeScript-Anwendung ohne Client-Framework umgesetzt. Ein Node.js-20.20.2-Server stellt Benutzeroberfläche, HTTP-API und Server-Sent Events bereit. SQLite speichert Benutzer, Haushalte, Zettel, Items, Mengen, Kaufereignisse, Einladungen und Sitzungen.
 
 Die Architektur trennt Browseroberfläche, API, Domänenlogik und Persistenz. Datenbankänderungen erfolgen über versionierte Migrationen. SQLite läuft im WAL-Modus; schreibende Geschäftsoperationen verwenden Transaktionen. V1 ist für eine einzelne Serverinstanz auf einem VPS ausgelegt, nicht für horizontale Skalierung.
 

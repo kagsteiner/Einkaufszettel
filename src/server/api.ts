@@ -203,6 +203,22 @@ export async function handleApiRequest(
       return true;
     }
 
+    const recurringItemsMatch = pathname.match(/^\/api\/lists\/([^/]+)\/recurring-items$/);
+    if (request.method === "GET" && recurringItemsMatch?.[1]) {
+      const user = authService.authenticate(sessionToken);
+      const suggestions = shoppingService.getRecurringSuggestions(user, recurringItemsMatch[1]);
+      sendJson(response, 200, { suggestions });
+      return true;
+    }
+    if (request.method === "POST" && recurringItemsMatch?.[1]) {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      const body = await readJson(request);
+      const items = shoppingService.addRecurringItems(user, recurringItemsMatch[1], body.items);
+      eventHub.publish(user.householdId);
+      sendJson(response, 200, { items });
+      return true;
+    }
+
     const listMatch = pathname.match(/^\/api\/lists\/([^/]+)$/);
     if (request.method === "PATCH" && listMatch?.[1]) {
       const user = authenticateWrite(request, authService, sessionToken, config);

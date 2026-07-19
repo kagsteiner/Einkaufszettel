@@ -1,7 +1,7 @@
 import { ApiError, api, apiFile, applicationPath } from "./api.ts";
 import { productIcon } from "./product-icons.ts";
 import "./styles.css";
-import type { AppState, ShoppingItem, ShoppingList, User } from "./types.ts";
+import type { AppState, RecurringSuggestion, ShoppingItem, ShoppingList, User } from "./types.ts";
 
 const appElement = document.querySelector<HTMLElement>("#app");
 if (!appElement) {
@@ -233,7 +233,7 @@ function listMarkup(list: ShoppingList): string {
     <main class="list-paper">
       <header class="list-heading">
         <div class="list-title">${list.imageId ? `<img src="${escapeHtml(applicationPath(`/api/images/${list.imageId}`))}" alt="">` : ""}<div><p class="eyebrow">Einkaufszettel</p><h1>${escapeHtml(list.name)}</h1></div></div>
-        <div class="heading-actions"><button class="quiet-button sort-button" type="button" data-sort-mode aria-label="Sortierung wechseln">${sortMode === "alphabetical" ? "A–Z" : "Laden"}</button><label class="quiet-button recipe-button"><span class="desktop-label">Rezeptfoto</span><span class="mobile-label">Foto</span><input type="file" data-recipe-file accept="image/*,.heic,.heif"></label><button class="quiet-button" type="button" data-list-menu aria-label="Zettel bearbeiten"><span class="desktop-label">Bearbeiten</span><span class="mobile-label" aria-hidden="true">•••</span></button></div>
+        <div class="heading-actions"><button class="quiet-button sort-button" type="button" data-sort-mode aria-label="Sortierung wechseln">${sortMode === "alphabetical" ? "A–Z" : "Laden"}</button><button class="quiet-button recurring-button" type="button" data-recurring-items><span class="desktop-label">Was ist dran?</span><span class="mobile-label">Dran</span></button><label class="quiet-button recipe-button"><span class="desktop-label">Rezeptfoto</span><span class="mobile-label">Foto</span><input type="file" data-recipe-file accept="image/*,.heic,.heif"></label><button class="quiet-button" type="button" data-list-menu aria-label="Zettel bearbeiten"><span class="desktop-label">Bearbeiten</span><span class="mobile-label" aria-hidden="true">•••</span></button></div>
       </header>
       <section class="shopping-items" aria-label="Offene Produkte">
         ${
@@ -333,6 +333,13 @@ function bindApplicationEvents(activeList: ShoppingList | null): void {
     localStorage.setItem("sort-mode", sortMode);
     renderApplication();
   });
+  app
+    .querySelector<HTMLButtonElement>("[data-recurring-items]")
+    ?.addEventListener("click", (event) => {
+      if (activeList) {
+        void openRecurringDialog(activeList.id, event.currentTarget as HTMLButtonElement);
+      }
+    });
   app.querySelector<HTMLFormElement>("[data-add-item]")?.addEventListener("submit", (event) => {
     if (activeList) {
       void submitItem(event, activeList.id);
@@ -590,6 +597,116 @@ function openImagePreview(item: ShoppingItem): void {
       openItemDialog(item);
     });
   dialog.showModal();
+}
+
+async function openRecurringDialog(listId: string, trigger: HTMLButtonElement): Promise<void> {
+  setBusy(trigger, true);
+  try {
+    const { suggestions } = await api<{ suggestions: RecurringSuggestion[] }>(
+      `/api/lists/${encodeURIComponent(listId)}/recurring-items`,
+    );
+    if (suggestions.length === 0) {
+      const dialog = createDialog(`
+        <section class="recurring-empty">
+          <div class="dialog-heading"><div><p class="eyebrow">Regelmäßig gekauft</p><h2>Was ist dran?</h2></div><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div>
+          <div class="empty-note"><span aria-hidden="true">✓</span><strong>Heute ist nichts dran</strong><p>Sobald sich aus mehreren Einkäufen ein Rhythmus ergibt, erscheinen fällige Produkte hier.</p></div>
+          <div class="dialog-actions"><button class="secondary-button" type="button" data-close>Schließen</button></div>
+        </section>`);
+      dialog.showModal();
+      return;
+    }
+
+    const rows = suggestions
+      .map((suggestion, index) => {
+        const quantityInputs = [...suggestion.quantities, { amount: "", id: "", unit: "" }]
+          .map(
+            (quantity) =>
+              `<div class="quantity-edit-row"><label>Menge<input name="amount" inputmode="decimal" value="${escapeHtml(quantity.amount)}" placeholder="Menge"></label><label>Einheit<input name="unit" value="${escapeHtml(quantity.unit)}" maxlength="40" placeholder="Einheit"></label></div>`,
+          )
+          .join("");
+        return `<fieldset class="ingredient-preview recurring-suggestion" data-recurring-suggestion="${index}">
+          <div class="suggestion-heading"><label class="ingredient-select"><input type="checkbox" name="selected" value="${index}" checked><span>Hinzufügen</span></label><span>${escapeHtml(recurringDueLabel(suggestion.dueAt))}</span></div>
+          <label>Produkt<input name="name" value="${escapeHtml(suggestion.name)}" maxlength="120" required></label>
+          ${suggestion.note ? `<p class="suggestion-note">${escapeHtml(suggestion.note)}</p>` : ""}
+          <div class="suggestion-quantities"><strong>Mengen</strong>${quantityInputs}</div>
+        </fieldset>`;
+      })
+      .join("");
+    const dialog = createDialog(`<form class="dialog-form recurring-preview" data-recurring-preview>
+      <div class="dialog-heading"><div><p class="eyebrow">Regelmäßig gekauft</p><h2>Was ist dran?</h2></div><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div>
+      <p class="settings-copy">Basierend auf den letzten fünf Käufen. Namen und Mengen kannst du vor dem Hinzufügen anpassen.</p>
+      <div class="ingredient-list">${rows}</div>
+      <p class="form-error" role="alert"></p>
+      <div class="dialog-actions"><button class="primary-button" type="submit">Auswahl hinzufügen</button></div>
+    </form>`);
+    dialog
+      .querySelector<HTMLFormElement>("[data-recurring-preview]")
+      ?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        void (async () => {
+          const form = event.currentTarget as HTMLFormElement;
+          const submit = form.querySelector<HTMLButtonElement>("button[type=submit]");
+          const selected = [...form.querySelectorAll<HTMLInputElement>("[name=selected]:checked")];
+          if (selected.length === 0) {
+            setDialogError(dialog, "Wähle mindestens ein Produkt aus.");
+            return;
+          }
+          const items: Array<{
+            itemId: string;
+            name: string;
+            quantities: Array<{ amount: string; unit: string }>;
+          }> = [];
+          for (const checkbox of selected) {
+            const index = Number(checkbox.value);
+            const suggestion = suggestions[index];
+            const row = checkbox.closest<HTMLElement>("[data-recurring-suggestion]");
+            const name = row?.querySelector<HTMLInputElement>("[name=name]")?.value.trim() || "";
+            const amounts = [...(row?.querySelectorAll<HTMLInputElement>("[name=amount]") || [])];
+            const units = [...(row?.querySelectorAll<HTMLInputElement>("[name=unit]") || [])];
+            if (!suggestion || !row || !name) {
+              setDialogError(dialog, "Ein ausgewähltes Produkt ist unvollständig.");
+              return;
+            }
+            const quantities = amounts
+              .map((amount, quantityIndex) => ({
+                amount: amount.value.trim(),
+                unit: units[quantityIndex]?.value.trim() || "",
+              }))
+              .filter((quantity) => quantity.amount);
+            if (
+              units.some(
+                (unit, quantityIndex) => unit.value.trim() && !amounts[quantityIndex]?.value.trim(),
+              )
+            ) {
+              setDialogError(dialog, "Gib zu jeder Einheit auch eine Menge ein.");
+              return;
+            }
+            items.push({ itemId: suggestion.itemId, name, quantities });
+          }
+          setBusy(submit, true);
+          try {
+            await api(`/api/lists/${encodeURIComponent(listId)}/recurring-items`, {
+              body: { items },
+              method: "POST",
+            });
+            dialog.close();
+            await refreshState(false);
+            showToast(
+              `${items.length} ${items.length === 1 ? "Produkt" : "Produkte"} hinzugefügt.`,
+            );
+          } catch (error) {
+            setDialogError(dialog, messageFromError(error));
+          } finally {
+            setBusy(submit, false);
+          }
+        })();
+      });
+    dialog.showModal();
+  } catch (error) {
+    showToast(messageFromError(error), "error");
+  } finally {
+    setBusy(trigger, false);
+  }
 }
 
 async function analyzeRecipe(file: File, listId: string): Promise<void> {
@@ -951,6 +1068,20 @@ function setBusy(button: HTMLButtonElement | null, busy: boolean): void {
 
 function formatAmount(amount: string): string {
   return amount.replace(".", ",");
+}
+
+function recurringDueLabel(dueAt: string): string {
+  const now = new Date();
+  const due = new Date(dueAt);
+  const difference = now.getTime() - due.getTime();
+  if (difference < 0) {
+    return due.toDateString() === now.toDateString() ? "heute fällig" : "morgen fällig";
+  }
+  const overdueDays = Math.floor(difference / (24 * 60 * 60 * 1_000));
+  if (overdueDays === 0) {
+    return "heute fällig";
+  }
+  return `seit ${overdueDays} ${overdueDays === 1 ? "Tag" : "Tagen"} fällig`;
 }
 
 function formatUnit(unit: string, amount: string): string {
