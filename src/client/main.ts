@@ -52,6 +52,11 @@ void boot();
 
 async function boot(): Promise<void> {
   app.innerHTML = loadingMarkup("Einkaufszettel wird geöffnet …");
+  const passwordResetToken = passwordResetTokenFromPath();
+  if (passwordResetToken) {
+    renderPasswordReset(passwordResetToken);
+    return;
+  }
   try {
     currentUser = (await api<{ user: User }>("/api/session")).user;
     await openApplication();
@@ -61,6 +66,73 @@ async function boot(): Promise<void> {
       return;
     }
     renderFatalError(error);
+  }
+}
+
+function renderPasswordReset(token: string, message = ""): void {
+  closeEventStream();
+  app.innerHTML = `
+    <div class="auth-layout">
+      <section class="auth-intro">
+        <div class="brand-mark" aria-hidden="true">✓</div>
+        <p class="eyebrow">Konto wiederherstellen</p>
+        <h1>Neues<br>Passwort</h1>
+        <p>Vergib ein neues Passwort. Danach kannst du dich wieder ganz normal anmelden.</p>
+      </section>
+      <section class="auth-card paper-card">
+        <form data-password-reset-form>
+          <h2>Passwort festlegen</h2>
+          <label>Neues Passwort<input name="password" type="password" autocomplete="new-password" minlength="12" required></label>
+          <p class="form-hint">Mindestens 12 Zeichen; eine zweite Eingabe ist nicht nötig.</p>
+          <p class="form-error" role="alert">${escapeHtml(message)}</p>
+          <button class="primary-button" type="submit">Passwort speichern</button>
+          <button class="text-button" type="button" data-back-to-login>Zur Anmeldung</button>
+        </form>
+      </section>
+    </div>`;
+  app
+    .querySelector<HTMLFormElement>("[data-password-reset-form]")
+    ?.addEventListener("submit", (event) => void submitPasswordReset(event, token));
+  app.querySelector<HTMLButtonElement>("[data-back-to-login]")?.addEventListener("click", () => {
+    window.history.replaceState(null, "", applicationPath("/"));
+    renderAuthentication("login");
+  });
+}
+
+async function submitPasswordReset(event: SubmitEvent, token: string): Promise<void> {
+  event.preventDefault();
+  const form = event.currentTarget as HTMLFormElement;
+  const submit = form.querySelector<HTMLButtonElement>("button[type=submit]");
+  setBusy(submit, true);
+  try {
+    await api("/api/auth/password-reset", {
+      body: { password: new FormData(form).get("password"), token },
+      method: "POST",
+    });
+    window.history.replaceState(null, "", applicationPath("/"));
+    renderAuthentication("login");
+    showToast("Passwort gespeichert. Du kannst dich jetzt anmelden.");
+  } catch (error) {
+    renderPasswordReset(token, messageFromError(error));
+  } finally {
+    setBusy(submit, false);
+  }
+}
+
+function passwordResetTokenFromPath(): string | null {
+  const basePath = new URL(document.baseURI).pathname.replace(/\/$/, "");
+  const relativePath =
+    basePath && window.location.pathname.startsWith(basePath)
+      ? window.location.pathname.slice(basePath.length)
+      : window.location.pathname;
+  const match = relativePath.match(/^\/passwort-zuruecksetzen\/([^/]+)$/);
+  if (!match?.[1]) {
+    return null;
+  }
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return match[1];
   }
 }
 

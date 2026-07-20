@@ -1,5 +1,28 @@
 import { expect, test } from "@playwright/test";
 
+test("a password reset link asks once for a new password", async ({ page }) => {
+  let resetPayload: unknown = null;
+  await page.route("**/api/auth/password-reset", async (route) => {
+    resetPayload = route.request().postDataJSON();
+    await route.fulfill({ body: JSON.stringify({ ok: true }), contentType: "application/json" });
+  });
+
+  await page.goto("/passwort-zuruecksetzen/browser-reset-token");
+  await expect(page.getByRole("heading", { name: "Passwort festlegen" })).toBeVisible();
+  await expect(page.locator('input[type="password"]')).toHaveCount(1);
+  await page.getByLabel("Neues Passwort").fill("Ein ganz neues Browserpasswort");
+  await page.getByRole("button", { name: "Passwort speichern" }).click();
+
+  await expect(page.getByRole("heading", { name: "Willkommen zurück" })).toBeVisible();
+  await expect(
+    page.getByText("Passwort gespeichert. Du kannst dich jetzt anmelden."),
+  ).toBeVisible();
+  expect(resetPayload).toEqual({
+    password: "Ein ganz neues Browserpasswort",
+    token: "browser-reset-token",
+  });
+});
+
 test("removing a household member updates the open settings immediately", async ({
   browser,
   page,

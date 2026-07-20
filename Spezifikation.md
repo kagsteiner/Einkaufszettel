@@ -22,6 +22,8 @@ Passwörter werden niemals im Klartext oder reversibel gespeichert, sondern mit 
 
 Bei der Registrierung wird automatisch ein persönlicher Haushalt angelegt.
 
+Ein vergessenes Passwort kann in V1 nicht selbständig per E-Mail zurückgesetzt werden. Stattdessen erzeugt der Betreiber über ein Server-CLI einen vertraulichen, einmal verwendbaren und 30 Minuten gültigen Link. Auf der öffentlichen Zielseite vergibt der Benutzer ein neues Passwort mit einer einzelnen Eingabe. Nach erfolgreicher Änderung werden alle bestehenden Sitzungen und Reset-Links dieses Kontos ungültig. Reset-Tokens werden in der Datenbank ausschließlich als Hash gespeichert.
+
 ## Haushalte und Einladungen
 
 Alle Mitglieder eines Haushalts sind gleichberechtigt. Sie können Zettel und Items bearbeiten, weitere Personen einladen und den Haushalt gemeinsam verwenden.

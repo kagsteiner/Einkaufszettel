@@ -15,6 +15,7 @@ import {
 } from "./security.ts";
 
 const sessionLifetimeMilliseconds = 30 * 24 * 60 * 60 * 1_000;
+const passwordResetLifetimeMilliseconds = 30 * 60 * 1_000;
 const dummyPasswordHash =
   "$argon2id$v=19$m=65536,t=3,p=1$0OftY+Vh5hCeZMToNkiRsQ$ioGpHMWbCro+Qz25b9Lzv2ybAKECqnfBnIRg9GnDiD8";
 
@@ -152,6 +153,64 @@ export class AuthService {
     }
   }
 
+  createPasswordReset(userId: string): { expiresAt: string; token: string } {
+    const userExists = this.database.prepare("SELECT 1 FROM users WHERE id = ?").get(userId);
+    if (!userExists) {
+      throw new AppError(404, "user_not_found", "Dieser Benutzer wurde nicht gefunden.");
+    }
+    const token = createOpaqueToken();
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + passwordResetLifetimeMilliseconds).toISOString();
+    inTransaction(this.database, () => {
+      this.database
+        .prepare("DELETE FROM password_reset_tokens WHERE expires_at <= ?")
+        .run(now.toISOString());
+      this.database.prepare("DELETE FROM password_reset_tokens WHERE user_id = ?").run(userId);
+      this.database
+        .prepare(
+          `INSERT INTO password_reset_tokens
+            (id, user_id, token_hash, created_at, expires_at)
+           VALUES (?, ?, ?, ?, ?)`,
+        )
+        .run(randomUUID(), userId, hashToken(token), now.toISOString(), expiresAt);
+    });
+    return { expiresAt, token };
+  }
+
+  async resetPassword(token: unknown, passwordValue: unknown): Promise<void> {
+    const password = validatePassword(passwordValue);
+    if (typeof token !== "string" || !token || token.length > 200) {
+      throw invalidPasswordReset();
+    }
+    const tokenHash = hashToken(token);
+    const initial = this.database
+      .prepare("SELECT user_id FROM password_reset_tokens WHERE token_hash = ? AND expires_at > ?")
+      .get(tokenHash, new Date().toISOString()) as { user_id: string } | undefined;
+    if (!initial) {
+      throw invalidPasswordReset();
+    }
+
+    const passwordHash = await hashPassword(password);
+    inTransaction(this.database, () => {
+      const reset = this.database
+        .prepare(
+          "SELECT user_id FROM password_reset_tokens WHERE token_hash = ? AND expires_at > ?",
+        )
+        .get(tokenHash, new Date().toISOString()) as { user_id: string } | undefined;
+      if (!reset || reset.user_id !== initial.user_id) {
+        throw invalidPasswordReset();
+      }
+      const now = new Date().toISOString();
+      this.database
+        .prepare("UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?")
+        .run(passwordHash, now, reset.user_id);
+      this.database.prepare("DELETE FROM sessions WHERE user_id = ?").run(reset.user_id);
+      this.database
+        .prepare("DELETE FROM password_reset_tokens WHERE user_id = ?")
+        .run(reset.user_id);
+    });
+  }
+
   private getUserById(userId: string): UserRow {
     const row = this.database.prepare(`${userQuery} WHERE u.id = ?`).get(userId) as
       | UserRow
@@ -209,4 +268,12 @@ function toAuthenticatedUser(row: UserRow, hasDevelopmentKey: boolean): Authenti
 
 function isUniqueConstraintError(error: unknown): boolean {
   return error instanceof Error && error.message.includes("UNIQUE constraint failed");
+}
+
+function invalidPasswordReset(): AppError {
+  return new AppError(
+    410,
+    "password_reset_invalid",
+    "Dieser Link ist ungültig oder bereits abgelaufen.",
+  );
 }

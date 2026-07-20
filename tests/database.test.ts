@@ -36,6 +36,7 @@ test("all initial tables are created by the migration runner", () => {
     "item_purchase_events",
     "items",
     "pantry_items",
+    "password_reset_tokens",
     "quantity_parts",
     "schema_migrations",
     "sessions",
@@ -49,7 +50,7 @@ test("all initial tables are created by the migration runner", () => {
     .get() as {
     count: number;
   };
-  assert.equal(migrationCount.count, 3);
+  assert.equal(migrationCount.count, 4);
 });
 
 test("foreign keys are active", () => {

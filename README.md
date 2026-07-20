@@ -20,10 +20,13 @@ Die Benutzerverwaltung ist bewusst nur als Server-CLI verfügbar und verwendet d
 
 ```sh
 npm run admin:users -- list
+npm run admin:users -- reset-password <E-Mail-oder-ID>
 npm run admin:users -- delete <E-Mail-oder-ID>
 ```
 
 Das Skript zeigt den verwendeten Datenbankpfad an. Vor dem unwiderruflichen Löschen sollte ein aktuelles Backup vorhanden sein und muss die exakte E-Mail-Adresse interaktiv eingegeben werden. Ohne interaktives Terminal ist `--confirm <exakte-E-Mail>` erforderlich. In einem gemeinsamen Haushalt bleiben Zettel, Items, Vorräte und Bilder erhalten; ihre technische Urheberschaft geht an ein verbleibendes Mitglied über. War die Person allein in ihrem Haushalt, werden der Haushalt und seine Daten vollständig gelöscht.
+
+`reset-password` erzeugt einen vertraulichen Einmal-Link, der 30 Minuten gültig ist. Auf der verlinkten Seite vergibt der Benutzer selbst ein neues Passwort. Nach erfolgreicher Änderung werden alle bestehenden Sitzungen und weiteren Reset-Links des Kontos ungültig.
 
 Im Entwicklungsmodus verwendet die Rezeptanalyse bevorzugt `OPENAI_API_KEY` aus der lokalen Laufzeitumgebung. Fehlt er, gilt der persönliche Schlüssel des angemeldeten Benutzers. Die übrige App funktioniert ohne OpenAI Key.
 

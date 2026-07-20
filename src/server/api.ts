@@ -59,6 +59,16 @@ export async function handleApiRequest(
       return true;
     }
 
+    if (request.method === "POST" && pathname === "/api/auth/password-reset") {
+      assertSameOrigin(request, config);
+      rateLimiter.consume(`password-reset:${clientAddress(request, config)}`, 10, 15 * 60 * 1_000);
+      const body = await readJson(request);
+      await authService.resetPassword(body.token, body.password);
+      clearSessionCookies(response, config);
+      sendJson(response, 200, { ok: true });
+      return true;
+    }
+
     const cookies = parseCookies(request.headers.cookie);
     const sessionToken = cookies.get(sessionCookieName) || null;
 

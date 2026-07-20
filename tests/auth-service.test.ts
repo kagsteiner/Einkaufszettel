@@ -67,6 +67,57 @@ test("login and CSRF checks reject invalid credentials", async () => {
   );
 });
 
+test("a one-time password reset changes the password and invalidates all sessions", async () => {
+  const user = database
+    .prepare("SELECT id FROM users WHERE email_normalized = ?")
+    .get("anna@example.com") as { id: string };
+  const existingSession = await authService.login({
+    email: "anna@example.com",
+    password: "ein sicheres Passwort",
+  });
+  const replacedReset = authService.createPasswordReset(user.id);
+  const reset = authService.createPasswordReset(user.id);
+
+  assert.equal(
+    (
+      database
+        .prepare("SELECT count(*) AS count FROM password_reset_tokens WHERE token_hash = ?")
+        .get(hashToken(reset.token)) as { count: number }
+    ).count,
+    1,
+  );
+  assert.equal(
+    (
+      database
+        .prepare("SELECT count(*) AS count FROM password_reset_tokens WHERE token_hash = ?")
+        .get(reset.token) as { count: number }
+    ).count,
+    0,
+  );
+  await assert.rejects(
+    authService.resetPassword(replacedReset.token, "ein ganz neues Passwort"),
+    /ungültig oder bereits abgelaufen/,
+  );
+
+  await authService.resetPassword(reset.token, "ein ganz neues Passwort");
+
+  assert.throws(
+    () => authService.authenticate(existingSession.sessionToken),
+    /Bitte melde dich an/,
+  );
+  await assert.rejects(
+    authService.login({ email: "anna@example.com", password: "ein sicheres Passwort" }),
+    /nicht korrekt/,
+  );
+  await assert.doesNotReject(
+    authService.login({ email: "anna@example.com", password: "ein ganz neues Passwort" }),
+  );
+  await assert.rejects(
+    authService.resetPassword(reset.token, "noch ein neues Passwort"),
+    /ungültig oder bereits abgelaufen/,
+  );
+});
+
 test("email uniqueness is case-independent", async () => {
   await assert.rejects(
     authService.register({
