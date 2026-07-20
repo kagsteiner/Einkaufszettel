@@ -156,7 +156,12 @@ async function refreshState(preserveFocus = true): Promise<void> {
       )
     : null;
   try {
+    const previousHouseholdId = currentState?.household.id || null;
     currentState = await api<AppState>("/api/state");
+    if (previousHouseholdId && previousHouseholdId !== currentState.household.id) {
+      currentUser = (await api<{ user: User }>("/api/session")).user;
+      openEventStream();
+    }
     if (!currentState.lists.some((list) => list.id === activeListId)) {
       activeListId = currentState.lists[0]?.id || null;
     }
@@ -796,6 +801,12 @@ function openSettingsDialog(): void {
       <div class="dialog-heading"><div><p class="eyebrow">Persönlich</p><h2>Einstellungen</h2></div><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div>
       <section><h3>Dein Profil</h3><form data-profile-form><label>Name<input name="displayName" maxlength="80" value="${escapeHtml(currentUser.displayName)}" required></label><button class="secondary-button" type="submit">Name speichern</button></form></section>
       <section><h3>OpenAI</h3><p class="settings-copy">${currentUser.openAiKeyMask ? `Aktiv: ${escapeHtml(currentUser.openAiKeyMask)}` : "Noch kein persönlicher API Key gespeichert."}</p><form data-key-form><label>API Key<input name="apiKey" type="password" autocomplete="off" placeholder="sk-…" required></label><div class="inline-actions"><button class="secondary-button" type="submit">Key speichern</button>${currentUser.openAiKeyMask && currentUser.openAiKeyMask !== "Entwicklungsschlüssel" ? `<button class="text-button danger-text" type="button" data-delete-key>Key löschen</button>` : ""}</div></form></section>
+      <section><h3>Mitglieder</h3><p class="settings-copy">Alle im Haushalt sind gleichberechtigt. Beim Entfernen bleibt das Konto bestehen; die gemeinsamen Zettel bleiben in diesem Haushalt.</p><div class="member-list">${currentState.household.members
+        .map(
+          (member) =>
+            `<div><span>${escapeHtml(member.displayName)}${member.id === currentUser?.id ? " (du)" : ""}</span>${member.id === currentUser?.id ? "" : `<button class="text-button danger-text" type="button" data-remove-member="${escapeHtml(member.id)}" data-member-name="${escapeHtml(member.displayName)}">Entfernen</button>`}</div>`,
+        )
+        .join("")}</div></section>
       <section><h3>Haushalt einladen</h3><p class="settings-copy">Der Link ist sieben Tage gültig und funktioniert nur für die angegebene E-Mail-Adresse.</p><form data-invite-form><label>E-Mail<input name="email" type="email" required></label><button class="secondary-button" type="submit">Link erzeugen</button></form><div class="copy-output" data-invite-output hidden></div></section>
       <section><h3>Vorrat</h3><form class="inline-form" data-pantry-form><label><span class="sr-only">Vorratsprodukt</span><input name="name" placeholder="z. B. Salz" required></label><button class="secondary-button" type="submit">Hinzufügen</button></form><div class="pantry-chips">${currentState.pantry.map((item) => `<button type="button" data-pantry-id="${escapeHtml(item.id)}" title="Aus Vorrat entfernen">${escapeHtml(item.name)} <span>×</span></button>`).join("") || "<small>Noch nichts eingetragen.</small>"}</div></section>
       <p class="form-error" role="alert"></p>
@@ -816,6 +827,9 @@ function openSettingsDialog(): void {
   dialog
     .querySelector<HTMLFormElement>("[data-invite-form]")
     ?.addEventListener("submit", (event) => void createInvitation(event, dialog));
+  for (const button of dialog.querySelectorAll<HTMLButtonElement>("[data-remove-member]")) {
+    button.addEventListener("click", () => void removeHouseholdMember(button, dialog));
+  }
   dialog
     .querySelector<HTMLFormElement>("[data-pantry-form]")
     ?.addEventListener("submit", (event) => void addPantry(event, dialog));
@@ -826,6 +840,33 @@ function openSettingsDialog(): void {
     .querySelector<HTMLButtonElement>("[data-logout]")
     ?.addEventListener("click", () => void logout(dialog));
   dialog.showModal();
+}
+
+async function removeHouseholdMember(
+  button: HTMLButtonElement,
+  dialog: HTMLDialogElement,
+): Promise<void> {
+  const memberId = button.dataset.removeMember;
+  const memberName = button.dataset.memberName || "Diese Person";
+  if (
+    !memberId ||
+    !window.confirm(
+      `${memberName} aus dem Haushalt entfernen? Das Konto bleibt bestehen. Gemeinsame Zettel werden nicht kopiert und bleiben hier.`,
+    )
+  ) {
+    return;
+  }
+  try {
+    setBusy(button, true);
+    await api(`/api/household/members/${encodeURIComponent(memberId)}`, { method: "DELETE" });
+    dialog.close();
+    await refreshState(false);
+    openSettingsDialog();
+    showToast(`${memberName} wurde aus dem Haushalt entfernt.`);
+  } catch (error) {
+    setBusy(button, false);
+    setDialogError(dialog, messageFromError(error));
+  }
 }
 
 async function saveProfile(event: SubmitEvent, dialog: HTMLDialogElement): Promise<void> {

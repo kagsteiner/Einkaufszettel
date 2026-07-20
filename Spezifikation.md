@@ -26,6 +26,8 @@ Bei der Registrierung wird automatisch ein persönlicher Haushalt angelegt.
 
 Alle Mitglieder eines Haushalts sind gleichberechtigt. Sie können Zettel und Items bearbeiten, weitere Personen einladen und den Haushalt gemeinsam verwenden.
 
+Jedes Mitglied kann ein anderes Mitglied aus dem Haushalt entfernen; eine Admin-, Eigentümer- oder Haushaltschef-Rolle gibt es nicht. Dabei wird niemals das Benutzerkonto der entfernten Person gelöscht. Sie erhält automatisch einen neuen persönlichen Haushalt. Die gemeinsam bearbeiteten Zettel und Vorräte bleiben ohne Kopie im bisherigen Haushalt, auch wenn die Person sie beim Beitritt dorthin mitgebracht hat. Noch offene Einladungen, die sie für den bisherigen Haushalt erstellt hat, werden ungültig. Das Entfernen des eigenen Kontos über die Mitgliederverwaltung ist nicht möglich.
+
 Eine Einladung wird für eine E-Mail-Adresse erzeugt und als zeitlich begrenzter Link bereitgestellt. Der Link darf nur von einem angemeldeten Benutzer mit der eingeladenen E-Mail-Adresse angenommen werden.
 
 ### Beitritt mit vorhandenen Zetteln

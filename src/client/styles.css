@@ -689,6 +689,21 @@ h2 {
   font-size: 0.82rem;
   line-height: 1.45;
 }
+.member-list {
+  display: grid;
+  gap: 0.35rem;
+}
+.member-list > div {
+  display: flex;
+  min-height: 2.4rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.member-list > div:last-child {
+  border-bottom: 0;
+}
 .inline-form {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;

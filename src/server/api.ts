@@ -128,6 +128,16 @@ export async function handleApiRequest(
       return true;
     }
 
+    const householdMemberMatch = pathname.match(/^\/api\/household\/members\/([^/]+)$/);
+    if (request.method === "DELETE" && householdMemberMatch?.[1]) {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      householdService.removeMember(user, householdMemberMatch[1]);
+      eventHub.publish(user.householdId);
+      response.writeHead(204, { "Cache-Control": "no-store" });
+      response.end();
+      return true;
+    }
+
     const acceptMatch = pathname.match(/^\/api\/invitations\/([^/]+)\/accept$/);
     if (request.method === "POST" && acceptMatch?.[1]) {
       assertSameOrigin(request, config);

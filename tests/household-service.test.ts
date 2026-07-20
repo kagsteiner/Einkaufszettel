@@ -82,6 +82,53 @@ test("a solo user can move lists and merge pantry data when joining", () => {
   );
 });
 
+test("an equal household member can remove another member without deleting their account", () => {
+  const currentInvitedUser = {
+    ...invited.user,
+    householdId: inviter.user.householdId,
+    householdName: inviter.user.householdName,
+  };
+  const pendingInvitation = householdService.createInvitation(
+    currentInvitedUser,
+    "gast@example.com",
+  );
+
+  const result = householdService.removeMember(inviter.user, invited.user.id);
+
+  assert.equal(result.removedMemberId, invited.user.id);
+  assert.notEqual(result.householdId, inviter.user.householdId);
+  assert.deepEqual(
+    database
+      .prepare("SELECT household_id FROM household_members WHERE user_id = ?")
+      .get(invited.user.id),
+    { household_id: result.householdId },
+  );
+  assert.equal(
+    (
+      database.prepare("SELECT count(*) AS count FROM users WHERE id = ?").get(invited.user.id) as {
+        count: number;
+      }
+    ).count,
+    1,
+  );
+  assert.equal(
+    (
+      database
+        .prepare("SELECT count(*) AS count FROM shopping_lists WHERE household_id = ?")
+        .get(inviter.user.householdId) as { count: number }
+    ).count,
+    2,
+  );
+  assert.throws(
+    () => householdService.previewInvitation(invited.user, pendingInvitation.token),
+    /nicht gefunden/,
+  );
+});
+
+test("a member cannot remove themselves through the member action", () => {
+  assert.throws(() => householdService.removeMember(inviter.user, inviter.user.id), /nicht selbst/);
+});
+
 function insertList(householdId: string, userId: string, name: string, now: string): void {
   database
     .prepare(

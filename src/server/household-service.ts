@@ -138,6 +138,50 @@ export class HouseholdService {
     });
   }
 
+  removeMember(
+    user: AuthenticatedUser,
+    memberId: string,
+  ): { householdId: string; removedMemberId: string } {
+    if (memberId === user.id) {
+      throw new AppError(
+        400,
+        "cannot_remove_self",
+        "Du kannst dich hier nicht selbst aus dem Haushalt entfernen.",
+      );
+    }
+
+    return inTransaction(this.database, () => {
+      const member = this.database
+        .prepare(
+          `SELECT u.id
+           FROM users u JOIN household_members hm ON hm.user_id = u.id
+           WHERE u.id = ? AND hm.household_id = ?`,
+        )
+        .get(memberId, user.householdId) as { id: string } | undefined;
+      if (!member) {
+        throw new AppError(
+          404,
+          "household_member_not_found",
+          "Diese Person gehört nicht zu deinem Haushalt.",
+        );
+      }
+
+      const householdId = randomUUID();
+      const now = new Date().toISOString();
+      this.database
+        .prepare("INSERT INTO households (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)")
+        .run(householdId, "Mein Haushalt", now, now);
+      this.database
+        .prepare("UPDATE household_members SET household_id = ?, joined_at = ? WHERE user_id = ?")
+        .run(householdId, now, member.id);
+      this.database
+        .prepare("DELETE FROM invitations WHERE created_by_user_id = ? AND accepted_at IS NULL")
+        .run(member.id);
+
+      return { householdId, removedMemberId: member.id };
+    });
+  }
+
   private getInvitation(token: string): InvitationRow {
     if (!token || token.length > 200) {
       throw new AppError(404, "invitation_not_found", "Diese Einladung wurde nicht gefunden.");
