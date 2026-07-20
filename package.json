@@ -7,6 +7,7 @@
     "node": ">=20.20.2"
   },
   "scripts": {
+    "admin:users": "tsx --env-file-if-exists=.env scripts/admin-users.ts",
     "dev": "tsx watch --env-file-if-exists=.env scripts/dev.ts",
     "start": "tsx --env-file-if-exists=.env src/server/main.ts",
     "build": "npm run typecheck && tsx scripts/build-client.ts --production",

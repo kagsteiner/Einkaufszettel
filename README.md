@@ -14,6 +14,17 @@ npm run dev
 
 Die Werte in `.env` werden ausschließlich vom Repository-Eigentümer gepflegt. Für persönliche OpenAI API Keys wird ein 32-Byte-Hauptschlüssel benötigt; ein passender Wert lässt sich mit `openssl rand -base64 32` erzeugen und als `APP_ENCRYPTION_KEY` eintragen.
 
+## Benutzer administrieren
+
+Die Benutzerverwaltung ist bewusst nur als Server-CLI verfügbar und verwendet die konfigurierte `DATABASE_PATH`:
+
+```sh
+npm run admin:users -- list
+npm run admin:users -- delete <E-Mail-oder-ID>
+```
+
+Das Skript zeigt den verwendeten Datenbankpfad an. Vor dem unwiderruflichen Löschen sollte ein aktuelles Backup vorhanden sein und muss die exakte E-Mail-Adresse interaktiv eingegeben werden. Ohne interaktives Terminal ist `--confirm <exakte-E-Mail>` erforderlich. In einem gemeinsamen Haushalt bleiben Zettel, Items, Vorräte und Bilder erhalten; ihre technische Urheberschaft geht an ein verbleibendes Mitglied über. War die Person allein in ihrem Haushalt, werden der Haushalt und seine Daten vollständig gelöscht.
+
 Im Entwicklungsmodus verwendet die Rezeptanalyse bevorzugt `OPENAI_API_KEY` aus der lokalen Laufzeitumgebung. Fehlt er, gilt der persönliche Schlüssel des angemeldeten Benutzers. Die übrige App funktioniert ohne OpenAI Key.
 
 ## Prüfen
