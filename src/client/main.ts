@@ -44,8 +44,9 @@ let activeListId = localStorage.getItem("active-list-id");
 let sortMode: "alphabetical" | "store" =
   localStorage.getItem("sort-mode") === "store" ? "store" : "alphabetical";
 let eventSource: EventSource | null = null;
-let refreshPending = false;
 let refreshQueued = false;
+let queuedRefreshPreserveFocus = true;
+let refreshPromise: Promise<void> | null = null;
 
 void boot();
 
@@ -138,12 +139,30 @@ async function openApplication(): Promise<void> {
   await handleInvitationPath();
 }
 
-async function refreshState(preserveFocus = true): Promise<void> {
-  if (refreshPending) {
+function refreshState(preserveFocus = true): Promise<void> {
+  if (refreshPromise) {
     refreshQueued = true;
-    return;
+    queuedRefreshPreserveFocus = queuedRefreshPreserveFocus && preserveFocus;
+    return refreshPromise;
   }
-  refreshPending = true;
+
+  refreshPromise = runRefreshQueue(preserveFocus).finally(() => {
+    refreshPromise = null;
+  });
+  return refreshPromise;
+}
+
+async function runRefreshQueue(preserveFocus: boolean): Promise<void> {
+  let nextPreserveFocus = preserveFocus;
+  do {
+    refreshQueued = false;
+    queuedRefreshPreserveFocus = true;
+    await refreshStateOnce(nextPreserveFocus);
+    nextPreserveFocus = queuedRefreshPreserveFocus;
+  } while (refreshQueued);
+}
+
+async function refreshStateOnce(preserveFocus: boolean): Promise<void> {
   const focusedName = preserveFocus
     ? (document.activeElement as HTMLInputElement | null)?.name || null
     : null;
@@ -188,12 +207,6 @@ async function refreshState(preserveFocus = true): Promise<void> {
       return;
     }
     showToast(messageFromError(error), "error");
-  } finally {
-    refreshPending = false;
-    if (refreshQueued) {
-      refreshQueued = false;
-      void refreshState(preserveFocus);
-    }
   }
 }
 

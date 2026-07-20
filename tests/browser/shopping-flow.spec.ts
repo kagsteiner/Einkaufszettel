@@ -1,5 +1,44 @@
 import { expect, test } from "@playwright/test";
 
+test("removing a household member updates the open settings immediately", async ({
+  browser,
+  page,
+}, testInfo) => {
+  const suffix = testInfo.project.name;
+  await register(page, "Alex Browser", `alex-household-${suffix}@example.com`);
+
+  await page.getByRole("button", { name: "Einstellungen" }).click();
+  const settings = page.getByRole("dialog");
+  await settings.getByLabel("E-Mail", { exact: true }).fill(`bea-household-${suffix}@example.com`);
+  await settings.getByRole("button", { name: "Link erzeugen" }).click();
+  const invitationUrl = await settings.locator(".copy-output input").inputValue();
+  await settings.getByRole("button", { name: "Schließen" }).click();
+
+  const invitedContext = await browser.newContext();
+  const invitedPage = await invitedContext.newPage();
+  await register(invitedPage, "Bea Browser", `bea-household-${suffix}@example.com`);
+  await invitedPage.goto(invitationUrl);
+  const invitation = invitedPage.getByRole("dialog");
+  await invitation.getByRole("button", { name: "Beitreten" }).click();
+  await expect(invitedPage.getByText("Haushalt beigetreten.", { exact: true })).toBeVisible();
+
+  await expect(
+    page.locator(".household-title").getByText("2 Personen", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Einstellungen" }).click();
+  const updatedSettings = page.getByRole("dialog");
+  await expect(updatedSettings.getByText("Bea Browser", { exact: true })).toBeVisible();
+  page.once("dialog", (confirmation) => void confirmation.accept());
+  await updatedSettings.getByRole("button", { name: "Entfernen" }).click();
+
+  const refreshedSettings = page.getByRole("dialog");
+  await expect(refreshedSettings.getByText("Bea Browser", { exact: true })).toHaveCount(0);
+  await expect(
+    page.locator(".household-title").getByText("1 Person", { exact: true }),
+  ).toBeVisible();
+  await invitedContext.close();
+});
+
 test("a household can maintain a live mobile shopping list", async ({ page }, testInfo) => {
   const documentResponse = await page.goto("/");
   expect(documentResponse?.headers()["cache-control"]).toBe("no-store");
@@ -164,3 +203,13 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   const registrations = await page.evaluate(async () => navigator.serviceWorker.getRegistrations());
   expect(registrations).toHaveLength(0);
 });
+
+async function register(page: import("@playwright/test").Page, name: string, email: string) {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Neu hier" }).click();
+  await page.getByLabel("Name", { exact: true }).fill(name);
+  await page.getByLabel("E-Mail", { exact: true }).fill(email);
+  await page.getByLabel("Passwort", { exact: true }).fill("Ein langes Browser-Testpasswort");
+  await page.getByRole("button", { name: "Loslegen" }).click();
+  await expect(page.getByRole("heading", { name: "Dein erster Zettel" })).toBeVisible();
+}
