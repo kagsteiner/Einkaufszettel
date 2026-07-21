@@ -7,6 +7,20 @@ import type { SettingsService } from "./settings-service.ts";
 import { normalizeComparableText } from "./text.ts";
 
 export const recipeModel = "gpt-5.6-terra";
+export const recipeAnalysisPrompt = `Analysiere das fotografierte Rezept unabhängig von seiner Ausgangssprache. Extrahiere ausschließlich Zutaten, die eingekauft werden können.
+
+Sprache:
+- Gib Titel, Produktnamen und Zusatztexte auf Deutsch aus.
+- Verwende kurze, in deutschen Supermärkten übliche Produktnamen. Erhalte relevante Sorten-, Marken- und Zustandsangaben wie "gehackt" oder "ungesüßt" als kurzen Zusatztext.
+
+Mengen und Einheiten:
+- Mengen sind positive Dezimalzahlen als String mit Punkt, zum Beispiel "0.5", niemals Brüche.
+- Verwende in Deutschland übliche metrische Kücheneinheiten: g, kg, ml, l, Stück, EL, TL sowie bei Bedarf Prise, Bund, Dose oder Packung.
+- Rechne imperiale Masse und Flüssigkeitsvolumen metrisch um: oz und lb in g oder kg; fl oz, cup, pint, quart und gallon in ml oder l.
+- Rechne tsp in TL und tbsp in EL um. Für feste Zutaten in cup darfst du eine verlässliche, zutatenspezifische Umrechnung in g verwenden; andernfalls rechne cup als Volumen in ml um.
+- Runde alltagstauglich und vermeide Scheingenauigkeit. Verändere die Gesamtmenge des Rezepts nicht und erfinde keine Packungsgrößen.
+
+Ordne jede Zutat einem Einkaufsbereich zu. Wenn das Bild kein lesbares Rezept zeigt, setze isRecipe auf false und ingredients auf eine leere Liste.`;
 
 const allowedCategories = new Set([
   "bakery",
@@ -50,7 +64,7 @@ export class OpenAiRecipeAnalyzer implements RecipeAnalyzer {
           {
             content: [
               {
-                text: `Analysiere das fotografierte Rezept. Extrahiere ausschließlich Zutaten, die eingekauft werden können. Verwende kurze deutsche Produktnamen. Mengen müssen positive Dezimalzahlen als String sein (zum Beispiel "0.5"), niemals Brüche. Bewahre Einheiten wie g, kg, ml, l, Stück, EL, TL oder Tasse; rechne Einheiten nicht um. Ordne jede Zutat einem Einkaufsbereich zu. Wenn das Bild kein lesbares Rezept zeigt, setze isRecipe auf false und ingredients auf eine leere Liste.`,
+                text: recipeAnalysisPrompt,
                 type: "input_text",
               },
               { detail: "high", image_url: imageDataUrl, type: "input_image" },

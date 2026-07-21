@@ -9,7 +9,12 @@ import { loadConfig } from "../src/server/config.ts";
 import type { AppDatabase } from "../src/server/database.ts";
 import { openDatabase } from "../src/server/database.ts";
 import { ImageService } from "../src/server/image-service.ts";
-import { type RecipeAnalyzer, RecipeService, recipeModel } from "../src/server/recipe-service.ts";
+import {
+  type RecipeAnalyzer,
+  RecipeService,
+  recipeAnalysisPrompt,
+  recipeModel,
+} from "../src/server/recipe-service.ts";
 import { SettingsService } from "../src/server/settings-service.ts";
 import { ShoppingService } from "../src/server/shopping-service.ts";
 
@@ -100,4 +105,14 @@ test("recipe analysis uses the personal key and preselects no pantry products", 
       { inPantry: false, name: "Äpfel" },
     ],
   );
+});
+
+test("the recipe prompt translates foreign recipes and converts imperial units", () => {
+  assert.match(recipeAnalysisPrompt, /Ausgangssprache/);
+  assert.match(recipeAnalysisPrompt, /Titel, Produktnamen und Zusatztexte auf Deutsch/);
+  assert.match(recipeAnalysisPrompt, /oz und lb in g oder kg/);
+  assert.match(recipeAnalysisPrompt, /fl oz, cup, pint, quart und gallon in ml oder l/);
+  assert.match(recipeAnalysisPrompt, /tsp in TL und tbsp in EL/);
+  assert.match(recipeAnalysisPrompt, /vermeide Scheingenauigkeit/);
+  assert.match(recipeAnalysisPrompt, /erfinde keine Packungsgrößen/);
 });

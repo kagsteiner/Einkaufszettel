@@ -106,6 +106,8 @@ Vorratsprodukte werden wie Produktnamen normalisiert und innerhalb eines Haushal
 
 Ein Benutzer kann ein Rezept fotografieren oder ein vorhandenes Bild auswählen. Der Server sendet das Bild an ein bildfähiges OpenAI-Modell und fordert strukturierte Vorschläge für Produktname, Menge, Einheit und Zusatztext an.
 
+Rezepte dürfen in beliebiger Sprache vorliegen. Titel, Produktnamen und Zusatztexte werden auf Deutsch ausgegeben. Imperiale Massen- und Volumeneinheiten werden alltagstauglich in g, kg, ml oder l umgerechnet; `tsp` und `tbsp` werden zu TL und EL. Für feste Zutaten kann eine verlässliche zutatenspezifische Cup-zu-Gramm-Umrechnung verwendet werden, andernfalls wird Cup als Volumen in ml umgerechnet. Ergebnisse werden sinnvoll gerundet, ohne Packungsgrößen zu erfinden oder die Gesamtmenge des Rezepts zu verändern.
+
 V1 verwendet das Modell `gpt-5.6-terra`. Das Bild wird serverseitig gedreht, verkleinert, ohne Metadaten nach WebP kodiert und als Base64-Data-URL mit Bilddetail `high` an die Responses API gesendet. Die Antwort verwendet ein striktes strukturiertes Schema.
 
 Das Ergebnis ist immer ein unverbindlicher Vorschlag:
