@@ -1,36 +1,5 @@
+import { findUnitDefinition, toComparableUnit } from "../shared/units.ts";
 import { invalidInput } from "./errors.ts";
-
-const unitAliases: Readonly<Record<string, { normalized: string; display: string }>> = {
-  "": { normalized: "", display: "" },
-  becher: { normalized: "becher", display: "Becher" },
-  dose: { normalized: "dose", display: "Dose" },
-  dosen: { normalized: "dose", display: "Dose" },
-  el: { normalized: "el", display: "EL" },
-  essloeffel: { normalized: "el", display: "EL" },
-  esslöffel: { normalized: "el", display: "EL" },
-  flasche: { normalized: "flasche", display: "Flasche" },
-  flaschen: { normalized: "flasche", display: "Flasche" },
-  g: { normalized: "g", display: "g" },
-  gramm: { normalized: "g", display: "g" },
-  kg: { normalized: "kg", display: "kg" },
-  kilogramm: { normalized: "kg", display: "kg" },
-  l: { normalized: "l", display: "l" },
-  liter: { normalized: "l", display: "l" },
-  ml: { normalized: "ml", display: "ml" },
-  packung: { normalized: "packung", display: "Packung" },
-  packungen: { normalized: "packung", display: "Packung" },
-  stk: { normalized: "stück", display: "Stück" },
-  "stk.": { normalized: "stück", display: "Stück" },
-  stück: { normalized: "stück", display: "Stück" },
-  stueck: { normalized: "stück", display: "Stück" },
-  tasse: { normalized: "tasse", display: "Tasse" },
-  tassen: { normalized: "tasse", display: "Tasse" },
-  tl: { normalized: "tl", display: "TL" },
-  teeloeffel: { normalized: "tl", display: "TL" },
-  teelöffel: { normalized: "tl", display: "TL" },
-  zehe: { normalized: "zehe", display: "Zehe" },
-  zehen: { normalized: "zehe", display: "Zehe" },
-};
 
 export type QuantityInput = Readonly<{ amount: unknown; unit?: unknown }>;
 export type NormalizedQuantity = Readonly<{
@@ -48,12 +17,12 @@ export function normalizeQuantity(input: QuantityInput): NormalizedQuantity {
   if (rawUnit.length > 40) {
     throw invalidInput("Die Mengeneinheit ist zu lang.");
   }
-  const comparable = rawUnit.toLocaleLowerCase("de-DE");
-  const known = unitAliases[comparable];
+  const comparable = toComparableUnit(rawUnit);
+  const known = findUnitDefinition(comparable);
   return {
     amount,
-    normalizedUnit: known?.normalized || comparable,
-    unit: known?.display || rawUnit,
+    normalizedUnit: known?.id || comparable,
+    unit: known?.singular || rawUnit,
   };
 }
 

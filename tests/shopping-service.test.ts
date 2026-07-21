@@ -67,6 +67,23 @@ test("different units are appended without conversion", () => {
   );
 });
 
+test("editorial and inflected units merge through their canonical unit", () => {
+  shopping.addItem(owner.user, listId, {
+    name: "Kichererbsen",
+    quantities: [{ amount: "1", unit: "Dose(n)" }],
+  });
+  const merged = shopping.addItem(owner.user, listId, {
+    name: "kichererbsen",
+    quantities: [{ amount: "2", unit: "Dosen" }],
+  });
+
+  assert.equal(merged.merge, "increased");
+  assert.deepEqual(
+    merged.item.quantities.map(({ amount, unit }) => ({ amount, unit })),
+    [{ amount: "3", unit: "Dose" }],
+  );
+});
+
 test("household authorization is enforced for list and item writes", () => {
   assert.throws(
     () => shopping.addItem(outsider.user, listId, { name: "Nicht erlaubt" }),

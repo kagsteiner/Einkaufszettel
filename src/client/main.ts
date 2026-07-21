@@ -1,6 +1,7 @@
 import { ApiError, api, apiFile, applicationPath } from "./api.ts";
 import { productIcon } from "./product-icons.ts";
 import "./styles.css";
+import { formatUnit } from "../shared/units.ts";
 import type { AppState, RecurringSuggestion, ShoppingItem, ShoppingList, User } from "./types.ts";
 
 const appElement = document.querySelector<HTMLElement>("#app");
@@ -1208,21 +1209,6 @@ function recurringDueLabel(dueAt: string): string {
     return "heute fällig";
   }
   return `seit ${overdueDays} ${overdueDays === 1 ? "Tag" : "Tagen"} fällig`;
-}
-
-function formatUnit(unit: string, amount: string): string {
-  if (Number(amount) === 1) {
-    return unit;
-  }
-  return (
-    {
-      Dose: "Dosen",
-      Flasche: "Flaschen",
-      Packung: "Packungen",
-      Tasse: "Tassen",
-      Zehe: "Zehen",
-    }[unit] || unit
-  );
 }
 
 function escapeHtml(value: string): string {
