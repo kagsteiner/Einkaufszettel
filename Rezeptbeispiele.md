@@ -402,3 +402,30 @@ For the homemade mayonnaise (alternatively, use 3 tbsp ready-made)
 - ▢ 1 Bund glatte Petersilie
 - ▢ Meersalz
 - ▢ Baguette und etwas Rouille oder Mayonnaise - nach Belieben
+
+
+### Besondere Rezeptformulierungen
+
+Hier einige Spezialfälle:
+
+* 2 große Tomaten
+* einige Salbeiblätter
+* 1 Spritzer Tabasco
+* 5 Stiel/e Thymian frisch
+* 3 Zweig/e Rosmarin frisch
+* 1 Flasche Rotwein
+* 15 große Garnelen
+* 6 Zwiebeln
+* einige Safranfäden
+* etwas Basilikum
+* 1 Pck. Gnocchi
+* Piment
+* 1 Tasse Reis
+* 10 m.-große Kartoffeln
+* 1 halbe Zwiebel(n)
+* 1 Handvoll Mungobohnenkeimlinge
+* n. B. Woksauce
+
+|   |   |
+|---|---|
+|1 gr. Dose/n|Tomaten, geschälte(à ca. 800 g), ohne Saft|
