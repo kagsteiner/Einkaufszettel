@@ -37,6 +37,7 @@ npm test                 # Node- und SQLite-Tests
 npm run test:browser     # mobile Chromium- und WebKit-Flows
 npm run lint             # Biome
 npm run build            # Typprüfung und gehashter Client-Build
+npm run icons:app        # App- und Browser-Icons aus public/icon.png erzeugen
 npm run check            # komplette Prüfung
 ```
 

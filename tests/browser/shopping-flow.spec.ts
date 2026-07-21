@@ -1,5 +1,52 @@
 import { expect, test } from "@playwright/test";
 
+test("the app shell advertises browser, iOS and Android icons", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator('link[rel="icon"][sizes="32x32"]')).toHaveAttribute(
+    "href",
+    "favicon-32x32.png",
+  );
+  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute(
+    "href",
+    "apple-touch-icon.png",
+  );
+
+  const manifestResponse = await page.request.get("/manifest.webmanifest");
+  expect(manifestResponse.ok()).toBe(true);
+  const manifest = (await manifestResponse.json()) as { icons?: unknown };
+  expect(manifest.icons).toEqual([
+    {
+      purpose: "any",
+      sizes: "192x192",
+      src: "android-chrome-192x192.png",
+      type: "image/png",
+    },
+    {
+      purpose: "any",
+      sizes: "512x512",
+      src: "android-chrome-512x512.png",
+      type: "image/png",
+    },
+    {
+      purpose: "maskable",
+      sizes: "512x512",
+      src: "android-chrome-maskable-512x512.png",
+      type: "image/png",
+    },
+  ]);
+  for (const path of [
+    "/favicon.ico",
+    "/favicon-16x16.png",
+    "/favicon-32x32.png",
+    "/apple-touch-icon.png",
+    "/android-chrome-192x192.png",
+    "/android-chrome-512x512.png",
+    "/android-chrome-maskable-512x512.png",
+  ]) {
+    expect((await page.request.get(path)).ok(), path).toBe(true);
+  }
+});
+
 test("a password reset link asks once for a new password", async ({ page }) => {
   let resetPayload: unknown = null;
   await page.route("**/api/auth/password-reset", async (route) => {

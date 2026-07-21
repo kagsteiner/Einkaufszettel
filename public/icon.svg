@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <title>Einkaufszettel</title>
-  <rect width="512" height="512" rx="112" fill="#26382e"/>
-  <circle cx="256" cy="256" r="150" fill="#d5664e"/>
-  <path d="m172 260 55 57 116-131" fill="none" stroke="#f8f2e6" stroke-linecap="round" stroke-linejoin="round" stroke-width="52"/>
-</svg>
