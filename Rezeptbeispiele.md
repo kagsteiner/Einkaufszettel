@@ -40,7 +40,7 @@ In den Beispielen nicht enthalten sind `kg`, `l`, `oz`, `lb`, `fl oz`, `cup`, `p
 | `generous` | Verstärkung eines ungenauen Maßes | Als Qualifier zu `Prise` erhalten. |
 | `etwas`, `evtl.`, `nach Belieben` | unbestimmte oder optionale Menge | Nicht in eine Zahl erfinden; als qualitative Menge oder Hinweis erhalten. |
 | leeres Mengenfeld, z. B. bei Salz oder Pfeffer | keine festgelegte Menge | Menge und Einheit bleiben leer. |
-| `3-4`, `1/2`, `½` | Bereich oder Bruch | Vor der Einheitenlogik als Zahlstruktur behandeln. Ein Bereich darf nicht stillschweigend zu einem Einzelwert werden. |
+| `3-4`, `1/2`, `½` | Bereich oder Bruch | Vor der Einheitenlogik behandeln. Bereiche werden nach der Einkaufsregel auf ihre Obergrenze reduziert; Brüche bleiben ein separates Thema. |
 
 ### Zusammengesetzte Mengenangaben
 
@@ -120,11 +120,13 @@ Zusätzlich braucht die Erkennung unterschiedliche Mengenarten:
 
 - exakter Einzelwert, z. B. `1.5`
 - Bruch, z. B. `1/2`, intern exakt `1/2`
-- Bereich, z. B. `3-4`, intern `{ min: 3, max: 4 }`
+- Bereich, z. B. `3-4`; für den Einkaufszettel wird daraus deterministisch die Obergrenze `4`
 - ungefährer Wert, z. B. `ca. 150 g`
 - qualitative Menge, z. B. `etwas`
 
-Nur exakte Einzelwerte dürfen ohne weitere Produktentscheidung automatisch addiert werden. Ein Bereich darf beispielsweise nicht ungefragt auf seinen Mittelwert reduziert werden.
+Für diese Einkaufs-App gilt bewusst eine pragmatische Regel: Bei einem Bereich wird immer die Obergrenze gekauft. `3-4 Stück` wird daher vor dem Zusammenführen zu `4 Stück`, `200-250 g` zu `250 g`. Ein kleiner Überschuss ist weniger problematisch als eine zu geringe Einkaufsmenge. Die Untergrenze muss kleiner oder gleich der Obergrenze sein; ein Bereich wird niemals auf den Mittelwert reduziert.
+
+Nach dieser Normalisierung darf die Obergrenze wie ein exakter Einzelwert addiert werden. Ungefähre und qualitative Mengen benötigen weiterhin eigene Regeln.
 
 ### 5. Nur innerhalb kompatibler Dimensionen umrechnen
 
@@ -170,7 +172,7 @@ So kann die App `1 Dose (400 g)` anzeigen, ohne zu behaupten, jede Dose habe 400
 3. **Küchenvolumen:** `EL/TL/ml` nach festgelegter Konvention zusammenführen.
 4. **Anzeigegrammatik:** Singular und Plural ausschließlich aus dem Register ableiten.
 5. **Zusammengesetzte Mengen:** Stück- und Packungsgrößen im Datenmodell verknüpfen.
-6. **Bereiche und ungefähre Mengen:** Erst danach Rechen- und Merge-Regeln für `3-4`, `ca.` und qualitative Angaben definieren.
+6. **Ungefähre und qualitative Mengen:** Bereiche verwenden bereits die feste Obergrenzenregel; für `ca.`, `etwas` und ähnliche Angaben werden später eigene Rechen- und Merge-Regeln definiert.
 
 Diese Reihenfolge liefert früh Nutzen, ohne unsichere Umrechnungen oder einen großen einmaligen Schemaumbau zu erzwingen.
 

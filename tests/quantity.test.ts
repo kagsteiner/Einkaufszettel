@@ -8,6 +8,20 @@ test("decimal addition does not introduce floating-point errors", () => {
   assert.equal(addDecimal("2", "3.2500"), "5.25");
 });
 
+test("shopping ranges use their upper bound", () => {
+  assert.equal(normalizeQuantity({ amount: "3-4", unit: "Stück" }).amount, "4");
+  assert.equal(normalizeQuantity({ amount: "3 – 4", unit: "Stück" }).amount, "4");
+  assert.equal(normalizeQuantity({ amount: "200 bis 250", unit: "g" }).amount, "250");
+  assert.equal(normalizeQuantity({ amount: "1,5—2,25", unit: "kg" }).amount, "2.25");
+});
+
+test("reversed shopping ranges are rejected", () => {
+  assert.throws(
+    () => normalizeQuantity({ amount: "4-3", unit: "Stück" }),
+    /Untergrenze.*Obergrenze/,
+  );
+});
+
 test("unit aliases normalize without converting physical units", () => {
   assert.deepEqual(normalizeQuantity({ amount: "2", unit: "Gramm" }), {
     amount: "2",

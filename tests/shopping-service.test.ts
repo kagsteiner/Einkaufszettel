@@ -84,6 +84,17 @@ test("editorial and inflected units merge through their canonical unit", () => {
   );
 });
 
+test("recipe ranges add their upper bound to the shopping list", () => {
+  const [created] = shopping.addRecipeItems(owner.user, listId, [
+    { amount: "200-250", category: "produce", name: "Pilze", note: null, unit: "g" },
+  ]);
+
+  assert.deepEqual(
+    created?.item.quantities.map(({ amount, unit }) => ({ amount, unit })),
+    [{ amount: "250", unit: "g" }],
+  );
+});
+
 test("household authorization is enforced for list and item writes", () => {
   assert.throws(
     () => shopping.addItem(outsider.user, listId, { name: "Nicht erlaubt" }),

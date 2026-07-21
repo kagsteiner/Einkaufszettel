@@ -9,7 +9,7 @@ export type NormalizedQuantity = Readonly<{
 }>;
 
 export function normalizeQuantity(input: QuantityInput): NormalizedQuantity {
-  const amount = normalizeDecimal(input.amount);
+  const amount = normalizeAmount(input.amount);
   if (input.unit !== undefined && typeof input.unit !== "string") {
     throw invalidInput("Die Mengeneinheit ist ungültig.");
   }
@@ -43,13 +43,29 @@ export function addDecimal(left: string, right: string): string {
   return fraction ? `${integer}.${fraction}` : integer;
 }
 
-function normalizeDecimal(value: unknown): string {
+function normalizeAmount(value: unknown): string {
   const raw =
     typeof value === "number" ? String(value) : typeof value === "string" ? value.trim() : "";
-  const normalized = raw.replace(",", ".");
+  const range = raw.match(
+    /^(\d{1,9}(?:[.,]\d{1,4})?)\s*(?:-|–|—|bis)\s*(\d{1,9}(?:[.,]\d{1,4})?)$/iu,
+  );
+  if (range) {
+    const lower = normalizeDecimal(range[1]);
+    const upper = normalizeDecimal(range[2]);
+    if (compareDecimals(lower, upper) > 0) {
+      throw invalidInput("Die Untergrenze der Menge darf nicht größer als die Obergrenze sein.");
+    }
+    return upper;
+  }
+
+  return normalizeDecimal(raw);
+}
+
+function normalizeDecimal(raw: string | undefined): string {
+  const normalized = (raw || "").replace(",", ".");
   if (!/^\d{1,9}(?:\.\d{1,4})?$/.test(normalized)) {
     throw invalidInput(
-      "Die Menge muss eine positive Zahl mit höchstens vier Nachkommastellen sein.",
+      "Die Menge muss eine positive Zahl oder ein Bereich mit höchstens vier Nachkommastellen sein.",
     );
   }
   const [integer = "0", fraction = ""] = normalized.split(".");
@@ -62,4 +78,14 @@ function normalizeDecimal(value: unknown): string {
     throw invalidInput("Die Menge muss größer als null sein.");
   }
   return canonical;
+}
+
+function compareDecimals(left: string, right: string): number {
+  const toScaledInteger = (value: string): bigint => {
+    const [integer = "0", fraction = ""] = value.split(".");
+    return BigInt(`${integer}${fraction.padEnd(4, "0")}`);
+  };
+  const leftInteger = toScaledInteger(left);
+  const rightInteger = toScaledInteger(right);
+  return leftInteger < rightInteger ? -1 : leftInteger > rightInteger ? 1 : 0;
 }
