@@ -3,7 +3,7 @@ import type { AuthenticatedUser } from "./auth-service.ts";
 import type { AppDatabase } from "./database.ts";
 import { inTransaction } from "./database.ts";
 import { AppError, invalidInput } from "./errors.ts";
-import { addDecimal, type NormalizedQuantity, normalizeQuantity } from "./quantity.ts";
+import { combineAmounts, type NormalizedQuantity, normalizeQuantity } from "./quantity.ts";
 import { cleanRequiredText, normalizeComparableText } from "./text.ts";
 
 const categories = [
@@ -286,7 +286,7 @@ export class ShoppingService {
         if (stored) {
           this.database
             .prepare("UPDATE quantity_parts SET amount = ? WHERE id = ?")
-            .run(addDecimal(stored.amount, quantity.amount), stored.id);
+            .run(combineAmounts(stored.amount, quantity.amount), stored.id);
           increased = true;
         } else {
           this.insertQuantity(existing.id, quantity, now);
@@ -656,7 +656,9 @@ function normalizeQuantities(value: unknown): NormalizedQuantity[] {
     const existing = merged.get(quantity.normalizedUnit);
     merged.set(
       quantity.normalizedUnit,
-      existing ? { ...quantity, amount: addDecimal(existing.amount, quantity.amount) } : quantity,
+      existing
+        ? { ...quantity, amount: combineAmounts(existing.amount, quantity.amount) }
+        : quantity,
     );
   }
   return [...merged.values()];

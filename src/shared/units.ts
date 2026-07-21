@@ -156,6 +156,20 @@ export const unitDefinitions: ReadonlyArray<UnitDefinition> = [
     singular: "Stange",
   },
   {
+    aliases: ["stiel", "stiele"],
+    dimension: "count:stem",
+    id: "stiel",
+    plural: "Stiele",
+    singular: "Stiel",
+  },
+  {
+    aliases: ["spritzer"],
+    dimension: "approximate:splash",
+    id: "spritzer",
+    plural: "Spritzer",
+    singular: "Spritzer",
+  },
+  {
     aliases: ["prise", "prisen", "pinch", "pinches"],
     dimension: "approximate:pinch",
     id: "prise",

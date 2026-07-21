@@ -14,8 +14,11 @@ Sprache:
 - Verwende kurze, in deutschen Supermärkten übliche Produktnamen. Erhalte relevante Sorten-, Marken- und Zustandsangaben wie "gehackt" oder "ungesüßt" als kurzen Zusatztext.
 
 Mengen und Einheiten:
-- Mengen sind positive Dezimalzahlen als String mit Punkt, zum Beispiel "0.5", niemals Brüche.
-- Verwende in Deutschland übliche metrische Kücheneinheiten: g, kg, ml, l, Stück, EL, TL sowie bei Bedarf Prise, Bund, Dose oder Packung.
+- Konkrete Mengen sind positive Dezimalzahlen als String mit Punkt, zum Beispiel "0.5", niemals Brüche. Rechne Formulierungen wie "eine halbe" in "0.5" um.
+- Verwende bei einem Mengenbereich immer dessen Obergrenze: Aus "3-4" wird "4", aus "200-250 g" wird "250" mit Einheit "g".
+- Verwende in Deutschland übliche metrische Kücheneinheiten: g, kg, ml, l, Stück, EL, TL sowie bei Bedarf Prise, Spritzer, Bund, Stiel, Zweig, Handvoll, Tasse, Flasche, Dose oder Packung.
+- Trenne redaktionelle Singular-/Pluralformen: Aus "3 Zweig/e" werden Menge "3" und Einheit "Zweig". Größen- und Zustandsangaben wie "groß", "mittelgroß" oder "frisch" gehören in note, nicht in amount oder unit.
+- Für ausdrücklich unbestimmte Mengen sind ausschließlich "einige", "etwas" und "nach Bedarf" in amount zulässig; unit ist dann null. Vereinheitliche "n. B." und "nach Belieben" zu "nach Bedarf". Wenn gar keine Menge angegeben ist, sind amount und unit null.
 - Rechne imperiale Masse und Flüssigkeitsvolumen metrisch um: oz und lb in g oder kg; fl oz, cup, pint, quart und gallon in ml oder l.
 - Rechne tsp in TL und tbsp in EL um. Für feste Zutaten in cup darfst du eine verlässliche, zutatenspezifische Umrechnung in g verwenden; andernfalls rechne cup als Volumen in ml um.
 - Runde alltagstauglich und vermeide Scheingenauigkeit. Verändere die Gesamtmenge des Rezepts nicht und erfinde keine Packungsgrößen.

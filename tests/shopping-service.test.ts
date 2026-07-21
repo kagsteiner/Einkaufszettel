@@ -95,6 +95,20 @@ test("recipe ranges add their upper bound to the shopping list", () => {
   );
 });
 
+test("qualitative recipe amounts are preserved instead of guessed", () => {
+  shopping.addRecipeItems(owner.user, listId, [
+    { amount: "einige", category: "spices", name: "Salbeiblätter", note: null, unit: null },
+  ]);
+  const [merged] = shopping.addRecipeItems(owner.user, listId, [
+    { amount: "einige", category: "spices", name: "salbeiblätter", note: null, unit: null },
+  ]);
+
+  assert.deepEqual(
+    merged?.item.quantities.map(({ amount, unit }) => ({ amount, unit })),
+    [{ amount: "2 × einige", unit: "" }],
+  );
+});
+
 test("household authorization is enforced for list and item writes", () => {
   assert.throws(
     () => shopping.addItem(outsider.user, listId, { name: "Nicht erlaubt" }),

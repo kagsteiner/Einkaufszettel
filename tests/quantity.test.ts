@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { addDecimal, normalizeQuantity } from "../src/server/quantity.ts";
+import { addDecimal, combineAmounts, normalizeQuantity } from "../src/server/quantity.ts";
 import { findUnitDefinition, formatUnit } from "../src/shared/units.ts";
 
 test("decimal addition does not introduce floating-point errors", () => {
@@ -20,6 +20,17 @@ test("reversed shopping ranges are rejected", () => {
     () => normalizeQuantity({ amount: "4-3", unit: "Stück" }),
     /Untergrenze.*Obergrenze/,
   );
+});
+
+test("qualitative shopping amounts remain qualitative when combined", () => {
+  assert.deepEqual(normalizeQuantity({ amount: "n. B.", unit: null }), {
+    amount: "nach Bedarf",
+    normalizedUnit: "qualitative:",
+    unit: "",
+  });
+  assert.equal(combineAmounts("einige", "einige"), "2 × einige");
+  assert.equal(combineAmounts("2 × einige", "etwas"), "2 × einige + etwas");
+  assert.equal(normalizeQuantity({ amount: "nach Belieben" }).amount, "nach Bedarf");
 });
 
 test("unit aliases normalize without converting physical units", () => {
@@ -73,6 +84,8 @@ test("the unit registry covers the units found in the recipe examples", () => {
     "Pck.",
     "Msp",
     "Stange",
+    "Stiel/e",
+    "Spritzer",
     "handful",
   ];
 

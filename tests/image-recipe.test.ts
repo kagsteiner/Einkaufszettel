@@ -115,4 +115,7 @@ test("the recipe prompt translates foreign recipes and converts imperial units",
   assert.match(recipeAnalysisPrompt, /tsp in TL und tbsp in EL/);
   assert.match(recipeAnalysisPrompt, /vermeide Scheingenauigkeit/);
   assert.match(recipeAnalysisPrompt, /erfinde keine Packungsgrößen/);
+  assert.match(recipeAnalysisPrompt, /Mengenbereich immer dessen Obergrenze/);
+  assert.match(recipeAnalysisPrompt, /"einige", "etwas" und "nach Bedarf"/);
+  assert.match(recipeAnalysisPrompt, /Größen- und Zustandsangaben.*gehören in note/);
 });
