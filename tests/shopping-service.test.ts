@@ -50,6 +50,14 @@ test("product matching is case-independent while display casing is preserved", (
   );
 });
 
+test("direct additions infer a useful category from the product name", () => {
+  const created = shopping.addItem(owner.user, listId, {
+    name: "Schlagsahne",
+  });
+
+  assert.equal(created.item.category, "dairy");
+});
+
 test("different units are appended without conversion", () => {
   shopping.addItem(owner.user, listId, {
     name: "Mehl",

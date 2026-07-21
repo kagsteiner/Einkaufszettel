@@ -1,6 +1,7 @@
 import { ApiError, api, apiFile, applicationPath } from "./api.ts";
 import { productIcon } from "./product-icons.ts";
 import "./styles.css";
+import { inferProductCategory } from "../shared/product-categories.ts";
 import { formatUnit } from "../shared/units.ts";
 import type { AppState, RecurringSuggestion, ShoppingItem, ShoppingList, User } from "./types.ts";
 
@@ -377,11 +378,17 @@ function itemMarkup(item: ShoppingItem): string {
         `${escapeHtml(formatAmount(quantity.amount))}${quantity.unit ? ` ${escapeHtml(formatUnit(quantity.unit, quantity.amount))}` : ""}`,
     )
     .join(" + ");
+  const inferredCategory = item.category === "other" ? inferProductCategory(item.name) : undefined;
+  const icon =
+    productIcon(item.name) ||
+    (inferredCategory ? categoryIcons[inferredCategory] : undefined) ||
+    categoryIcons[item.category] ||
+    "🛒";
   return `<article class="shopping-row ${item.completedAt ? "completed" : ""}" data-item-id="${escapeHtml(item.id)}">
     <button class="check-button" type="button" data-toggle-item aria-label="${
       item.completedAt ? "Wieder auf die Liste setzen" : "Als erledigt markieren"
     }"><span aria-hidden="true">✓</span></button>
-    <button class="item-image ${item.imageId ? "" : "fallback"}" type="button" ${item.imageId ? "data-preview-image" : "data-edit-item"} aria-label="${escapeHtml(item.imageId ? `${item.name} Bild ansehen` : `${item.name} bearbeiten`)}">${item.imageId ? `<img src="${escapeHtml(applicationPath(`/api/images/${item.imageId}`))}" alt="">` : productIcon(item.name) || categoryIcons[item.category] || "🛒"}</button>
+    <button class="item-image ${item.imageId ? "" : "fallback"}" type="button" ${item.imageId ? "data-preview-image" : "data-edit-item"} aria-label="${escapeHtml(item.imageId ? `${item.name} Bild ansehen` : `${item.name} bearbeiten`)}">${item.imageId ? `<img src="${escapeHtml(applicationPath(`/api/images/${item.imageId}`))}" alt="">` : icon}</button>
     <button class="item-copy" type="button" data-edit-item>
       <strong>${escapeHtml(item.name)}</strong>${item.note ? `<small>${escapeHtml(item.note)}</small>` : ""}
     </button>

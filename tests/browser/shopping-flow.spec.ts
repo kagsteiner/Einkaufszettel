@@ -136,6 +136,11 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();
   await expect(page.getByText("2 l", { exact: true })).toBeVisible();
 
+  await page.getByLabel("Produkt", { exact: true }).fill("Schlagsahne");
+  await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();
+  const creamRow = page.locator(".shopping-row").filter({ hasText: "Schlagsahne" });
+  await expect(creamRow.locator(".item-image")).toHaveText("🥛");
+
   await page.getByLabel("Produkt", { exact: true }).fill("HAFERMILCH");
   await page.getByLabel("Menge", { exact: true }).fill("1");
   await page.getByLabel("Einheit", { exact: true }).fill("Liter");
@@ -267,7 +272,11 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
     ],
   });
 
-  await page.getByRole("button", { name: "Als erledigt markieren" }).click();
+  await page
+    .locator(".shopping-row")
+    .filter({ hasText: "Hafermilch" })
+    .getByRole("button", { name: "Als erledigt markieren" })
+    .click();
   await expect(page.getByText("1 erledigt", { exact: true })).toBeVisible();
 
   const registrations = await page.evaluate(async () => navigator.serviceWorker.getRegistrations());

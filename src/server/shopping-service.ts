@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { inferProductCategory } from "../shared/product-categories.ts";
 import type { AuthenticatedUser } from "./auth-service.ts";
 import type { AppDatabase } from "./database.ts";
 import { inTransaction } from "./database.ts";
@@ -232,7 +233,7 @@ export class ShoppingService {
   } {
     const name = cleanItemName(input.name);
     const note = cleanNote(input.note);
-    const category = normalizeCategory(input.category);
+    const category = normalizeCategory(input.category, name);
     const quantities = normalizeQuantities(input.quantities);
 
     return inTransaction(this.database, () => {
@@ -682,9 +683,9 @@ function cleanNote(value: unknown): string | null {
   return value.trim().normalize("NFC") || null;
 }
 
-function normalizeCategory(value: unknown): string {
+function normalizeCategory(value: unknown, productName?: string): string {
   if (value === undefined) {
-    return "other";
+    return (productName && inferProductCategory(productName)) || "other";
   }
   if (typeof value !== "string" || !categorySet.has(value)) {
     throw invalidInput("Der Einkaufsbereich ist ungültig.");
