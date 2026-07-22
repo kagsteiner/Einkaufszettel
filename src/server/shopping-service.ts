@@ -67,6 +67,12 @@ export type RecurringSuggestion = Readonly<{
   quantities: ShoppingItem["quantities"];
 }>;
 
+export type ProductSuggestion = Readonly<{
+  lastUsedAt: string;
+  name: string;
+  useCount: number;
+}>;
+
 export class ShoppingService {
   private readonly database: AppDatabase;
 
@@ -140,7 +146,42 @@ export class ShoppingService {
         updatedAt: list.updated_at,
       })),
       pantry,
+      productSuggestions: this.getProductSuggestions(user),
     };
+  }
+
+  getProductSuggestions(user: AuthenticatedUser): ProductSuggestion[] {
+    return this.database
+      .prepare(
+        `WITH product_usage AS (
+           SELECT i.normalized_name,
+                  COUNT(DISTINCT i.id) + COUNT(e.id) AS use_count,
+                  MAX(CASE
+                    WHEN e.purchased_at > i.updated_at THEN e.purchased_at
+                    ELSE i.updated_at
+                  END) AS last_used_at
+           FROM items i
+           JOIN shopping_lists l ON l.id = i.list_id
+           LEFT JOIN item_purchase_events e ON e.item_id = i.id
+           WHERE l.household_id = ?
+           GROUP BY i.normalized_name
+         )
+         SELECT (
+                  SELECT recent.name
+                  FROM items recent
+                  JOIN shopping_lists recent_list ON recent_list.id = recent.list_id
+                  WHERE recent_list.household_id = ?
+                    AND recent.normalized_name = product_usage.normalized_name
+                  ORDER BY recent.updated_at DESC, recent.created_at DESC
+                  LIMIT 1
+                ) AS name,
+                use_count AS useCount,
+                last_used_at AS lastUsedAt
+         FROM product_usage
+         ORDER BY use_count DESC, last_used_at DESC, name COLLATE NOCASE
+         LIMIT 500`,
+      )
+      .all(user.householdId, user.householdId) as ProductSuggestion[];
   }
 
   createList(user: AuthenticatedUser, nameValue: unknown): { id: string; name: string } {

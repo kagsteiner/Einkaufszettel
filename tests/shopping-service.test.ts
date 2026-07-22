@@ -58,6 +58,41 @@ test("direct additions infer a useful category from the product name", () => {
   assert.equal(created.item.category, "dairy");
 });
 
+test("product suggestions prefer frequent use and use recency as a tie-breaker", () => {
+  const frequent = shopping.addItem(owner.user, listId, { name: "Test Mohnmilch" });
+  const recent = shopping.addItem(owner.user, listId, { name: "Test Mandelmilch" });
+  shopping.setCompleted(owner.user, frequent.item.id, true);
+  shopping.setCompleted(owner.user, frequent.item.id, false);
+  shopping.setCompleted(owner.user, frequent.item.id, true);
+  shopping.setCompleted(owner.user, recent.item.id, true);
+
+  let matches = shopping
+    .getProductSuggestions(owner.user)
+    .filter((suggestion) => suggestion.name.startsWith("Test M"));
+  assert.deepEqual(
+    matches.map((suggestion) => suggestion.name),
+    ["Test Mohnmilch", "Test Mandelmilch"],
+  );
+
+  database
+    .prepare("DELETE FROM item_purchase_events WHERE item_id IN (?, ?)")
+    .run(frequent.item.id, recent.item.id);
+  database
+    .prepare("UPDATE items SET updated_at = ? WHERE id = ?")
+    .run("2026-01-01T00:00:00.000Z", frequent.item.id);
+  database
+    .prepare("UPDATE items SET updated_at = ? WHERE id = ?")
+    .run("2026-02-01T00:00:00.000Z", recent.item.id);
+
+  matches = shopping
+    .getProductSuggestions(owner.user)
+    .filter((suggestion) => suggestion.name.startsWith("Test M"));
+  assert.deepEqual(
+    matches.map((suggestion) => suggestion.name),
+    ["Test Mandelmilch", "Test Mohnmilch"],
+  );
+});
+
 test("different units are appended without conversion", () => {
   shopping.addItem(owner.user, listId, {
     name: "Mehl",

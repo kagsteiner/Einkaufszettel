@@ -596,6 +596,47 @@ h2 {
   padding-left: 0.3rem;
   font-size: 0.65rem;
 }
+.quick-product-field {
+  position: relative;
+  display: grid;
+  gap: 0.2rem;
+}
+.quick-product-field > label {
+  display: block;
+  padding-left: 0.3rem;
+  font-size: 0.65rem;
+}
+.product-completion {
+  position: absolute;
+  bottom: calc(100% + 0.6rem);
+  left: 0;
+  display: flex;
+  max-width: min(24rem, calc(100vw - 2rem));
+  align-items: baseline;
+  gap: 0.55rem;
+  overflow: hidden;
+  border: 1px solid rgb(37 56 46 / 18%);
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  color: var(--ink);
+  background: #fffdf8;
+  box-shadow: 0 0.45rem 1.4rem rgb(25 39 31 / 18%);
+  cursor: pointer;
+}
+.product-completion[hidden] {
+  display: none;
+}
+.product-completion span {
+  overflow: hidden;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.product-completion small {
+  flex: none;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
 .quick-add input {
   min-height: 2.65rem;
   padding: 0.6rem 0.7rem;

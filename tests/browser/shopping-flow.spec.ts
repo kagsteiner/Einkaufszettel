@@ -158,6 +158,15 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();
   await expect(page.getByText("2 l", { exact: true })).toBeVisible();
 
+  await page.getByLabel("Produkt", { exact: true }).fill("Haf");
+  const productCompletion = page.getByRole("button", { name: "Hafermilch vervollständigen" });
+  await expect(productCompletion).toBeVisible();
+  await page.getByLabel("Produkt", { exact: true }).fill("Hafersahne");
+  await expect(productCompletion).toBeHidden();
+  await page.getByLabel("Produkt", { exact: true }).fill("Haf");
+  await productCompletion.click();
+  await expect(page.getByLabel("Produkt", { exact: true })).toHaveValue("Hafermilch");
+
   await page.getByLabel("Produkt", { exact: true }).fill("Schlagsahne");
   await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();
   let creamRow = page.locator(".shopping-items .shopping-row").filter({ hasText: "Schlagsahne" });

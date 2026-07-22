@@ -327,7 +327,7 @@ function listMarkup(list: ShoppingList): string {
           : ""
       }
       <form class="quick-add" data-add-item>
-        <label class="product-field"><span>Produkt</span><input name="name" maxlength="120" placeholder="Was fehlt?" autocomplete="off" required></label>
+        <div class="product-field quick-product-field"><label for="quick-product-name">Produkt</label><input id="quick-product-name" name="name" maxlength="120" placeholder="Was fehlt?" autocomplete="off" aria-autocomplete="inline" aria-controls="quick-product-suggestion" aria-expanded="false" required><button class="product-completion" id="quick-product-suggestion" type="button" hidden></button></div>
         <label class="amount-field"><span>Menge</span><input name="amount" inputmode="decimal" placeholder="2"></label>
         <label class="unit-field"><span>Einheit</span><input name="unit" maxlength="40" placeholder="Stück"></label>
         <button class="round-add" type="submit" aria-label="Zum Zettel hinzufügen">＋</button>
@@ -428,6 +428,7 @@ function bindApplicationEvents(activeList: ShoppingList | null): void {
       void submitItem(event, activeList.id);
     }
   });
+  bindProductCompletion();
   app.querySelector<HTMLInputElement>("[data-recipe-file]")?.addEventListener("change", (event) => {
     const file = (event.currentTarget as HTMLInputElement).files?.[0];
     if (file && activeList) {
@@ -449,6 +450,66 @@ function bindApplicationEvents(activeList: ShoppingList | null): void {
       }
     });
   }
+}
+
+function bindProductCompletion(): void {
+  const input = app.querySelector<HTMLInputElement>('[data-add-item] [name="name"]');
+  const completion = app.querySelector<HTMLButtonElement>("[data-add-item] .product-completion");
+  if (!input || !completion || !currentState) {
+    return;
+  }
+
+  let suggestedName: string | null = null;
+  let dismissedValue: string | null = null;
+  const updateCompletion = () => {
+    const query = normalizeProductName(input.value);
+    suggestedName =
+      query && query !== dismissedValue
+        ? currentState?.productSuggestions.find((candidate) => {
+            const candidateName = normalizeProductName(candidate.name);
+            return candidateName.startsWith(query) && candidateName !== query;
+          })?.name || null
+        : null;
+    completion.hidden = !suggestedName;
+    input.setAttribute("aria-expanded", String(Boolean(suggestedName)));
+    if (suggestedName) {
+      completion.innerHTML = `<span>${escapeHtml(suggestedName)}</span><small>vervollständigen</small>`;
+      completion.setAttribute("aria-label", `${suggestedName} vervollständigen`);
+    }
+  };
+  const acceptCompletion = () => {
+    if (!suggestedName) {
+      return;
+    }
+    input.value = suggestedName;
+    input.setSelectionRange(input.value.length, input.value.length);
+    dismissedValue = null;
+    updateCompletion();
+    input.focus();
+  };
+
+  input.addEventListener("input", () => {
+    dismissedValue = null;
+    updateCompletion();
+  });
+  input.addEventListener("keydown", (event) => {
+    const acceptsWithArrow =
+      event.key === "ArrowRight" && input.selectionStart === input.value.length;
+    if (suggestedName && (event.key === "Tab" || acceptsWithArrow)) {
+      event.preventDefault();
+      acceptCompletion();
+    } else if (suggestedName && event.key === "Escape") {
+      dismissedValue = normalizeProductName(input.value);
+      updateCompletion();
+    }
+  });
+  completion.addEventListener("pointerdown", (event) => event.preventDefault());
+  completion.addEventListener("click", acceptCompletion);
+  updateCompletion();
+}
+
+function normalizeProductName(value: string): string {
+  return value.trim().normalize("NFKC").replace(/\s+/g, " ").toLocaleLowerCase("de-DE");
 }
 
 function openMobileListActions(list: ShoppingList): void {

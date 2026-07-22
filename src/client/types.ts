@@ -38,6 +38,12 @@ export type RecurringSuggestion = Readonly<{
   quantities: ReadonlyArray<Quantity>;
 }>;
 
+export type ProductSuggestion = Readonly<{
+  lastUsedAt: string;
+  name: string;
+  useCount: number;
+}>;
+
 export type AppState = Readonly<{
   household: {
     id: string;
@@ -46,4 +52,5 @@ export type AppState = Readonly<{
   };
   lists: ReadonlyArray<ShoppingList>;
   pantry: ReadonlyArray<{ id: string; name: string }>;
+  productSuggestions: ReadonlyArray<ProductSuggestion>;
 }>;
