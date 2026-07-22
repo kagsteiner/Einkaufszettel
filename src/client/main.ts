@@ -1,7 +1,5 @@
 import { ApiError, api, apiFile, applicationPath } from "./api.ts";
-import { productIcon } from "./product-icons.ts";
 import "./styles.css";
-import { inferProductCategory } from "../shared/product-categories.ts";
 import { formatUnit } from "../shared/units.ts";
 import type { AppState, RecurringSuggestion, ShoppingItem, ShoppingList, User } from "./types.ts";
 
@@ -11,20 +9,6 @@ if (!appElement) {
 }
 const app: HTMLElement = appElement;
 
-const categoryIcons: Readonly<Record<string, string>> = {
-  bakery: "🥖",
-  canned: "🥫",
-  dairy: "🥛",
-  drinks: "🧃",
-  frozen: "❄️",
-  household: "🧽",
-  meat: "🥩",
-  other: "🛒",
-  pet: "🐾",
-  produce: "🥬",
-  spices: "🌿",
-  staples: "🍚",
-};
 const categoryLabels: Readonly<Record<string, string>> = {
   bakery: "Brot & Backwaren",
   canned: "Konserven",
@@ -378,17 +362,10 @@ function itemMarkup(item: ShoppingItem): string {
         `${escapeHtml(formatAmount(quantity.amount))}${quantity.unit ? ` ${escapeHtml(formatUnit(quantity.unit, quantity.amount))}` : ""}`,
     )
     .join(" + ");
-  const inferredCategory = item.category === "other" ? inferProductCategory(item.name) : undefined;
-  const icon =
-    productIcon(item.name) ||
-    (inferredCategory ? categoryIcons[inferredCategory] : undefined) ||
-    categoryIcons[item.category] ||
-    "🛒";
   return `<article class="shopping-row ${item.completedAt ? "completed" : ""}" data-item-id="${escapeHtml(item.id)}">
     <button class="check-button" type="button" data-toggle-item aria-label="${
       item.completedAt ? "Wieder auf die Liste setzen" : "Als erledigt markieren"
     }"><span aria-hidden="true">✓</span></button>
-    <button class="item-image ${item.imageId ? "" : "fallback"}" type="button" ${item.imageId ? "data-preview-image" : "data-edit-item"} aria-label="${escapeHtml(item.imageId ? `${item.name} Bild ansehen` : `${item.name} bearbeiten`)}">${item.imageId ? `<img src="${escapeHtml(applicationPath(`/api/images/${item.imageId}`))}" alt="">` : icon}</button>
     <button class="item-copy" type="button" data-edit-item>
       <strong>${escapeHtml(item.name)}</strong>${item.note ? `<small>${escapeHtml(item.note)}</small>` : ""}
     </button>
@@ -461,15 +438,6 @@ function bindApplicationEvents(activeList: ShoppingList | null): void {
       const item = activeList?.items.find((candidate) => candidate.id === id);
       if (item) {
         openItemDialog(item);
-      }
-    });
-  }
-  for (const button of app.querySelectorAll<HTMLButtonElement>("[data-preview-image]")) {
-    button.addEventListener("click", () => {
-      const id = button.closest<HTMLElement>("[data-item-id]")?.dataset.itemId;
-      const item = activeList?.items.find((candidate) => candidate.id === id);
-      if (item?.imageId) {
-        openImagePreview(item);
       }
     });
   }
@@ -607,6 +575,7 @@ function openItemDialog(item: ShoppingItem): void {
   const dialog = createDialog(`
     <form method="dialog" class="dialog-form" data-item-form>
       <div class="dialog-heading"><div><p class="eyebrow">Produkt</p><h2>Eintrag bearbeiten</h2></div><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div>
+      ${item.imageId ? `<div class="item-detail-photo"><span>Aktuelles Foto</span><img src="${escapeHtml(applicationPath(`/api/images/${item.imageId}`))}" alt="${escapeHtml(item.name)}"></div>` : ""}
       <label>Name<input name="name" maxlength="120" value="${escapeHtml(item.name)}" required></label>
       <label>Notiz<textarea name="note" maxlength="500" rows="2">${escapeHtml(item.note || "")}</textarea></label>
       <label>Einkaufsbereich<select name="category">${Object.entries(categoryLabels)
@@ -678,22 +647,6 @@ function openItemDialog(item: ShoppingItem): void {
       }
     })();
   });
-  dialog.showModal();
-}
-
-function openImagePreview(item: ShoppingItem): void {
-  if (!item.imageId) {
-    return;
-  }
-  const dialog = createDialog(
-    `<section class="image-preview"><div class="dialog-heading"><h2>${escapeHtml(item.name)}</h2><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div><img src="${escapeHtml(applicationPath(`/api/images/${item.imageId}`))}" alt="${escapeHtml(item.name)}"><button class="secondary-button" type="button" data-edit-from-preview>Eintrag bearbeiten</button></section>`,
-  );
-  dialog
-    .querySelector<HTMLButtonElement>("[data-edit-from-preview]")
-    ?.addEventListener("click", () => {
-      dialog.close();
-      openItemDialog(item);
-    });
   dialog.showModal();
 }
 

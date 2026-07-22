@@ -138,8 +138,34 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
 
   await page.getByLabel("Produkt", { exact: true }).fill("Schlagsahne");
   await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();
-  const creamRow = page.locator(".shopping-row").filter({ hasText: "Schlagsahne" });
-  await expect(creamRow.locator(".item-image")).toHaveText("🥛");
+  let creamRow = page.locator(".shopping-items .shopping-row").filter({ hasText: "Schlagsahne" });
+  await expect(page.locator(".shopping-row .item-image")).toHaveCount(0);
+
+  await creamRow.locator(".item-copy").click();
+  let itemDialog = page.getByRole("dialog");
+  await itemDialog.getByLabel("Foto").setInputFiles("public/favicon-32x32.png");
+  await itemDialog.getByRole("button", { name: "Speichern" }).click();
+  await expect(itemDialog).not.toBeVisible();
+  await expect(page.locator(".shopping-row img")).toHaveCount(0);
+
+  creamRow = page.locator(".shopping-items .shopping-row").filter({ hasText: "Schlagsahne" });
+  await creamRow.locator(".item-copy").click();
+  itemDialog = page.getByRole("dialog");
+  await expect(itemDialog.locator(".item-detail-photo img")).toBeVisible();
+  await itemDialog.getByRole("button", { name: "Schließen" }).click();
+
+  await creamRow.getByRole("button", { name: "Als erledigt markieren" }).click();
+  await expect(page.getByText("1 erledigt", { exact: true })).toBeVisible();
+  await page.getByLabel("Produkt", { exact: true }).fill("Schlagsahne");
+  await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();
+  await expect(
+    page.getByText("Erneut mit der neuen Menge auf den Zettel gesetzt.", { exact: true }),
+  ).toBeVisible();
+  creamRow = page.locator(".shopping-items .shopping-row").filter({ hasText: "Schlagsahne" });
+  await creamRow.locator(".item-copy").click();
+  itemDialog = page.getByRole("dialog");
+  await expect(itemDialog.locator(".item-detail-photo img")).toBeVisible();
+  await itemDialog.getByRole("button", { name: "Schließen" }).click();
 
   await page.getByLabel("Produkt", { exact: true }).fill("HAFERMILCH");
   await page.getByLabel("Menge", { exact: true }).fill("1");

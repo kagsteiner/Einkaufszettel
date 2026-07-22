@@ -412,7 +412,7 @@ h2 {
 .shopping-row {
   min-height: var(--paper-rule);
   display: grid;
-  grid-template-columns: 2.6rem 3rem minmax(0, 1fr) minmax(3.5rem, auto);
+  grid-template-columns: 2.6rem minmax(0, 1fr) minmax(3.5rem, auto);
   align-items: center;
   gap: 0.65rem;
   transition:
@@ -455,23 +455,6 @@ h2 {
 .completed .check-button span {
   color: #fff;
 }
-.item-image {
-  width: 2.8rem;
-  height: 2.8rem;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 0.75rem;
-  background: #e4dfd2;
-  font-size: 1.35rem;
-  cursor: pointer;
-}
-.item-image img {
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  object-fit: cover;
-}
 .item-copy {
   min-width: 0;
   display: grid;
@@ -503,8 +486,7 @@ h2 {
   text-align: right;
 }
 .completed .item-copy,
-.completed .item-quantity,
-.completed .item-image {
+.completed .item-quantity {
   opacity: 0.48;
 }
 .completed .item-copy strong {
@@ -663,6 +645,22 @@ h2 {
   color: #526058;
   font-size: 0.8rem;
   font-weight: 750;
+}
+.item-detail-photo {
+  display: grid;
+  gap: 0.4rem;
+}
+.item-detail-photo > span {
+  color: #526058;
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+.item-detail-photo > img {
+  width: 100%;
+  max-height: 20rem;
+  border-radius: 1rem;
+  object-fit: contain;
+  background: #e6e0d5;
 }
 .quantity-edit-row {
   display: grid;
@@ -964,7 +962,7 @@ h2 {
     font-size: 0.9rem;
   }
   .shopping-row {
-    grid-template-columns: 2.5rem 2.9rem minmax(0, 1fr) minmax(2.5rem, auto);
+    grid-template-columns: 2.5rem minmax(0, 1fr) minmax(2.5rem, auto);
     gap: 0.4rem;
   }
   .item-quantity {
