@@ -58,6 +58,43 @@ test("direct additions infer a useful category from the product name", () => {
   assert.equal(created.item.category, "dairy");
 });
 
+test("permanent product notes survive while recipe notes belong to one shopping cycle", () => {
+  const created = shopping.addItem(owner.user, listId, {
+    name: "Dosentomaten",
+    persistentNote: "Bitte immer Bio",
+    purchaseNote: "Diesmal gehackt",
+  });
+  assert.equal(created.item.persistentNote, "Bitte immer Bio");
+  assert.equal(created.item.purchaseNote, "Diesmal gehackt");
+
+  shopping.setCompleted(owner.user, created.item.id, true);
+  const undone = shopping.setCompleted(owner.user, created.item.id, false);
+  assert.equal(undone.purchaseNote, "Diesmal gehackt");
+
+  shopping.setCompleted(owner.user, created.item.id, true);
+  const directRepeat = shopping.addItem(owner.user, listId, { name: "Dosentomaten" });
+  assert.equal(directRepeat.item.persistentNote, "Bitte immer Bio");
+  assert.equal(directRepeat.item.purchaseNote, null);
+
+  shopping.setCompleted(owner.user, created.item.id, true);
+  const [recipeRepeat] = shopping.addRecipeItems(owner.user, listId, [
+    {
+      amount: "2",
+      category: "canned",
+      name: "Dosentomaten",
+      note: "Für dieses Rezept stückig",
+      unit: "Dose",
+    },
+  ]);
+  assert.equal(recipeRepeat?.item.persistentNote, "Bitte immer Bio");
+  assert.equal(recipeRepeat?.item.purchaseNote, "Für dieses Rezept stückig");
+
+  shopping.setCompleted(owner.user, created.item.id, true);
+  const nextDirectRepeat = shopping.addItem(owner.user, listId, { name: "Dosentomaten" });
+  assert.equal(nextDirectRepeat.item.persistentNote, "Bitte immer Bio");
+  assert.equal(nextDirectRepeat.item.purchaseNote, null);
+});
+
 test("product suggestions prefer frequent use and use recency as a tie-breaker", () => {
   const frequent = shopping.addItem(owner.user, listId, { name: "Test Mohnmilch" });
   const recent = shopping.addItem(owner.user, listId, { name: "Test Mandelmilch" });

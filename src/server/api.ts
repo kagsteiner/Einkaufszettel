@@ -284,7 +284,8 @@ export async function handleApiRequest(
       const result = shoppingService.addItem(user, listItemsMatch[1], {
         category: body.category,
         name: body.name,
-        note: body.note,
+        persistentNote: body.persistentNote !== undefined ? body.persistentNote : body.note,
+        purchaseNote: body.purchaseNote,
         quantities: body.quantities,
       });
       eventHub.publish(user.householdId);
@@ -322,7 +323,8 @@ export async function handleApiRequest(
       const item = shoppingService.updateItem(user, itemMatch[1], {
         category: body.category,
         name: body.name,
-        note: body.note,
+        persistentNote: body.persistentNote !== undefined ? body.persistentNote : body.note,
+        purchaseNote: body.purchaseNote,
         quantities: body.quantities,
       });
       eventHub.publish(user.householdId);

@@ -15,7 +15,8 @@ export type ShoppingItem = Readonly<{
   id: string;
   imageId: string | null;
   name: string;
-  note: string | null;
+  persistentNote: string | null;
+  purchaseNote: string | null;
   quantities: ReadonlyArray<Quantity>;
   updatedAt: string;
 }>;
@@ -34,7 +35,7 @@ export type RecurringSuggestion = Readonly<{
   itemId: string;
   lastPurchasedAt: string;
   name: string;
-  note: string | null;
+  persistentNote: string | null;
   quantities: ReadonlyArray<Quantity>;
 }>;
 

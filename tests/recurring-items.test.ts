@@ -79,6 +79,10 @@ test("due suggestions use the last five purchases and include tomorrow", () => {
 test("adding a recurring suggestion keeps its history and accepts edited values", () => {
   const now = new Date();
   const itemId = completedItem("Kaffee", now, [13, 6], [{ amount: "1", unit: "Packung" }]);
+  shopping.updateItem(owner.user, itemId, {
+    persistentNote: "Nur diese Röstung",
+    purchaseNote: "Für das letzte Rezept gemahlen",
+  });
 
   const [item] = shopping.addRecurringItems(owner.user, listId, [
     {
@@ -91,6 +95,8 @@ test("adding a recurring suggestion keeps its history and accepts edited values"
   assert.ok(item);
   assert.equal(item.completedAt, null);
   assert.equal(item.name, "Espresso");
+  assert.equal(item.persistentNote, "Nur diese Röstung");
+  assert.equal(item.purchaseNote, null);
   assert.deepEqual(
     item.quantities.map(({ amount, unit }) => ({ amount, unit })),
     [{ amount: "3", unit: "Packung" }],

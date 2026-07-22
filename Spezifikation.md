@@ -50,6 +50,8 @@ Ein Haushalt besitzt eine lineare Sammlung von Zetteln ohne Ordner oder weitere 
 
 Items können manuell hinzugefügt werden. Bilder stammen entweder aus einer mitgelieferten Bibliothek, der Kamera oder – soweit der Browser dies unterstützt – der Fotomediathek des Geräts.
 
+Ein Item kann zwei getrennte Zusatztexte besitzen: Ein dauerhafter Produkthinweis bleibt gemeinsam mit einem eigenen Produktfoto bei späteren Einkäufen erhalten. Eine Notiz für den aktuellen Einkauf gilt nur für diesen Einkaufszyklus. Rezeptanalysen legen ihren Zusatztext standardmäßig als solche einmalige Einkaufsnotiz ab. Beim direkten Wiederhinzufügen eines erledigten Items wird die alte Einkaufsnotiz entfernt; beim erneuten Hinzufügen aus einem Rezept wird sie durch dessen neue Notiz ersetzt. Das unmittelbare Rückgängigmachen des Erledigt-Status behält beide Notizen bei.
+
 ### Visuelles Konzept
 
 Die Hauptansicht wirkt wie ein klassischer Einkaufszettel, nicht wie ein Kachelraster. Jede Zeile besitzt links eine große Abhakfläche, daneben ein festes 44–48-Pixel-Bild oder Kategorie-Icon, in der Mitte Produktname und Zusatz und rechts die Menge. Eigene Fotos werden ausschnittfüllend dargestellt und lassen sich antippen. Erledigte Items stehen in einem einklappbaren Bereich am Ende. Kacheln sind nur für bildorientierte Auswahldialoge zulässig.

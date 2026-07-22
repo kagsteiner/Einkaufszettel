@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import { copyFile, mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
@@ -50,7 +51,7 @@ test("all initial tables are created by the migration runner", () => {
     .get() as {
     count: number;
   };
-  assert.equal(migrationCount.count, 4);
+  assert.equal(migrationCount.count, 5);
 });
 
 test("foreign keys are active", () => {
@@ -81,17 +82,37 @@ test("the purchase-history migration seeds already completed items", async () =>
   });
   const legacyShopping = new ShoppingService(legacyDatabase);
   const legacyListId = legacyShopping.createList(user.user, "Altbestand").id;
-  const legacyItem = legacyShopping.addItem(user.user, legacyListId, { name: "Reis" }).item;
+  const legacyItemId = randomUUID();
   const completedAt = "2026-07-18T10:00:00.000Z";
   legacyDatabase
-    .prepare("UPDATE items SET completed_at = ?, updated_at = ? WHERE id = ?")
-    .run(completedAt, completedAt, legacyItem.id);
+    .prepare(
+      `INSERT INTO items
+        (id, list_id, name, normalized_name, note, completed_at, created_by_user_id,
+         updated_by_user_id, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .run(
+      legacyItemId,
+      legacyListId,
+      "Reis",
+      "reis",
+      "Nur diese Sorte",
+      completedAt,
+      user.user.id,
+      user.user.id,
+      completedAt,
+      completedAt,
+    );
   legacyDatabase.close();
 
   const migratedDatabase = await openDatabase(legacyDatabasePath);
   const event = migratedDatabase
     .prepare("SELECT purchased_at FROM item_purchase_events WHERE item_id = ?")
-    .get(legacyItem.id) as { purchased_at: string };
+    .get(legacyItemId) as { purchased_at: string };
   assert.equal(event.purchased_at, completedAt);
+  const migratedItem = migratedDatabase
+    .prepare("SELECT note, purchase_note FROM items WHERE id = ?")
+    .get(legacyItemId) as { note: string; purchase_note: string | null };
+  assert.deepEqual(migratedItem, { note: "Nur diese Sorte", purchase_note: null });
   migratedDatabase.close();
 });

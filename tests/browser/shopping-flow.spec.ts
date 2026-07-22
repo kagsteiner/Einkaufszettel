@@ -174,7 +174,8 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
 
   await creamRow.locator(".item-copy").click();
   let itemDialog = page.getByRole("dialog");
-  await itemDialog.getByLabel("Foto").setInputFiles("public/favicon-32x32.png");
+  await itemDialog.getByLabel("Immer merken").fill("Das ist meine Sorte");
+  await itemDialog.getByLabel("Foto", { exact: true }).setInputFiles("public/favicon-32x32.png");
   await itemDialog.getByRole("button", { name: "Speichern" }).click();
   await expect(itemDialog).not.toBeVisible();
   await expect(page.locator(".shopping-row img")).toHaveCount(0);
@@ -183,6 +184,8 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   await creamRow.locator(".item-copy").click();
   itemDialog = page.getByRole("dialog");
   await expect(itemDialog.locator(".item-detail-photo img")).toBeVisible();
+  await expect(itemDialog.getByLabel("Immer merken")).toHaveValue("Das ist meine Sorte");
+  await expect(itemDialog.getByLabel("Nur für diesen Einkauf")).toHaveValue("");
   await itemDialog.getByRole("button", { name: "Schließen" }).click();
 
   await creamRow.getByRole("button", { name: "Als erledigt markieren" }).click();
@@ -196,6 +199,8 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   await creamRow.locator(".item-copy").click();
   itemDialog = page.getByRole("dialog");
   await expect(itemDialog.locator(".item-detail-photo img")).toBeVisible();
+  await expect(itemDialog.getByLabel("Immer merken")).toHaveValue("Das ist meine Sorte");
+  await expect(itemDialog.getByLabel("Nur für diesen Einkauf")).toHaveValue("");
   await itemDialog.getByRole("button", { name: "Schließen" }).click();
 
   await page.getByLabel("Produkt", { exact: true }).fill("HAFERMILCH");
@@ -257,10 +262,10 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
           ingredients: [
             {
               amount: "3",
-              category: "pantry",
+              category: "staples",
               inPantry: false,
               name: "Olivenöl",
-              note: null,
+              note: "am besten Bio",
               unit: "EL",
             },
           ],
@@ -296,7 +301,23 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
     };
   });
   expect(ingredientGeometry.selectionBottom).toBeLessThan(ingredientGeometry.productTop);
-  await recipeDialog.getByRole("button", { name: "Schließen" }).click();
+  await expect(recipeDialog.getByLabel("Nur für diesen Einkauf")).toHaveValue("am besten Bio");
+  await recipeDialog.getByRole("button", { name: "Auswahl hinzufügen" }).click();
+  let oilRow = page.locator(".shopping-items .shopping-row").filter({ hasText: "Olivenöl" });
+  await expect(oilRow.getByText("Diesmal: am besten Bio", { exact: true })).toBeVisible();
+  await oilRow.getByRole("button", { name: "Als erledigt markieren" }).click();
+  await expect(
+    page.locator(".completed-items .shopping-row").filter({ hasText: "Olivenöl" }),
+  ).toHaveCount(1);
+  await page.getByLabel("Produkt", { exact: true }).fill("Olivenöl");
+  await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();
+  oilRow = page.locator(".shopping-items .shopping-row").filter({ hasText: "Olivenöl" });
+  await expect(oilRow).toBeVisible();
+  await expect(oilRow.getByText("Diesmal: am besten Bio", { exact: true })).toHaveCount(0);
+  await oilRow.locator(".item-copy").click();
+  itemDialog = page.getByRole("dialog");
+  await expect(itemDialog.getByLabel("Nur für diesen Einkauf")).toHaveValue("");
+  await itemDialog.getByRole("button", { name: "Schließen" }).click();
 
   let recurringItems: unknown = null;
   await page.route("**/api/lists/*/recurring-items", async (route) => {
@@ -314,7 +335,7 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
             itemId: "hafermilch-history",
             lastPurchasedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1_000).toISOString(),
             name: "Hafermilch",
-            note: null,
+            persistentNote: null,
             quantities: [{ amount: "2", id: "quantity", unit: "l" }],
           },
         ],

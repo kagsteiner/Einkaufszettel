@@ -368,7 +368,7 @@ function itemMarkup(item: ShoppingItem): string {
       item.completedAt ? "Wieder auf die Liste setzen" : "Als erledigt markieren"
     }"><span aria-hidden="true">✓</span></button>
     <button class="item-copy" type="button" data-edit-item>
-      <strong>${escapeHtml(item.name)}</strong>${item.note ? `<small>${escapeHtml(item.note)}</small>` : ""}
+      <strong>${escapeHtml(item.name)}</strong>${item.persistentNote ? `<small>${escapeHtml(item.persistentNote)}</small>` : ""}${item.purchaseNote ? `<small class="purchase-note">Diesmal: ${escapeHtml(item.purchaseNote)}</small>` : ""}
     </button>
     <span class="item-quantity">${quantities || "–"}</span>
   </article>`;
@@ -692,7 +692,8 @@ function openItemDialog(item: ShoppingItem): void {
       <div class="dialog-heading"><div><p class="eyebrow">Produkt</p><h2>Eintrag bearbeiten</h2></div><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div>
       ${item.imageId ? `<div class="item-detail-photo"><span>Aktuelles Foto</span><img src="${escapeHtml(applicationPath(`/api/images/${item.imageId}`))}" alt="${escapeHtml(item.name)}"></div>` : ""}
       <label>Name<input name="name" maxlength="120" value="${escapeHtml(item.name)}" required></label>
-      <label>Notiz<textarea name="note" maxlength="500" rows="2">${escapeHtml(item.note || "")}</textarea></label>
+      <label>Immer merken<textarea name="persistentNote" maxlength="500" rows="2">${escapeHtml(item.persistentNote || "")}</textarea><small class="form-field-hint">Bleibt mit Foto und Produkt für spätere Einkäufe erhalten.</small></label>
+      <label>Nur für diesen Einkauf<textarea name="purchaseNote" maxlength="500" rows="2">${escapeHtml(item.purchaseNote || "")}</textarea><small class="form-field-hint">Wird bei einem späteren Wiederkauf entfernt oder durch eine neue Rezeptnotiz ersetzt.</small></label>
       <label>Einkaufsbereich<select name="category">${Object.entries(categoryLabels)
         .map(
           ([value, label]) =>
@@ -722,7 +723,8 @@ function openItemDialog(item: ShoppingItem): void {
         await api(`/api/items/${item.id}`, {
           body: {
             name: formData.get("name"),
-            note: formData.get("note"),
+            persistentNote: formData.get("persistentNote"),
+            purchaseNote: formData.get("purchaseNote"),
             category: formData.get("category"),
             quantities,
           },
@@ -793,7 +795,7 @@ async function openRecurringDialog(listId: string, trigger: HTMLButtonElement): 
         return `<fieldset class="ingredient-preview recurring-suggestion" data-recurring-suggestion="${index}">
           <div class="suggestion-heading"><label class="ingredient-select"><input type="checkbox" name="selected" value="${index}" checked><span>Hinzufügen</span></label><span>${escapeHtml(recurringDueLabel(suggestion.dueAt))}</span></div>
           <label>Produkt<input name="name" value="${escapeHtml(suggestion.name)}" maxlength="120" required></label>
-          ${suggestion.note ? `<p class="suggestion-note">${escapeHtml(suggestion.note)}</p>` : ""}
+          ${suggestion.persistentNote ? `<p class="suggestion-note">${escapeHtml(suggestion.persistentNote)}</p>` : ""}
           <div class="suggestion-quantities"><strong>Mengen</strong>${quantityInputs}</div>
         </fieldset>`;
       })
@@ -902,7 +904,7 @@ async function analyzeRecipe(file: File, listId: string): Promise<void> {
           <label class="ingredient-select"><input type="checkbox" name="selected" value="${index}" ${ingredient.inPantry ? "" : "checked"}><span>${ingredient.inPantry ? "Im Vorrat" : "Hinzufügen"}</span></label>
           <label>Produkt<input name="name-${index}" value="${escapeHtml(ingredient.name)}" maxlength="120" required></label>
           <div class="quantity-edit-row"><label>Menge<input name="amount-${index}" value="${escapeHtml(ingredient.amount || "")}" inputmode="decimal"></label><label>Einheit<input name="unit-${index}" value="${escapeHtml(ingredient.unit || "")}" maxlength="40"></label></div>
-          <label>Notiz<input name="note-${index}" value="${escapeHtml(ingredient.note || "")}" maxlength="500"></label>
+          <label>Nur für diesen Einkauf<input name="note-${index}" value="${escapeHtml(ingredient.note || "")}" maxlength="500"><small class="form-field-hint">Diese Rezeptnotiz wird beim nächsten direkten Wiederkauf nicht übernommen.</small></label>
           <input type="hidden" name="category-${index}" value="${escapeHtml(ingredient.category)}">
         </fieldset>`,
       )

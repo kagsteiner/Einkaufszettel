@@ -34,6 +34,7 @@ type ItemRow = {
   name: string;
   normalized_name: string;
   note: string | null;
+  purchase_note: string | null;
   sort_position: number;
   updated_at: string;
 };
@@ -52,7 +53,8 @@ export type ShoppingItem = Readonly<{
   id: string;
   imageId: string | null;
   name: string;
-  note: string | null;
+  persistentNote: string | null;
+  purchaseNote: string | null;
   quantities: ReadonlyArray<Readonly<{ amount: string; id: string; unit: string }>>;
   updatedAt: string;
 }>;
@@ -63,7 +65,7 @@ export type RecurringSuggestion = Readonly<{
   itemId: string;
   lastPurchasedAt: string;
   name: string;
-  note: string | null;
+  persistentNote: string | null;
   quantities: ShoppingItem["quantities"];
 }>;
 
@@ -267,13 +269,22 @@ export class ShoppingService {
   addItem(
     user: AuthenticatedUser,
     listId: string,
-    input: { category?: unknown; name: unknown; note?: unknown; quantities?: unknown },
+    input: {
+      category?: unknown;
+      name: unknown;
+      persistentNote?: unknown;
+      purchaseNote?: unknown;
+      quantities?: unknown;
+    },
   ): {
     item: ShoppingItem;
     merge: "created" | "increased" | "appended" | "reactivated" | "unchanged";
   } {
     const name = cleanItemName(input.name);
-    const note = cleanNote(input.note);
+    const persistentNoteProvided = input.persistentNote !== undefined;
+    const purchaseNoteProvided = input.purchaseNote !== undefined;
+    const persistentNote = persistentNoteProvided ? cleanNote(input.persistentNote) : null;
+    const purchaseNote = purchaseNoteProvided ? cleanNote(input.purchaseNote) : null;
     const category = normalizeCategory(input.category, name);
     const quantities = normalizeQuantities(input.quantities);
 
@@ -289,16 +300,17 @@ export class ShoppingService {
         this.database
           .prepare(
             `INSERT INTO items
-              (id, list_id, name, normalized_name, note, category, sort_position, created_by_user_id,
-               updated_by_user_id, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              (id, list_id, name, normalized_name, note, purchase_note, category, sort_position,
+               created_by_user_id, updated_by_user_id, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           )
           .run(
             itemId,
             listId,
             name,
             normalizeComparableText(name),
-            note,
+            persistentNote,
+            purchaseNote,
             category,
             this.nextItemPosition(listId),
             user.id,
@@ -335,12 +347,18 @@ export class ShoppingService {
           appended = true;
         }
       }
+      const nextPersistentNote = persistentNoteProvided ? persistentNote : existing.note;
+      const nextPurchaseNote = purchaseNoteProvided
+        ? purchaseNote
+        : wasCompleted
+          ? null
+          : existing.purchase_note;
       this.database
         .prepare(
-          `UPDATE items SET completed_at = NULL, note = COALESCE(note, ?),
+          `UPDATE items SET completed_at = NULL, note = ?, purchase_note = ?,
            updated_by_user_id = ?, updated_at = ? WHERE id = ?`,
         )
-        .run(note, user.id, now, existing.id);
+        .run(nextPersistentNote, nextPurchaseNote, user.id, now, existing.id);
       return {
         item: this.getItem(user, existing.id),
         merge: wasCompleted
@@ -375,7 +393,9 @@ export class ShoppingService {
         return this.addItem(user, listId, {
           category: ingredient.category,
           name: ingredient.name,
-          note: ingredient.note,
+          ...(ingredient.note === null || ingredient.note === undefined || ingredient.note === ""
+            ? {}
+            : { purchaseNote: ingredient.note }),
           quantities:
             amount === null || amount === undefined || amount === ""
               ? undefined
@@ -445,7 +465,7 @@ export class ShoppingService {
         itemId,
         lastPurchasedAt: new Date(lastPurchase).toISOString(),
         name: item.name,
-        note: item.note,
+        persistentNote: item.persistentNote,
         quantities: item.quantities,
       });
     }
@@ -473,6 +493,7 @@ export class ShoppingService {
         selectedItemIds.add(itemId);
         this.updateItem(user, itemId, {
           name: selection.name,
+          purchaseNote: null,
           quantities: selection.quantities,
         });
         return this.setCompleted(user, itemId, false);
@@ -504,12 +525,21 @@ export class ShoppingService {
   updateItem(
     user: AuthenticatedUser,
     itemId: string,
-    input: { category?: unknown; name?: unknown; note?: unknown; quantities?: unknown },
+    input: {
+      category?: unknown;
+      name?: unknown;
+      persistentNote?: unknown;
+      purchaseNote?: unknown;
+      quantities?: unknown;
+    },
   ): ShoppingItem {
     return inTransaction(this.database, () => {
       const existing = this.assertItemAccess(user, itemId);
       const name = input.name === undefined ? existing.name : cleanItemName(input.name);
-      const note = input.note === undefined ? existing.note : cleanNote(input.note);
+      const persistentNote =
+        input.persistentNote === undefined ? existing.note : cleanNote(input.persistentNote);
+      const purchaseNote =
+        input.purchaseNote === undefined ? existing.purchase_note : cleanNote(input.purchaseNote);
       const category =
         input.category === undefined ? existing.category : normalizeCategory(input.category);
       const quantities =
@@ -518,10 +548,19 @@ export class ShoppingService {
       try {
         this.database
           .prepare(
-            `UPDATE items SET name = ?, normalized_name = ?, note = ?, category = ?,
+            `UPDATE items SET name = ?, normalized_name = ?, note = ?, purchase_note = ?, category = ?,
              updated_by_user_id = ?, updated_at = ? WHERE id = ?`,
           )
-          .run(name, normalizeComparableText(name), note, category, user.id, now, itemId);
+          .run(
+            name,
+            normalizeComparableText(name),
+            persistentNote,
+            purchaseNote,
+            category,
+            user.id,
+            now,
+            itemId,
+          );
       } catch (error) {
         if (isUniqueConstraintError(error)) {
           throw new AppError(409, "item_exists", "Dieses Produkt steht bereits auf dem Zettel.");
@@ -751,7 +790,8 @@ function toItem(row: ItemRow, quantities: QuantityRow[]): ShoppingItem {
     id: row.id,
     imageId: row.image_id,
     name: row.name,
-    note: row.note,
+    persistentNote: row.note,
+    purchaseNote: row.purchase_note,
     quantities: quantities.map((quantity) => ({
       amount: quantity.amount,
       id: quantity.id,

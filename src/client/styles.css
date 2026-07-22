@@ -522,6 +522,9 @@ h2 {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.item-copy .purchase-note {
+  color: #8a594b;
+}
 .item-quantity {
   justify-self: end;
   color: #536158;
@@ -730,6 +733,12 @@ h2 {
   color: #526058;
   font-size: 0.8rem;
   font-weight: 750;
+}
+.form-field-hint {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.35;
 }
 .item-detail-photo {
   display: grid;
