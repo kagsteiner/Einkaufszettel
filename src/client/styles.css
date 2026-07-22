@@ -962,6 +962,11 @@ h2 {
 }
 
 @media (max-width: 720px) {
+  input,
+  textarea,
+  select {
+    font-size: 1rem;
+  }
   .auth-layout {
     grid-template-columns: 1fr;
     align-content: center;
@@ -1018,7 +1023,7 @@ h2 {
   }
   .quick-add input {
     padding-inline: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
   .shopping-row {
     grid-template-columns: 2.5rem minmax(0, 1fr) minmax(2.5rem, auto);
