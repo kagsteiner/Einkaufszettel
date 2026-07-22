@@ -310,6 +310,7 @@ function listMarkup(list: ShoppingList): string {
       <header class="list-heading">
         <div class="list-title">${list.imageId ? `<img src="${escapeHtml(applicationPath(`/api/images/${list.imageId}`))}" alt="">` : ""}<div><p class="eyebrow">Einkaufszettel</p><h1>${escapeHtml(list.name)}</h1></div></div>
         <div class="heading-actions"><button class="quiet-button sort-button" type="button" data-sort-mode aria-label="Sortierung wechseln">${sortMode === "alphabetical" ? "A–Z" : "Laden"}</button><button class="quiet-button recurring-button" type="button" data-recurring-items><span class="desktop-label">Was ist dran?</span><span class="mobile-label">Dran</span></button><label class="quiet-button recipe-button"><span class="desktop-label">Rezeptfoto</span><span class="mobile-label">Foto</span><input type="file" data-recipe-file accept="image/*,.heic,.heif"></label><button class="quiet-button" type="button" data-list-menu aria-label="Zettel bearbeiten"><span class="desktop-label">Bearbeiten</span><span class="mobile-label" aria-hidden="true">•••</span></button></div>
+        <button class="quiet-button mobile-list-actions" type="button" data-mobile-list-actions aria-haspopup="dialog">Aktionen</button>
       </header>
       <section class="shopping-items" aria-label="Offene Produkte">
         ${
@@ -403,6 +404,13 @@ function bindApplicationEvents(activeList: ShoppingList | null): void {
       void openListDialog(activeList);
     }
   });
+  app
+    .querySelector<HTMLButtonElement>("[data-mobile-list-actions]")
+    ?.addEventListener("click", () => {
+      if (activeList) {
+        openMobileListActions(activeList);
+      }
+    });
   app.querySelector<HTMLButtonElement>("[data-sort-mode]")?.addEventListener("click", () => {
     sortMode = sortMode === "alphabetical" ? "store" : "alphabetical";
     localStorage.setItem("sort-mode", sortMode);
@@ -441,6 +449,52 @@ function bindApplicationEvents(activeList: ShoppingList | null): void {
       }
     });
   }
+}
+
+function openMobileListActions(list: ShoppingList): void {
+  const nextSortLabel =
+    sortMode === "alphabetical" ? "Ladenreihenfolge verwenden" : "Alphabetisch sortieren";
+  const currentSortLabel =
+    sortMode === "alphabetical" ? "Aktuell alphabetisch" : "Aktuell nach Einkaufsbereichen";
+  const dialog = createDialog(`
+    <section class="mobile-actions-sheet">
+      <div class="dialog-heading"><div><p class="eyebrow">${escapeHtml(list.name)}</p><h2>Aktionen</h2></div><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div>
+      <div class="mobile-action-menu">
+        <button class="mobile-action-item" type="button" data-mobile-sort><strong>${nextSortLabel}</strong><span>${currentSortLabel}</span></button>
+        <button class="mobile-action-item" type="button" data-mobile-recurring><strong>Wieder kaufen</strong><span>Regelmäßig benötigte Produkte vorschlagen</span></button>
+        <label class="mobile-action-item mobile-recipe-action"><strong>Rezept einlesen</strong><span>Zutaten aus einem Foto übernehmen</span><input type="file" data-mobile-recipe-file accept="image/*,.heic,.heif"></label>
+        <button class="mobile-action-item" type="button" data-mobile-edit-list><strong>Liste bearbeiten</strong><span>Name oder Bild ändern</span></button>
+      </div>
+    </section>`);
+  dialog.classList.add("mobile-actions-modal");
+  dialog.querySelector<HTMLButtonElement>("[data-mobile-sort]")?.addEventListener("click", () => {
+    sortMode = sortMode === "alphabetical" ? "store" : "alphabetical";
+    localStorage.setItem("sort-mode", sortMode);
+    dialog.close();
+    renderApplication();
+  });
+  dialog
+    .querySelector<HTMLButtonElement>("[data-mobile-recurring]")
+    ?.addEventListener("click", (event) => {
+      dialog.close();
+      void openRecurringDialog(list.id, event.currentTarget as HTMLButtonElement);
+    });
+  dialog
+    .querySelector<HTMLInputElement>("[data-mobile-recipe-file]")
+    ?.addEventListener("change", (event) => {
+      const file = (event.currentTarget as HTMLInputElement).files?.[0];
+      if (file) {
+        dialog.close();
+        void analyzeRecipe(file, list.id);
+      }
+    });
+  dialog
+    .querySelector<HTMLButtonElement>("[data-mobile-edit-list]")
+    ?.addEventListener("click", () => {
+      dialog.close();
+      void openListDialog(list);
+    });
+  dialog.showModal();
 }
 
 async function submitItem(event: SubmitEvent, listId: string): Promise<void> {

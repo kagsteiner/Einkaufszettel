@@ -127,8 +127,30 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
 
   await expect(page.getByRole("heading", { name: "Dein erster Zettel" })).toBeVisible();
   await page.getByRole("button", { exact: true, name: "Zettel anlegen" }).click();
-  await page.getByRole("dialog").getByLabel("Name", { exact: true }).fill("Supermarkt");
-  await page.getByRole("dialog").getByRole("button", { name: "Speichern" }).click();
+  const newListDialog = page.getByRole("dialog");
+  await newListDialog.getByLabel("Name", { exact: true }).fill("Prime Day Einkäufe");
+  await newListDialog.getByLabel("Bild (optional)").setInputFiles("public/favicon-32x32.png");
+  await newListDialog.getByRole("button", { name: "Speichern" }).click();
+  await expect(page.locator(".list-title h1")).toHaveText("Prime Day Einkäufe");
+  await expect(page.locator(".list-title > img")).toBeHidden();
+  await expect(page.locator(".heading-actions")).toBeHidden();
+  await expect(page.getByRole("button", { name: "Aktionen" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Aktionen" }).click();
+  let actionsDialog = page.getByRole("dialog");
+  let sortAction = actionsDialog.locator("[data-mobile-sort]");
+  const initialSortAction = await sortAction.textContent();
+  await expect(sortAction).toBeVisible();
+  await expect(actionsDialog.getByRole("button", { name: /Wieder kaufen/ })).toBeVisible();
+  await expect(actionsDialog.getByText("Rezept einlesen", { exact: true })).toBeVisible();
+  await expect(actionsDialog.getByRole("button", { name: /Liste bearbeiten/ })).toBeVisible();
+  await sortAction.click();
+
+  await page.getByRole("button", { name: "Aktionen" }).click();
+  actionsDialog = page.getByRole("dialog");
+  sortAction = actionsDialog.locator("[data-mobile-sort]");
+  await expect(sortAction).not.toHaveText(initialSortAction || "");
+  await sortAction.click();
 
   await page.getByLabel("Produkt", { exact: true }).fill("Hafermilch");
   await page.getByLabel("Menge", { exact: true }).fill("2");
@@ -196,9 +218,10 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   expect(paperGeometry.rowOffsetRules).toBeCloseTo(2, 2);
   expect(paperGeometry.rowRules).toBeCloseTo(1, 2);
   const headingFits = await page.locator(".list-heading").evaluate((heading) => {
-    const actions = heading.querySelector<HTMLElement>(".heading-actions");
+    const actions = heading.querySelector<HTMLElement>(".mobile-list-actions");
     const title = heading.querySelector<HTMLElement>(".list-title");
-    if (!actions || !title) {
+    const titleText = title?.querySelector<HTMLElement>("h1");
+    if (!actions || !title || !titleText) {
       throw new Error("Zetteltitel oder Aktionen fehlen.");
     }
     const headingRect = heading.getBoundingClientRect();
@@ -207,9 +230,16 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
     return {
       actionsInside: actionsRect.right <= headingRect.right + 1,
       noOverlap: titleRect.right <= actionsRect.left + 1,
+      titleIsNotTruncated:
+        getComputedStyle(titleText).textOverflow !== "ellipsis" &&
+        getComputedStyle(titleText).whiteSpace !== "nowrap",
     };
   });
-  expect(headingFits).toEqual({ actionsInside: true, noOverlap: true });
+  expect(headingFits).toEqual({
+    actionsInside: true,
+    noOverlap: true,
+    titleIsNotTruncated: true,
+  });
 
   await page.route("**/api/ai/recipe-analysis", async (route) => {
     await route.fulfill({
@@ -232,7 +262,9 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
       status: 200,
     });
   });
-  await page.locator("[data-recipe-file]").setInputFiles({
+  await page.getByRole("button", { name: "Aktionen" }).click();
+  actionsDialog = page.getByRole("dialog");
+  await actionsDialog.locator("[data-mobile-recipe-file]").setInputFiles({
     buffer: Buffer.from("browser-test"),
     mimeType: "image/jpeg",
     name: "rezept.jpg",
@@ -281,7 +313,9 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
       contentType: "application/json",
     });
   });
-  await page.locator("[data-recurring-items]").click();
+  await page.getByRole("button", { name: "Aktionen" }).click();
+  actionsDialog = page.getByRole("dialog");
+  await actionsDialog.getByRole("button", { name: /Wieder kaufen/ }).click();
   const recurringDialog = page.getByRole("dialog");
   await expect(recurringDialog.getByRole("heading", { name: "Was ist dran?" })).toBeVisible();
   await expect(recurringDialog.getByText("morgen fällig", { exact: true })).toBeVisible();
