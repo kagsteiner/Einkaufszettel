@@ -29,6 +29,24 @@ Never read, print, search, copy, modify, or include `.env` files or their conten
 
 Choose one test runner during project setup and configure it behind `npm test`. Test files should describe observable behavior, for example `merge-lists.test.ts`. Prioritize authentication, authorization between shared lists, input validation, list merging, ordering, migrations, and failure handling around AI calls. Mock external OpenAI requests; tests must not require network access or real credentials.
 
+## Experimentier-Modus
+
+Ein Arbeitsauftrag ist ein Experiment, wenn der Repository-Eigentümer die gewünschte Änderung mit `Experiment:` kennzeichnet oder ausdrücklich den „Experimentier-Modus“ startet. Eine bloße Diskussion über Experimente aktiviert den Modus nicht.
+
+Für ein Experiment gelten diese Regeln:
+
+- Zu Beginn den aktuellen Branch und Arbeitsbaum prüfen und bereits vorhandene Änderungen vom Experiment abgrenzen.
+- Kurz und ausdrücklich melden: „Experiment aktiv – keine Git-Commits oder Pushes.“
+- Die gewünschten Dateien dürfen geändert und sinnvolle Checks dürfen ausgeführt werden.
+- Während des Experiments niemals `git add`, `git commit`, `git push`, einen Branchwechsel, einen Merge, einen Rebase oder einen Stash ausführen. Die allgemeine Pflicht zu lokalen Checkpoint-Commits ist für diesen Modus ausgesetzt.
+- Der Modus bleibt über Folgeaufträge hinweg aktiv, bis der Repository-Eigentümer das Experiment ausdrücklich übernimmt oder verwirft. Ein allgemeines „mach weiter“ beendet ihn nicht.
+- Bei „Experiment übernehmen“ oder einer gleichwertigen ausdrücklichen Anweisung zuerst den finalen Diff und die Checks prüfen, dann ausschließlich die Experimentänderungen stagen und committen. GitHub weiterhin nur auf ausdrückliche Push-Anweisung aktualisieren.
+- Bei „Experiment übernehmen und pushen“ dürfen die geprüften Experimentänderungen committed und anschließend nach GitHub gepusht werden.
+- Bei „Experiment verwerfen“ ausschließlich die eindeutig zum Experiment gehörenden Änderungen zurücknehmen. Bereits vorher vorhandene oder zwischenzeitlich vom Repository-Eigentümer vorgenommene Änderungen erhalten. Falls die Abgrenzung nicht zweifelsfrei möglich ist, vor einer destruktiven Git-Aktion nachfragen.
+- Im Abschluss jedes Experiment-Schritts den Modus weiterhin als aktiv nennen und ausdrücklich darauf hinweisen, dass nichts committed oder gepusht wurde.
+
+Empfohlene eindeutige Formulierungen sind `Experiment: <Änderung>`, `Experiment übernehmen`, `Experiment übernehmen und pushen` sowie `Experiment verwerfen`.
+
 ## Git & Commit Guidelines
 
 The coding agent maintains the local Git history: stage only project-related changes and commit at sensible checkpoints. Use one branch named `main`; do not create feature branches. Git provides recovery points if development goes astray.
