@@ -692,8 +692,8 @@ function openItemDialog(item: ShoppingItem): void {
       <div class="dialog-heading"><div><p class="eyebrow">Produkt</p><h2>Eintrag bearbeiten</h2></div><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div>
       ${item.imageId ? `<div class="item-detail-photo"><span>Aktuelles Foto</span><img src="${escapeHtml(applicationPath(`/api/images/${item.imageId}`))}" alt="${escapeHtml(item.name)}"></div>` : ""}
       <label>Name<input name="name" maxlength="120" value="${escapeHtml(item.name)}" required></label>
-      <label>Immer merken<textarea name="persistentNote" maxlength="500" rows="2">${escapeHtml(item.persistentNote || "")}</textarea><small class="form-field-hint">Bleibt mit Foto und Produkt für spätere Einkäufe erhalten.</small></label>
-      <label>Nur für diesen Einkauf<textarea name="purchaseNote" maxlength="500" rows="2">${escapeHtml(item.purchaseNote || "")}</textarea><small class="form-field-hint">Wird bei einem späteren Wiederkauf entfernt oder durch eine neue Rezeptnotiz ersetzt.</small></label>
+      <label>Immer merken<textarea name="persistentNote" maxlength="500" rows="2">${escapeHtml(item.persistentNote || "")}</textarea></label>
+      <label>Nur für diesen Einkauf<textarea name="purchaseNote" maxlength="500" rows="2">${escapeHtml(item.purchaseNote || "")}</textarea></label>
       <label>Einkaufsbereich<select name="category">${Object.entries(categoryLabels)
         .map(
           ([value, label]) =>
