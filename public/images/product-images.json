@@ -27,6 +27,11 @@
       "products": ["banane", "bananen"]
     },
     {
+      "id": "bandnudeln",
+      "file": "images/products/bandnudeln.jpg",
+      "products": ["bandnudeln"]
+    },
+    {
       "id": "bier",
       "file": "images/products/bier.jpg",
       "products": ["bier", "biere"]
@@ -107,6 +112,11 @@
       "products": ["dosenessen"]
     },
     {
+      "id": "dosentomaten",
+      "file": "images/products/dosentomaten.jpg",
+      "products": ["dosentomaten", "pizzatomaten", "passierte tomaten", "gehackte tomaten"]
+    },
+    {
       "id": "ei",
       "file": "images/products/ei.jpg",
       "products": ["ei", "eier"]
@@ -167,6 +177,11 @@
       "products": ["grüner spargel", "grüne spargel"]
     },
     {
+      "id": "hackfleisch",
+      "file": "images/products/hackfleisch.jpg",
+      "products": ["hackfleisch"]
+    },
+    {
       "id": "haferdrink",
       "file": "images/products/haferdrink.jpg",
       "products": ["haferdrink", "haferdrinks", "oatly"]
@@ -180,6 +195,16 @@
       "id": "haehnchen",
       "file": "images/products/haehnchen.jpg",
       "products": ["hähnchen", "hühnchen", "suppenhuhn", "suppenhühner"]
+    },
+    {
+      "id": "hefe",
+      "file": "images/products/hefe.jpg",
+      "products": ["hefe"]
+    },
+    {
+      "id": "honig",
+      "file": "images/products/honig.jpg",
+      "products": ["honig", "agavendicksaft", "agavensirup"]
     },
     {
       "id": "hund",
@@ -330,6 +355,11 @@
       "products": ["multivitaminsaft", "multivitaminsäfte"]
     },
     {
+      "id": "mundm",
+      "file": "images/products/mundm.jpg",
+      "products": ["mundm", "m&m", "m&ms", "m&m's", "smarties"]
+    },
+    {
       "id": "muesli",
       "file": "images/products/muesli.jpg",
       "products": ["müsli", "müslis"]
@@ -440,9 +470,19 @@
       "products": ["sekt", "sekte"]
     },
     {
+      "id": "spaghetti",
+      "file": "images/products/spaghetti.jpg",
+      "products": ["spaghetti", "linguine"]
+    },
+    {
       "id": "spargel",
       "file": "images/products/spargel.jpg",
       "products": ["spargel", "weisser spargel", "weisse spargel"]
+    },
+    {
+      "id": "speck",
+      "file": "images/products/speck.jpg",
+      "products": ["speck"]
     },
     {
       "id": "spitzpaprika",
