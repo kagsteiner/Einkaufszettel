@@ -58,6 +58,70 @@ test("direct additions infer a useful category from the product name", () => {
   assert.equal(created.item.category, "dairy");
 });
 
+test("manual category changes become household-specific product knowledge", () => {
+  const firstListId = shopping.createList(owner.user, "Lernzettel 1").id;
+  const secondListId = shopping.createList(owner.user, "Lernzettel 2").id;
+  const unknown = shopping.addItem(owner.user, firstListId, {
+    name: "Hafercuisine",
+  });
+  assert.equal(unknown.item.category, "other");
+
+  const corrected = shopping.updateItem(owner.user, unknown.item.id, {
+    category: "staples",
+  });
+  assert.equal(corrected.category, "staples");
+  assert.deepEqual(
+    database
+      .prepare(
+        `SELECT normalized_name, name, category
+         FROM household_product_categories WHERE household_id = ?`,
+      )
+      .all(owner.user.householdId),
+    [{ category: "staples", name: "Hafercuisine", normalized_name: "hafercuisine" }],
+  );
+
+  const learned = shopping.addItem(owner.user, secondListId, {
+    name: "HAFERCUISINE",
+  });
+  assert.equal(learned.item.category, "staples");
+
+  const outsiderListId = shopping.createList(outsider.user, "Fremder Lernzettel").id;
+  const notShared = shopping.addItem(outsider.user, outsiderListId, {
+    name: "Hafercuisine",
+  });
+  assert.equal(notShared.item.category, "other");
+});
+
+test("manual corrections can override and suppress the fallback heuristic", () => {
+  const firstListId = shopping.createList(owner.user, "Korrekturzettel 1").id;
+  const secondListId = shopping.createList(owner.user, "Korrekturzettel 2").id;
+  const inferred = shopping.addItem(owner.user, firstListId, {
+    name: "Körperbutter",
+  });
+  assert.equal(inferred.item.category, "dairy");
+
+  shopping.updateItem(owner.user, inferred.item.id, { category: "other" });
+  const corrected = shopping.addItem(owner.user, secondListId, {
+    name: "Körperbutter",
+  });
+  assert.equal(corrected.item.category, "other");
+});
+
+test("saving an unchanged category does not create product knowledge", () => {
+  const item = shopping.addItem(owner.user, listId, { name: "Testprodukt ohne Wissen" });
+  shopping.updateItem(owner.user, item.item.id, {
+    category: "other",
+    persistentNote: "Nur die Notiz ändert sich",
+  });
+  const row = database
+    .prepare(
+      `SELECT 1 FROM household_product_categories
+       WHERE household_id = ? AND normalized_name = ?`,
+    )
+    .get(owner.user.householdId, "testprodukt ohne wissen");
+  assert.equal(row, undefined);
+});
+
 test("permanent product notes survive while recipe notes belong to one shopping cycle", () => {
   const created = shopping.addItem(owner.user, listId, {
     name: "Dosentomaten",

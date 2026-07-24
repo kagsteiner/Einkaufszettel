@@ -90,6 +90,8 @@ Alle fälligen Vorschläge sind zunächst ausgewählt. Namen und die zuletzt ver
 
 Die Anwendung kennt eine zur Entwicklungszeit definierte Reihenfolge typischer Supermarktbereiche, beispielsweise Obst und Gemüse, Milchprodukte, Brot, Fleisch, Grundnahrungsmittel, Konserven, Gewürze, Getränke, Tiernahrung, Haushalt, Tiefkühlkost und Sonstiges.
 
+Manuelle Änderungen eines Einkaufsbereichs werden als exakte, haushaltsbezogene Produktzuordnung gespeichert. Bei späteren Einträgen hat dieses gelernte Wissen Vorrang vor dem allgemeinen, versionierten Produktkatalog und dessen Schlüsselwort-Heuristik. Bewusst korrigierte Zuordnungen können ohne weitere Haushaltsdaten exportiert, auf Konflikte geprüft und kontrolliert in den allgemeinen Produktkatalog übernommen werden.
+
 Beim Hinzufügen werden Items standardmäßig alphabetisch dargestellt. Im Einkaufsmodus werden sie entsprechend der Supermarktreihenfolge gruppiert. Benutzer können zwischen beiden Ansichten wechseln; die Supermarktreihenfolge selbst ist in V1 nicht konfigurierbar.
 
 ## Zusammenarbeit und Synchronisation

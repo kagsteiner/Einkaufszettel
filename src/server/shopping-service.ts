@@ -1,5 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { inferProductCategory } from "../shared/product-categories.ts";
+import {
+  inferProductCategory,
+  isProductCategory,
+  type ProductCategory,
+  productCategories,
+} from "../shared/product-categories.ts";
 import type { AuthenticatedUser } from "./auth-service.ts";
 import type { AppDatabase } from "./database.ts";
 import { inTransaction } from "./database.ts";
@@ -7,25 +12,10 @@ import { AppError, invalidInput } from "./errors.ts";
 import { combineAmounts, type NormalizedQuantity, normalizeQuantity } from "./quantity.ts";
 import { cleanRequiredText, normalizeComparableText } from "./text.ts";
 
-const categories = [
-  "produce",
-  "dairy",
-  "bakery",
-  "meat",
-  "staples",
-  "canned",
-  "spices",
-  "drinks",
-  "pet",
-  "household",
-  "frozen",
-  "other",
-] as const;
-const categorySet = new Set<string>(categories);
 const dayMilliseconds = 24 * 60 * 60 * 1_000;
 
 type ItemRow = {
-  category: string;
+  category: ProductCategory;
   completed_at: string | null;
   created_at: string;
   id: string;
@@ -48,7 +38,7 @@ type QuantityRow = {
 };
 
 export type ShoppingItem = Readonly<{
-  category: string;
+  category: ProductCategory;
   completedAt: string | null;
   id: string;
   imageId: string | null;
@@ -60,7 +50,7 @@ export type ShoppingItem = Readonly<{
 }>;
 
 export type RecurringSuggestion = Readonly<{
-  category: string;
+  category: ProductCategory;
   dueAt: string;
   itemId: string;
   lastPurchasedAt: string;
@@ -110,7 +100,7 @@ export class ShoppingService {
       .all(user.householdId) as QuantityRow[];
     const quantitiesByItem = groupQuantities(quantityRows);
     const categoryIndex = new Map<string, number>(
-      categories.map((category, index) => [category, index]),
+      productCategories.map((category, index) => [category, index]),
     );
     const itemsByList = new Map<string, ShoppingItem[]>();
     for (const item of itemRows.sort((left, right) => {
@@ -285,11 +275,14 @@ export class ShoppingService {
     const purchaseNoteProvided = input.purchaseNote !== undefined;
     const persistentNote = persistentNoteProvided ? cleanNote(input.persistentNote) : null;
     const purchaseNote = purchaseNoteProvided ? cleanNote(input.purchaseNote) : null;
-    const category = normalizeCategory(input.category, name);
     const quantities = normalizeQuantities(input.quantities);
 
     return inTransaction(this.database, () => {
       this.assertListAccess(user, listId);
+      const category =
+        input.category === undefined
+          ? this.resolveProductCategory(user.householdId, name)
+          : normalizeCategory(input.category);
       const existing = this.database
         .prepare("SELECT * FROM items WHERE list_id = ? AND normalized_name = ?")
         .get(listId, normalizeComparableText(name)) as ItemRow | undefined;
@@ -573,6 +566,9 @@ export class ShoppingService {
           this.insertQuantity(itemId, quantity, now);
         }
       }
+      if (category !== existing.category) {
+        this.rememberProductCategory(user.householdId, name, category, now);
+      }
       return this.getItem(user, itemId);
     });
   }
@@ -675,6 +671,35 @@ export class ShoppingService {
     return toItem(item, quantities);
   }
 
+  private rememberProductCategory(
+    householdId: string,
+    name: string,
+    category: ProductCategory,
+    now: string,
+  ): void {
+    this.database
+      .prepare(
+        `INSERT INTO household_product_categories
+          (household_id, normalized_name, name, category, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT (household_id, normalized_name) DO UPDATE SET
+           name = excluded.name,
+           category = excluded.category,
+           updated_at = excluded.updated_at`,
+      )
+      .run(householdId, normalizeComparableText(name), name, category, now, now);
+  }
+
+  private resolveProductCategory(householdId: string, name: string): ProductCategory {
+    const learned = this.database
+      .prepare(
+        `SELECT category FROM household_product_categories
+         WHERE household_id = ? AND normalized_name = ?`,
+      )
+      .get(householdId, normalizeComparableText(name)) as { category: ProductCategory } | undefined;
+    return learned?.category || inferProductCategory(name) || "other";
+  }
+
   private insertQuantity(itemId: string, quantity: NormalizedQuantity, now: string): void {
     this.database
       .prepare(
@@ -763,11 +788,8 @@ function cleanNote(value: unknown): string | null {
   return value.trim().normalize("NFC") || null;
 }
 
-function normalizeCategory(value: unknown, productName?: string): string {
-  if (value === undefined) {
-    return (productName && inferProductCategory(productName)) || "other";
-  }
-  if (typeof value !== "string" || !categorySet.has(value)) {
+function normalizeCategory(value: unknown): ProductCategory {
+  if (!isProductCategory(value)) {
     throw invalidInput("Der Einkaufsbereich ist ungültig.");
   }
   return value;

@@ -50,6 +50,9 @@ test("a solo user can move lists and merge pantry data when joining", () => {
   insertPantry(inviter.user.householdId, inviter.user.id, "Salz", "salz", now);
   insertPantry(invited.user.householdId, invited.user.id, "SALZ", "salz", now);
   insertPantry(invited.user.householdId, invited.user.id, "Öl", "öl", now);
+  insertProductCategory(inviter.user.householdId, "Räuchertofu", "produce", now);
+  insertProductCategory(invited.user.householdId, "Räuchertofu", "staples", now);
+  insertProductCategory(invited.user.householdId, "Hafercuisine", "staples", now);
   const sourceHouseholdId = invited.user.householdId;
   const invitation = householdService.createInvitation(inviter.user, invited.user.email);
 
@@ -72,6 +75,16 @@ test("a solo user can move lists and merge pantry data when joining", () => {
     pantry.map((item) => item.normalized_name),
     ["salz", "öl"],
   );
+  const productCategories = database
+    .prepare(
+      `SELECT normalized_name, category FROM household_product_categories
+       WHERE household_id = ? ORDER BY normalized_name`,
+    )
+    .all(inviter.user.householdId);
+  assert.deepEqual(productCategories, [
+    { category: "staples", normalized_name: "hafercuisine" },
+    { category: "produce", normalized_name: "räuchertofu" },
+  ]);
   assert.equal(
     (
       database
@@ -153,4 +166,19 @@ function insertPantry(
        VALUES (?, ?, ?, ?, ?, ?)`,
     )
     .run(randomUUID(), householdId, name, normalizedName, userId, now);
+}
+
+function insertProductCategory(
+  householdId: string,
+  name: string,
+  category: string,
+  now: string,
+): void {
+  database
+    .prepare(
+      `INSERT INTO household_product_categories
+        (household_id, normalized_name, name, category, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+    )
+    .run(householdId, name.toLocaleLowerCase("de-DE"), name, category, now, now);
 }

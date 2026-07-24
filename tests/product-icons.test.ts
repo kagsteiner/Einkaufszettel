@@ -12,6 +12,7 @@ test("the generated Unicode table contains many German product-like symbol names
 });
 
 test("common direct entries get a local category fallback", () => {
+  assert.equal(inferProductCategory("Erdnussbutter"), "staples");
   assert.equal(inferProductCategory("Schlagsahne"), "dairy");
   assert.equal(inferProductCategory("Frischer Lachs"), "meat");
   assert.equal(inferProductCategory("Spülmittel sensitiv"), "household");

@@ -31,6 +31,7 @@ test("all initial tables are created by the migration runner", () => {
 
   for (const requiredTable of [
     "household_members",
+    "household_product_categories",
     "households",
     "images",
     "invitations",
@@ -51,7 +52,7 @@ test("all initial tables are created by the migration runner", () => {
     .get() as {
     count: number;
   };
-  assert.equal(migrationCount.count, 5);
+  assert.equal(migrationCount.count, 6);
 });
 
 test("foreign keys are active", () => {

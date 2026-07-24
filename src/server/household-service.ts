@@ -118,6 +118,7 @@ export class HouseholdService {
       if (moveExistingData) {
         this.moveLists(sourceHouseholdId, targetHouseholdId);
         this.movePantry(sourceHouseholdId, targetHouseholdId);
+        this.moveProductCategories(sourceHouseholdId, targetHouseholdId);
         this.database
           .prepare("UPDATE images SET household_id = ? WHERE household_id = ?")
           .run(targetHouseholdId, sourceHouseholdId);
@@ -275,5 +276,17 @@ export class HouseholdService {
         item.created_at,
       );
     }
+  }
+
+  private moveProductCategories(sourceHouseholdId: string, targetHouseholdId: string): void {
+    this.database
+      .prepare(
+        `INSERT OR IGNORE INTO household_product_categories
+          (household_id, normalized_name, name, category, created_at, updated_at)
+         SELECT ?, normalized_name, name, category, created_at, updated_at
+         FROM household_product_categories
+         WHERE household_id = ?`,
+      )
+      .run(targetHouseholdId, sourceHouseholdId);
   }
 }

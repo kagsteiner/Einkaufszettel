@@ -43,6 +43,31 @@ npm run check            # komplette Prüfung
 
 OpenAI wird in automatisierten Tests gefälscht; Tests benötigen weder Netzwerk noch echte Zugangsdaten.
 
+## Produktkategorien pflegen
+
+Ändert ein Benutzer die Kategorie eines Produkts, merkt sich die Anwendung die exakte Zuordnung
+für den gesamten Haushalt. Bei einem neuen Eintrag gilt diese Zuordnung vor dem allgemeinen
+Produktkatalog und der Schlüsselwort-Heuristik.
+
+Das bewusst korrigierte Produktwissen lässt sich auf dem produktiven Server ohne Schreibzugriff
+auf die Datenbank exportieren:
+
+```bash
+npm run categories:export -- --database <datenbank.db> --output <export.json>
+```
+
+Stimmen Haushalte bei einem Produkt nicht überein, führt der Export die Kategorien als Konflikt
+auf und übernimmt das Produkt nicht automatisch. Nach dem Transfer ins Entwicklungsverzeichnis
+wird ein konfliktfreier Export in den versionierten Katalog übernommen:
+
+```bash
+npm run categories:import -- --input <export.json>
+```
+
+Der Import ergänzt ausschließlich neue Zuordnungen. Widerspricht eine Zuordnung dem bestehenden
+Katalog, bricht er ohne Änderung ab. Anschließend sollten mindestens `npm test` und
+`npm run lint` ausgeführt werden.
+
 ## Produktion
 
 Setze mindestens `APP_ENV=production`, eine HTTPS-`APP_ORIGIN`, `DATABASE_PATH`, `UPLOAD_DIRECTORY` und `APP_ENCRYPTION_KEY`. Für einen Betrieb unter einem Unterpfad wie `/zettel` setze zusätzlich `APP_BASE_PATH=/zettel`. Der Server erwartet HTTPS-Terminierung durch einen Reverse Proxy. `TRUST_PROXY=true` ist nur korrekt, wenn der Proxy eingehende `X-Forwarded-For`-Header zuverlässig ersetzt.
