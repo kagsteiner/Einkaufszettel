@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f3e9">
+    <meta
+      name="description"
+      content="Lokales Studio für stilisierte Produktbilder der Einkaufszettel-App."
+    >
+    <link rel="stylesheet" href="/styles.css">
+    <title>Product Image Studio</title>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Product Image Studio">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span>
+          <strong>Product Image Studio</strong>
+          <small>Lokales FLUX-Labor</small>
+        </span>
+      </a>
+      <div class="engine-state" data-engine-state>
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>Verbinde …</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="composer" aria-labelledby="composer-title">
+        <div class="composer-copy">
+          <p class="eyebrow">Neues Motiv</p>
+          <h1 id="composer-title">Welches Produkt<br>soll sichtbar werden?</h1>
+          <p>
+            Erzeuge farbige, schnell erfassbare Produktmotive direkt auf diesem Mac.
+            Jeder Auftrag wird nacheinander abgearbeitet.
+          </p>
+        </div>
+
+        <form class="generation-form" data-generation-form>
+          <label class="field field-product">
+            <span>Produktname</span>
+            <input
+              name="productName"
+              placeholder="z. B. Butter"
+              maxlength="80"
+              autocomplete="off"
+              required
+            >
+          </label>
+
+          <label class="field">
+            <span>Zusätzliche Stilrichtung <small>optional</small></span>
+            <textarea
+              name="direction"
+              rows="3"
+              maxlength="600"
+              placeholder="z. B. weich modellierte Papier-Optik, kräftiges Gelb, leichter Schatten"
+            ></textarea>
+          </label>
+
+          <fieldset class="references-field">
+            <legend>Stilreferenzen <small>optional, maximal 4</small></legend>
+            <label class="reference-drop" data-reference-drop>
+              <input
+                name="references"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                multiple
+              >
+              <span class="reference-plus" aria-hidden="true">＋</span>
+              <strong>Bilder auswählen oder hier ablegen</strong>
+              <small>
+                FLUX versucht Farbe, Formensprache und Licht zu übernehmen – nicht das Motiv.
+              </small>
+            </label>
+            <div class="reference-preview" data-reference-preview></div>
+          </fieldset>
+
+          <div class="generation-options">
+            <label class="field compact">
+              <span>Varianten</span>
+              <select name="variantCount">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="4" selected>4</option>
+                <option value="6">6</option>
+                <option value="8">8</option>
+                <option value="10">10</option>
+              </select>
+            </label>
+            <label class="field compact">
+              <span>Auflösung</span>
+              <select name="imageSize">
+                <option value="512">512 px</option>
+                <option value="768" selected>768 px</option>
+                <option value="1024">1024 px</option>
+              </select>
+            </label>
+            <label class="field compact seed-field">
+              <span>Start-Seed <small>optional</small></span>
+              <input name="seed" type="number" min="0" max="2147483637" placeholder="zufällig">
+            </label>
+          </div>
+
+          <div class="form-footer">
+            <p class="form-message" data-form-message role="alert"></p>
+            <button class="primary-button" type="submit">
+              <span>In die Queue</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="queue-section" aria-labelledby="queue-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Generierungsqueue</p>
+            <h2 id="queue-title">Entwürfe</h2>
+          </div>
+          <button class="quiet-button" type="button" data-refresh>Aktualisieren</button>
+        </div>
+        <div class="empty-state" data-empty-state>
+          <span aria-hidden="true">◎</span>
+          <h3>Noch keine Entwürfe</h3>
+          <p>Dein erster Auftrag erscheint hier und bleibt auch nach einem Neustart erhalten.</p>
+        </div>
+        <div class="job-list" data-job-list></div>
+      </section>
+    </main>
+
+    <template data-job-template>
+      <article class="job-card">
+        <header class="job-header">
+          <div>
+            <div class="job-title-row">
+              <h3 data-job-name>Produkt</h3>
+              <span class="job-status" data-job-status></span>
+            </div>
+            <p data-job-meta></p>
+          </div>
+          <div class="job-actions">
+            <button class="quiet-button danger" type="button" data-cancel-job>Abbrechen</button>
+            <button class="icon-button" type="button" data-delete-job aria-label="Auftrag löschen">×</button>
+          </div>
+        </header>
+        <div class="progress-track" data-progress-track>
+          <span data-progress-bar></span>
+        </div>
+        <p class="job-error" data-job-error role="alert"></p>
+        <div class="result-grid" data-result-grid></div>
+      </article>
+    </template>
+
+    <template data-result-template>
+      <figure class="result-card">
+        <button type="button" class="result-select" data-select-result>
+          <img alt="" data-result-image>
+          <span class="selection-badge">Ausgewählt</span>
+        </button>
+        <figcaption>
+          <span data-result-label></span>
+          <a href="/" data-download-result download>PNG laden</a>
+        </figcaption>
+      </figure>
+    </template>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

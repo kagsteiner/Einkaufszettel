@@ -26,6 +26,17 @@ def parse_arguments() -> argparse.Namespace:
         help="Startet nach dem Setup den lokalen FLUX-MPS-Smoke-Test.",
     )
     parser.add_argument(
+        "--run-server",
+        action="store_true",
+        help="Startet nach dem Setup das lokale Product Image Studio.",
+    )
+    parser.add_argument(
+        "--port",
+        default=7861,
+        type=int,
+        help="Lokaler Port des Product Image Studios (Standard: 7861).",
+    )
+    parser.add_argument(
         "--runtime-directory",
         type=Path,
         default=DEFAULT_RUNTIME_DIRECTORY,
@@ -94,6 +105,34 @@ def run_smoke_test(python: Path, runtime_directory: Path) -> None:
     )
 
 
+def run_server(python: Path, runtime_directory: Path, port: int) -> None:
+    model_cache = runtime_directory.expanduser().resolve() / "huggingface"
+    process = subprocess.Popen(
+        [
+            str(python),
+            str(STUDIO_DIRECTORY / "studio_server.py"),
+            "--cache-directory",
+            str(model_cache),
+            "--runtime-directory",
+            str(runtime_directory.expanduser().resolve() / "studio"),
+            "--port",
+            str(port),
+        ],
+        cwd=PROJECT_ROOT,
+    )
+    try:
+        return_code = process.wait()
+    except KeyboardInterrupt:
+        print("Beende Product Image Studio …", flush=True)
+        try:
+            return_code = process.wait(timeout=15)
+        except subprocess.TimeoutExpired:
+            process.terminate()
+            return_code = process.wait(timeout=5)
+    if return_code not in {0, -2, 130}:
+        raise subprocess.CalledProcessError(return_code, process.args)
+
+
 def main() -> None:
     arguments = parse_arguments()
     if sys.version_info < (3, 10):
@@ -102,8 +141,12 @@ def main() -> None:
     runtime_directory = arguments.runtime_directory.expanduser().resolve()
     python = ensure_runtime(runtime_directory)
     print(f"Runtime: {runtime_directory}", flush=True)
+    if arguments.run_smoke and arguments.run_server:
+        raise SystemExit("--run-smoke und --run-server können nicht kombiniert werden.")
     if arguments.run_smoke:
         run_smoke_test(python, runtime_directory)
+    elif arguments.run_server:
+        run_server(python, runtime_directory, arguments.port)
     else:
         print("Setup abgeschlossen. Starte den Test mit npm run product-images:smoke.", flush=True)
 

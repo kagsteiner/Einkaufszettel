@@ -10,11 +10,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import torch
-from diffusers import Flux2KleinPipeline
 
-
-MODEL_ID = "black-forest-labs/FLUX.2-klein-4B"
-MODEL_REVISION = "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+from flux_runtime import MODEL_ID, MODEL_REVISION, prepare_pipeline
 PROMPT = (
     "A single ripe red tomato as a cheerful premium grocery catalog illustration. "
     "Centered, fully visible, three-quarter view, bold colorful stylized shapes, "
@@ -39,43 +36,10 @@ def gibibytes(byte_count: int) -> float:
     return round(byte_count / 1024**3, 3)
 
 
-def load_pipeline(cache_directory: Path) -> Flux2KleinPipeline:
-    snapshot_directory = (
-        cache_directory
-        / "models--black-forest-labs--FLUX.2-klein-4B"
-        / "snapshots"
-        / MODEL_REVISION
-    )
-    if (snapshot_directory / "model_index.json").exists():
-        print(f"Lade vorhandenen lokalen Snapshot: {snapshot_directory}", flush=True)
-        try:
-            return Flux2KleinPipeline.from_pretrained(
-                snapshot_directory,
-                torch_dtype=torch.bfloat16,
-                local_files_only=True,
-            )
-        except OSError:
-            print(
-                "Der lokale Snapshot ist unvollständig; setze den Download über Hugging Face fort …",
-                flush=True,
-            )
-
-    print("Lade Pipeline; fehlende Modellgewichte werden heruntergeladen …", flush=True)
-    return Flux2KleinPipeline.from_pretrained(
-        MODEL_ID,
-        cache_dir=cache_directory,
-        revision=MODEL_REVISION,
-        torch_dtype=torch.bfloat16,
-    )
-
-
 def main() -> None:
     arguments = parse_arguments()
     if arguments.size < 256 or arguments.size > 2048 or arguments.size % 16 != 0:
         raise SystemExit("--size muss zwischen 256 und 2048 liegen und durch 16 teilbar sein.")
-    if not torch.backends.mps.is_available():
-        raise SystemExit("Apple MPS ist in dieser PyTorch-Installation nicht verfügbar.")
-
     cache_directory = arguments.cache_directory.expanduser().resolve()
     output_directory = arguments.output_directory.expanduser().resolve()
     cache_directory.mkdir(parents=True, exist_ok=True)
@@ -84,9 +48,10 @@ def main() -> None:
     print(f"Modell: {MODEL_ID}@{MODEL_REVISION}", flush=True)
     print(f"Cache: {cache_directory}", flush=True)
     load_started = time.perf_counter()
-    pipeline = load_pipeline(cache_directory)
-    pipeline.enable_attention_slicing()
-    pipeline.to("mps")
+    try:
+        pipeline = prepare_pipeline(cache_directory)
+    except RuntimeError as error:
+        raise SystemExit(str(error)) from error
     load_seconds = time.perf_counter() - load_started
 
     torch.mps.empty_cache()
