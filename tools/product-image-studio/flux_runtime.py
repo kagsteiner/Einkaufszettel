@@ -42,7 +42,7 @@ def load_pipeline(cache_directory: Path) -> Flux2KleinPipeline:
 
 def prepare_pipeline(cache_directory: Path) -> Flux2KleinPipeline:
     if not torch.backends.mps.is_available():
-        raise RuntimeError("Apple MPS ist in dieser PyTorch-Installation nicht verfügbar.")
+        raise RuntimeError("Apple MPS is not available in this PyTorch installation.")
 
     pipeline = load_pipeline(cache_directory)
     pipeline.enable_attention_slicing()

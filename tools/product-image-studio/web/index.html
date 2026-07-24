@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f7f3e9">
     <meta
       name="description"
-      content="Lokales Studio für stilisierte Produktbilder der Einkaufszettel-App."
+      content="Local studio for stylized product artwork used by the shopping list app."
     >
     <link rel="stylesheet" href="/styles.css">
     <title>Product Image Studio</title>
@@ -17,32 +17,32 @@
         <span class="brand-mark" aria-hidden="true">✦</span>
         <span>
           <strong>Product Image Studio</strong>
-          <small>Lokales FLUX-Labor</small>
+          <small>Local FLUX workshop</small>
         </span>
       </a>
       <div class="engine-state" data-engine-state>
         <span class="status-dot" aria-hidden="true"></span>
-        <span>Verbinde …</span>
+        <span>Connecting …</span>
       </div>
     </header>
 
     <main>
       <section class="composer" aria-labelledby="composer-title">
         <div class="composer-copy">
-          <p class="eyebrow">Neues Motiv</p>
-          <h1 id="composer-title">Welches Produkt<br>soll sichtbar werden?</h1>
+          <p class="eyebrow">New subject</p>
+          <h1 id="composer-title">What product<br>should become visible?</h1>
           <p>
-            Erzeuge farbige, schnell erfassbare Produktmotive direkt auf diesem Mac.
-            Jeder Auftrag wird nacheinander abgearbeitet.
+            Create colorful, instantly recognizable product artwork directly on this Mac.
+            Jobs are generated one at a time.
           </p>
         </div>
 
         <form class="generation-form" data-generation-form>
           <label class="field field-product">
-            <span>Produktname</span>
+            <span>Product name</span>
             <input
               name="productName"
-              placeholder="z. B. Butter"
+              placeholder="e.g. milk carton"
               maxlength="80"
               autocomplete="off"
               required
@@ -50,17 +50,17 @@
           </label>
 
           <label class="field">
-            <span>Zusätzliche Stilrichtung <small>optional</small></span>
+            <span>Additional art direction <small>optional</small></span>
             <textarea
               name="direction"
               rows="3"
               maxlength="600"
-              placeholder="z. B. weich modellierte Papier-Optik, kräftiges Gelb, leichter Schatten"
+              placeholder="e.g. softly modeled paper texture, bold yellow, subtle shadow"
             ></textarea>
           </label>
 
           <fieldset class="references-field">
-            <legend>Stilreferenzen <small>optional, maximal 4</small></legend>
+            <legend>Style references <small>optional, up to 4</small></legend>
             <label class="reference-drop" data-reference-drop>
               <input
                 name="references"
@@ -69,9 +69,9 @@
                 multiple
               >
               <span class="reference-plus" aria-hidden="true">＋</span>
-              <strong>Bilder auswählen oder hier ablegen</strong>
+              <strong>Choose images or drop them here</strong>
               <small>
-                FLUX versucht Farbe, Formensprache und Licht zu übernehmen – nicht das Motiv.
+                FLUX will follow their color, shape language, and lighting — not their subject.
               </small>
             </label>
             <div class="reference-preview" data-reference-preview></div>
@@ -79,7 +79,7 @@
 
           <div class="generation-options">
             <label class="field compact">
-              <span>Varianten</span>
+              <span>Variants</span>
               <select name="variantCount">
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -90,7 +90,7 @@
               </select>
             </label>
             <label class="field compact">
-              <span>Auflösung</span>
+              <span>Resolution</span>
               <select name="imageSize">
                 <option value="512">512 px</option>
                 <option value="768" selected>768 px</option>
@@ -98,15 +98,15 @@
               </select>
             </label>
             <label class="field compact seed-field">
-              <span>Start-Seed <small>optional</small></span>
-              <input name="seed" type="number" min="0" max="2147483637" placeholder="zufällig">
+              <span>Starting seed <small>optional</small></span>
+              <input name="seed" type="number" min="0" max="2147483637" placeholder="random">
             </label>
           </div>
 
           <div class="form-footer">
             <p class="form-message" data-form-message role="alert"></p>
             <button class="primary-button" type="submit">
-              <span>In die Queue</span>
+              <span>Add to queue</span>
               <span aria-hidden="true">→</span>
             </button>
           </div>
@@ -116,15 +116,15 @@
       <section class="queue-section" aria-labelledby="queue-title">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Generierungsqueue</p>
-            <h2 id="queue-title">Entwürfe</h2>
+            <p class="eyebrow">Generation queue</p>
+            <h2 id="queue-title">Drafts</h2>
           </div>
-          <button class="quiet-button" type="button" data-refresh>Aktualisieren</button>
+          <button class="quiet-button" type="button" data-refresh>Refresh</button>
         </div>
         <div class="empty-state" data-empty-state>
           <span aria-hidden="true">◎</span>
-          <h3>Noch keine Entwürfe</h3>
-          <p>Dein erster Auftrag erscheint hier und bleibt auch nach einem Neustart erhalten.</p>
+          <h3>No drafts yet</h3>
+          <p>Your first job will appear here and remain available after a restart.</p>
         </div>
         <div class="job-list" data-job-list></div>
       </section>
@@ -135,14 +135,14 @@
         <header class="job-header">
           <div>
             <div class="job-title-row">
-              <h3 data-job-name>Produkt</h3>
+              <h3 data-job-name>Product</h3>
               <span class="job-status" data-job-status></span>
             </div>
             <p data-job-meta></p>
           </div>
           <div class="job-actions">
-            <button class="quiet-button danger" type="button" data-cancel-job>Abbrechen</button>
-            <button class="icon-button" type="button" data-delete-job aria-label="Auftrag löschen">×</button>
+            <button class="quiet-button danger" type="button" data-cancel-job>Cancel</button>
+            <button class="icon-button" type="button" data-delete-job aria-label="Delete job">×</button>
           </div>
         </header>
         <div class="progress-track" data-progress-track>
@@ -157,11 +157,11 @@
       <figure class="result-card">
         <button type="button" class="result-select" data-select-result>
           <img alt="" data-result-image>
-          <span class="selection-badge">Ausgewählt</span>
+          <span class="selection-badge">Selected</span>
         </button>
         <figcaption>
           <span data-result-label></span>
-          <a href="/" data-download-result download>PNG laden</a>
+          <a href="/" data-download-result download>Download PNG</a>
         </figcaption>
       </figure>
     </template>

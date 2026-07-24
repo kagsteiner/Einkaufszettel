@@ -110,7 +110,7 @@ class JobStore:
             )
         job = self.get(job_id)
         if job is None:
-            raise RuntimeError("Der neu angelegte Job konnte nicht gelesen werden.")
+            raise RuntimeError("The newly created job could not be read.")
         return job
 
     def get(self, job_id: str) -> dict[str, Any] | None:

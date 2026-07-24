@@ -202,28 +202,28 @@ class StudioApplication:
     def create_job(self, payload: dict[str, Any]) -> dict[str, Any]:
         product_name = str(payload.get("productName", "")).strip()
         if not product_name or len(product_name) > 80:
-            raise ValueError("Der Produktname muss zwischen 1 und 80 Zeichen lang sein.")
+            raise ValueError("The product name must be between 1 and 80 characters long.")
 
         direction = str(payload.get("direction", "")).strip()
         if len(direction) > 600:
-            raise ValueError("Die zusätzliche Stilbeschreibung darf höchstens 600 Zeichen haben.")
+            raise ValueError("Additional art direction must not exceed 600 characters.")
 
         try:
             variant_count = int(payload.get("variantCount", 4))
             image_size = int(payload.get("imageSize", 768))
             seed = int(payload.get("seed", secrets.randbelow(2_000_000_000)))
         except (TypeError, ValueError) as error:
-            raise ValueError("Varianten, Bildgröße und Seed müssen ganze Zahlen sein.") from error
+            raise ValueError("Variants, image size, and seed must be whole numbers.") from error
         if variant_count < 1 or variant_count > 10:
-            raise ValueError("Es können zwischen 1 und 10 Varianten erzeugt werden.")
+            raise ValueError("You can generate between 1 and 10 variants.")
         if image_size not in ALLOWED_IMAGE_SIZES:
-            raise ValueError("Erlaubte Bildgrößen sind 512, 768 und 1024 Pixel.")
+            raise ValueError("Allowed image sizes are 512, 768, and 1024 pixels.")
         if seed < 0 or seed > 2_147_483_637:
-            raise ValueError("Der Seed muss zwischen 0 und 2147483637 liegen.")
+            raise ValueError("The seed must be between 0 and 2147483637.")
 
         references = payload.get("referenceImages", [])
         if not isinstance(references, list) or len(references) > 4:
-            raise ValueError("Es können höchstens vier Referenzbilder verwendet werden.")
+            raise ValueError("You can use up to four reference images.")
 
         job_id = uuid.uuid4().hex
         reference_directory = self.jobs_directory / job_id / "references"
@@ -247,18 +247,18 @@ class StudioApplication:
         try:
             for index, reference in enumerate(references):
                 if not isinstance(reference, dict):
-                    raise ValueError("Ein Referenzbild hat ein ungültiges Format.")
+                    raise ValueError("A reference image has an invalid format.")
                 encoded = reference.get("data")
                 if not isinstance(encoded, str):
-                    raise ValueError("Ein Referenzbild enthält keine Bilddaten.")
+                    raise ValueError("A reference image does not contain image data.")
                 if "," in encoded and encoded.startswith("data:"):
                     encoded = encoded.split(",", 1)[1]
                 try:
                     raw = base64.b64decode(encoded, validate=True)
                 except (binascii.Error, ValueError) as error:
-                    raise ValueError("Ein Referenzbild ist nicht korrekt Base64-kodiert.") from error
+                    raise ValueError("A reference image is not valid Base64 data.") from error
                 if not raw or len(raw) > MAX_REFERENCE_BYTES:
-                    raise ValueError("Jedes Referenzbild darf höchstens 6 MB groß sein.")
+                    raise ValueError("Each reference image must be no larger than 6 MB.")
 
                 directory.mkdir(parents=True, exist_ok=True)
                 temporary_path = directory / f"reference-{index + 1}.upload"
@@ -272,7 +272,7 @@ class StudioApplication:
                         target = directory / f"reference-{index + 1}.jpg"
                         clean.save(target, format="JPEG", quality=92, optimize=True)
                 except (UnidentifiedImageError, OSError) as error:
-                    raise ValueError("Eine Referenzdatei ist kein lesbares Bild.") from error
+                    raise ValueError("A reference file is not a readable image.") from error
                 finally:
                     temporary_path.unlink(missing_ok=True)
                 saved_paths.append(str(target))
@@ -332,7 +332,7 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
         if len(parts) == 3 and parts[:2] == ["api", "jobs"]:
             job = self.application.store.get(parts[2])
             if job is None:
-                self._send_error(HTTPStatus.NOT_FOUND, "Job nicht gefunden.")
+                self._send_error(HTTPStatus.NOT_FOUND, "Job not found.")
             else:
                 self._send_json(HTTPStatus.OK, {"job": public_job(job)})
             return
@@ -357,13 +357,13 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
             job_id, action = parts[2], parts[3]
             job = self.application.store.get(job_id)
             if job is None:
-                self._send_error(HTTPStatus.NOT_FOUND, "Job nicht gefunden.")
+                self._send_error(HTTPStatus.NOT_FOUND, "Job not found.")
                 return
             if action == "cancel":
                 if not self.application.store.request_cancel(job_id):
                     self._send_error(
                         HTTPStatus.CONFLICT,
-                        "Nur wartende oder laufende Jobs können abgebrochen werden.",
+                        "Only queued or running jobs can be cancelled.",
                     )
                     return
                 self.application.worker.wake()
@@ -374,55 +374,55 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
                 try:
                     selected_index = int(self._read_json().get("selectedIndex"))
                 except (TypeError, ValueError) as error:
-                    self._send_error(HTTPStatus.BAD_REQUEST, "Ungültige Auswahl.")
+                    self._send_error(HTTPStatus.BAD_REQUEST, "Invalid selection.")
                     return
                 if not self.application.store.select(job_id, selected_index):
                     self._send_error(
                         HTTPStatus.CONFLICT,
-                        "Dieses Ergebnis kann nicht ausgewählt werden.",
+                        "This result cannot be selected.",
                     )
                     return
                 updated = self.application.store.get(job_id)
                 self._send_json(HTTPStatus.OK, {"job": public_job(updated or job)})
                 return
-        self._send_error(HTTPStatus.NOT_FOUND, "Nicht gefunden.")
+        self._send_error(HTTPStatus.NOT_FOUND, "Not found.")
 
     def do_DELETE(self) -> None:
         path = unquote(urlparse(self.path).path)
         parts = path.strip("/").split("/")
         if len(parts) == 3 and parts[:2] == ["api", "jobs"]:
             if self.application.store.get(parts[2]) is None:
-                self._send_error(HTTPStatus.NOT_FOUND, "Job nicht gefunden.")
+                self._send_error(HTTPStatus.NOT_FOUND, "Job not found.")
                 return
             if not self.application.delete_job(parts[2]):
                 self._send_error(
                     HTTPStatus.CONFLICT,
-                    "Ein laufender Job muss zuerst abgebrochen werden.",
+                    "A running job must be cancelled first.",
                 )
                 return
             self._send_json(HTTPStatus.OK, {"deleted": True})
             return
-        self._send_error(HTTPStatus.NOT_FOUND, "Nicht gefunden.")
+        self._send_error(HTTPStatus.NOT_FOUND, "Not found.")
 
     def _read_json(self) -> dict[str, Any]:
         try:
             content_length = int(self.headers.get("Content-Length", "0"))
         except ValueError as error:
-            raise ValueError("Ungültige Content-Length.") from error
+            raise ValueError("Invalid Content-Length.") from error
         if content_length <= 0 or content_length > MAX_REQUEST_BYTES:
-            raise ValueError("Die Anfrage ist leer oder größer als 36 MB.")
+            raise ValueError("The request is empty or larger than 36 MB.")
         try:
             payload = json.loads(self.rfile.read(content_length))
         except (json.JSONDecodeError, UnicodeDecodeError) as error:
-            raise ValueError("Die Anfrage enthält kein gültiges JSON.") from error
+            raise ValueError("The request does not contain valid JSON.") from error
         if not isinstance(payload, dict):
-            raise ValueError("Die Anfrage muss ein JSON-Objekt enthalten.")
+            raise ValueError("The request must contain a JSON object.")
         return payload
 
     def _serve_result_image(self, job_id: str, filename: str) -> None:
         job = self.application.store.get(job_id)
         if job is None or filename not in job["results"] or Path(filename).name != filename:
-            self._send_error(HTTPStatus.NOT_FOUND, "Bild nicht gefunden.")
+            self._send_error(HTTPStatus.NOT_FOUND, "Image not found.")
             return
         self._serve_file(
             self.application.jobs_directory / job_id / "results" / filename,
@@ -434,10 +434,10 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
         relative_path = "index.html" if path in {"", "/"} else path.lstrip("/")
         requested = (WEB_DIRECTORY / relative_path).resolve()
         if requested != WEB_DIRECTORY and WEB_DIRECTORY not in requested.parents:
-            self._send_error(HTTPStatus.NOT_FOUND, "Nicht gefunden.")
+            self._send_error(HTTPStatus.NOT_FOUND, "Not found.")
             return
         if not requested.is_file():
-            self._send_error(HTTPStatus.NOT_FOUND, "Nicht gefunden.")
+            self._send_error(HTTPStatus.NOT_FOUND, "Not found.")
             return
         content_type, _ = mimetypes.guess_type(requested.name)
         self._serve_file(
@@ -450,7 +450,7 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
         try:
             data = path.read_bytes()
         except OSError:
-            self._send_error(HTTPStatus.NOT_FOUND, "Datei nicht gefunden.")
+            self._send_error(HTTPStatus.NOT_FOUND, "File not found.")
             return
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", content_type)

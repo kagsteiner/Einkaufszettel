@@ -12,11 +12,11 @@ const resultTemplate = document.querySelector("[data-result-template]");
 const refreshButton = document.querySelector("[data-refresh]");
 
 const statusLabels = {
-  queued: "Wartet",
-  running: "Generiert",
-  completed: "Fertig",
-  failed: "Fehler",
-  cancelled: "Abgebrochen",
+  queued: "Queued",
+  running: "Generating",
+  completed: "Complete",
+  failed: "Failed",
+  cancelled: "Cancelled",
 };
 
 let referenceFiles = [];
@@ -68,7 +68,7 @@ async function loadHealth() {
       `${shortModelName(health.model)} · ${health.device.toUpperCase()}`;
   } catch {
     engineState.classList.remove("ready");
-    engineState.querySelector("span:last-child").textContent = "Server nicht erreichbar";
+    engineState.querySelector("span:last-child").textContent = "Server unavailable";
   }
 }
 
@@ -100,9 +100,9 @@ function addReferenceFiles(files) {
   referenceFiles = [...referenceFiles, ...images].slice(0, 4);
   renderReferences();
   if (files.length !== images.length) {
-    formMessage.textContent = "Es können nur Bilddateien als Referenz verwendet werden.";
+    formMessage.textContent = "Only image files can be used as references.";
   } else if (wouldOverflow) {
-    formMessage.textContent = "Es werden höchstens vier Referenzbilder verwendet.";
+    formMessage.textContent = "You can use up to four reference images.";
   } else {
     formMessage.textContent = "";
   }
@@ -115,11 +115,11 @@ function renderReferences() {
     item.className = "reference-thumbnail";
     const image = document.createElement("img");
     image.src = URL.createObjectURL(file);
-    image.alt = `Stilreferenz ${index + 1}`;
+    image.alt = `Style reference ${index + 1}`;
     image.addEventListener("load", () => URL.revokeObjectURL(image.src), { once: true });
     const remove = document.createElement("button");
     remove.type = "button";
-    remove.setAttribute("aria-label", `Stilreferenz ${index + 1} entfernen`);
+    remove.setAttribute("aria-label", `Remove style reference ${index + 1}`);
     remove.textContent = "×";
     remove.addEventListener("click", () => {
       referenceFiles.splice(index, 1);
@@ -210,13 +210,13 @@ function renderJobs() {
       resultCard.classList.toggle("selected", job.selectedIndex === index);
       const image = resultFragment.querySelector("[data-result-image]");
       image.src = result.url;
-      image.alt = `${job.productName}, Variante ${index + 1}`;
-      resultFragment.querySelector("[data-result-label]").textContent = `Variante ${index + 1}`;
+      image.alt = `${job.productName}, variant ${index + 1}`;
+      resultFragment.querySelector("[data-result-label]").textContent = `Variant ${index + 1}`;
       const download = resultFragment.querySelector("[data-download-result]");
       download.href = result.url;
       download.download = `${safeFilename(job.productName)}-${index + 1}.png`;
       const select = resultFragment.querySelector("[data-select-result]");
-      select.setAttribute("aria-label", `${job.productName}, Variante ${index + 1} auswählen`);
+      select.setAttribute("aria-label", `Select ${job.productName}, variant ${index + 1}`);
       select.disabled = job.status !== "completed";
       select.addEventListener("click", () => void selectResult(job.id, index));
       resultGrid.append(resultFragment);
@@ -227,9 +227,15 @@ function renderJobs() {
 }
 
 function jobMeta(job) {
-  const pieces = [`${job.variantCount} Varianten`, `${job.imageSize} px`, `Seed ${job.seed}`];
+  const pieces = [
+    `${job.variantCount} ${job.variantCount === 1 ? "variant" : "variants"}`,
+    `${job.imageSize} px`,
+    `Seed ${job.seed}`,
+  ];
   if (job.referenceCount) {
-    pieces.push(`${job.referenceCount} Stilreferenz${job.referenceCount === 1 ? "" : "en"}`);
+    pieces.push(
+      `${job.referenceCount} style ${job.referenceCount === 1 ? "reference" : "references"}`,
+    );
   }
   if (job.status === "running") {
     pieces.push(`${job.progress} %`);
@@ -262,7 +268,7 @@ async function selectResult(jobId, selectedIndex) {
 }
 
 async function deleteJob(jobId) {
-  if (!window.confirm("Diesen Auftrag und seine erzeugten Bilder wirklich löschen?")) {
+  if (!window.confirm("Delete this job and all of its generated images?")) {
     return;
   }
   try {
@@ -289,7 +295,7 @@ async function api(path, options = {}) {
   try {
     payload = await response.json();
   } catch {
-    throw new Error(`Der Server antwortete mit HTTP ${response.status}.`);
+    throw new Error(`The server responded with HTTP ${response.status}.`);
   }
   if (!response.ok) {
     throw new Error(payload.error || `HTTP ${response.status}`);
@@ -301,13 +307,9 @@ function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.addEventListener("load", () => resolve(reader.result), { once: true });
-    reader.addEventListener(
-      "error",
-      () => reject(new Error(`${file.name} konnte nicht gelesen werden.`)),
-      {
-        once: true,
-      },
-    );
+    reader.addEventListener("error", () => reject(new Error(`${file.name} could not be read.`)), {
+      once: true,
+    });
     reader.readAsDataURL(file);
   });
 }
@@ -328,5 +330,5 @@ function safeFilename(value) {
 }
 
 function messageFromError(error) {
-  return error instanceof Error ? error.message : "Unbekannter Fehler";
+  return error instanceof Error ? error.message : "Unknown error";
 }
