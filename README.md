@@ -49,6 +49,10 @@ OpenAI wird in automatisierten Tests gefälscht; Tests benötigen weder Netzwerk
 für den gesamten Haushalt. Bei einem neuen Eintrag gilt diese Zuordnung vor dem allgemeinen
 Produktkatalog und der Schlüsselwort-Heuristik.
 
+Der vollständige, wiederkehrende Ablauf vom Export auf dem VPS über den Dateitransfer und die
+Konfliktprüfung bis zu Commit und Deployment steht in
+[Produktwissen-Workflow.md](Produktwissen-Workflow.md).
+
 Das bewusst korrigierte Produktwissen lässt sich auf dem produktiven Server ohne Schreibzugriff
 auf die Datenbank exportieren:
 
@@ -65,8 +69,7 @@ npm run categories:import -- --input <export.json>
 ```
 
 Der Import ergänzt ausschließlich neue Zuordnungen. Widerspricht eine Zuordnung dem bestehenden
-Katalog, bricht er ohne Änderung ab. Anschließend sollten mindestens `npm test` und
-`npm run lint` ausgeführt werden.
+Katalog, bricht er ohne Änderung ab. Anschließend muss `npm run check` ausgeführt werden.
 
 ## Produktion
 

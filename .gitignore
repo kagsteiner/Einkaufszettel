@@ -19,6 +19,7 @@ test-results/
 *.db-wal
 uploads/
 data/
+product-category-export*.json
 
 # Operating-system metadata
 .DS_Store
