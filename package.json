@@ -22,6 +22,8 @@
     "format": "biome check --write .",
     "icons:app": "tsx scripts/generate-app-icons.ts",
     "icons:generate": "tsx scripts/generate-product-icons.ts",
+    "product-images:setup": "python3 tools/product-image-studio/bootstrap.py",
+    "product-images:smoke": "python3 tools/product-image-studio/bootstrap.py --run-smoke",
     "check": "npm run typecheck && npm test && npm run lint && npm run test:browser && npm run build"
   },
   "dependencies": {

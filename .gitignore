@@ -7,6 +7,7 @@
 
 # Dependencies and generated output
 node_modules/
+__pycache__/
 dist/
 build/
 coverage/
@@ -20,6 +21,7 @@ test-results/
 uploads/
 data/
 product-category-export*.json
+tools/product-image-studio/output/
 
 # Operating-system metadata
 .DS_Store
