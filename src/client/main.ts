@@ -1,4 +1,10 @@
 import { ApiError, api, apiFile, applicationPath } from "./api.ts";
+import {
+  createProductImageCatalog,
+  normalizeProductName,
+  productImageFile,
+  unknownProductImageFile,
+} from "./product-image-catalog.ts";
 import "./styles.css";
 import { formatUnit } from "../shared/units.ts";
 import type { AppState, RecurringSuggestion, ShoppingItem, ShoppingList, User } from "./types.ts";
@@ -29,6 +35,9 @@ let currentState: AppState | null = null;
 let activeListId = localStorage.getItem("active-list-id");
 let sortMode: "alphabetical" | "store" =
   localStorage.getItem("sort-mode") === "store" ? "store" : "alphabetical";
+let shoppingView: "list" | "tiles" =
+  localStorage.getItem("shopping-view") === "tiles" ? "tiles" : "list";
+let productImageCatalog: ReadonlyMap<string, string> = new Map();
 let eventSource: EventSource | null = null;
 let refreshQueued = false;
 let queuedRefreshPreserveFocus = true;
@@ -38,6 +47,7 @@ void boot();
 
 async function boot(): Promise<void> {
   app.innerHTML = loadingMarkup("Einkaufszettel wird geöffnet …");
+  await loadProductImageCatalog();
   const passwordResetToken = passwordResetTokenFromPath();
   if (passwordResetToken) {
     renderPasswordReset(passwordResetToken);
@@ -52,6 +62,20 @@ async function boot(): Promise<void> {
       return;
     }
     renderFatalError(error);
+  }
+}
+
+async function loadProductImageCatalog(): Promise<void> {
+  try {
+    const response = await fetch(applicationPath("/images/product-images.json"), {
+      cache: "force-cache",
+    });
+    if (!response.ok) {
+      return;
+    }
+    productImageCatalog = createProductImageCatalog(await response.json());
+  } catch {
+    // The shopping list remains usable with the unknown-product fallback.
   }
 }
 
@@ -274,7 +298,7 @@ function renderApplication(): void {
   }
   const activeList = currentState.lists.find((list) => list.id === activeListId) || null;
   app.innerHTML = `
-    <div class="app-shell">
+    <div class="app-shell ${activeList && shoppingView === "tiles" ? "tile-app-shell" : ""}">
       <header class="app-header">
         <button class="wordmark" type="button" aria-label="Zur Zettelübersicht">
           <span aria-hidden="true">✓</span><strong>Zettel</strong>
@@ -306,16 +330,24 @@ function listMarkup(list: ShoppingList): string {
   const activeItems = list.items.filter((item) => !item.completedAt);
   const completedItems = list.items.filter((item) => item.completedAt);
   return `
-    <main class="list-paper">
+    <main class="list-paper ${shoppingView === "tiles" ? "tile-list-paper" : ""}">
       <header class="list-heading">
         <div class="list-title">${list.imageId ? `<img src="${escapeHtml(applicationPath(`/api/images/${list.imageId}`))}" alt="">` : ""}<div><p class="eyebrow">Einkaufszettel</p><h1>${escapeHtml(list.name)}</h1></div></div>
-        <div class="heading-actions"><button class="quiet-button sort-button" type="button" data-sort-mode aria-label="Sortierung wechseln">${sortMode === "alphabetical" ? "A–Z" : "Laden"}</button><button class="quiet-button recurring-button" type="button" data-recurring-items><span class="desktop-label">Was ist dran?</span><span class="mobile-label">Dran</span></button><label class="quiet-button recipe-button"><span class="desktop-label">Rezeptfoto</span><span class="mobile-label">Foto</span><input type="file" data-recipe-file accept="image/*,.heic,.heif"></label><button class="quiet-button" type="button" data-list-menu aria-label="Zettel bearbeiten"><span class="desktop-label">Bearbeiten</span><span class="mobile-label" aria-hidden="true">•••</span></button></div>
-        <button class="quiet-button mobile-list-actions" type="button" data-mobile-list-actions aria-haspopup="dialog">Aktionen</button>
+        <div class="list-controls">
+          <div class="view-switch" role="group" aria-label="Ansicht">
+            <button type="button" data-shopping-view="list" aria-label="Listenansicht" aria-pressed="${shoppingView === "list"}" class="${shoppingView === "list" ? "active" : ""}"><span aria-hidden="true">☷</span><span class="desktop-label">Liste</span></button>
+            <button type="button" data-shopping-view="tiles" aria-label="Bilderansicht" aria-pressed="${shoppingView === "tiles"}" class="${shoppingView === "tiles" ? "active" : ""}"><span aria-hidden="true">▦</span><span class="desktop-label">Bilder</span></button>
+          </div>
+          <div class="heading-actions"><button class="quiet-button sort-button" type="button" data-sort-mode aria-label="Sortierung wechseln">${sortMode === "alphabetical" ? "A–Z" : "Laden"}</button><button class="quiet-button recurring-button" type="button" data-recurring-items><span class="desktop-label">Was ist dran?</span><span class="mobile-label">Dran</span></button><label class="quiet-button recipe-button"><span class="desktop-label">Rezeptfoto</span><span class="mobile-label">Foto</span><input type="file" data-recipe-file accept="image/*,.heic,.heif"></label><button class="quiet-button" type="button" data-list-menu aria-label="Zettel bearbeiten"><span class="desktop-label">Bearbeiten</span><span class="mobile-label" aria-hidden="true">•••</span></button></div>
+          <button class="quiet-button mobile-list-actions" type="button" data-mobile-list-actions aria-haspopup="dialog">Aktionen</button>
+        </div>
       </header>
-      <section class="shopping-items" aria-label="Offene Produkte">
+      <section class="shopping-items ${shoppingView === "tiles" ? "tile-shopping-items" : ""}" aria-label="Offene Produkte">
         ${
           activeItems.length
-            ? openItemsMarkup(activeItems)
+            ? shoppingView === "tiles"
+              ? openTilesMarkup(activeItems)
+              : openItemsMarkup(activeItems)
             : `<div class="empty-note"><span aria-hidden="true">✓</span><strong>Alles erledigt</strong><p>Füge unten etwas hinzu, sobald euch wieder etwas einfällt.</p></div>`
         }
       </section>
@@ -357,12 +389,7 @@ function openItemsMarkup(items: ReadonlyArray<ShoppingItem>): string {
 }
 
 function itemMarkup(item: ShoppingItem): string {
-  const quantities = item.quantities
-    .map(
-      (quantity) =>
-        `${escapeHtml(formatAmount(quantity.amount))}${quantity.unit ? ` ${escapeHtml(formatUnit(quantity.unit, quantity.amount))}` : ""}`,
-    )
-    .join(" + ");
+  const quantities = itemQuantityText(item);
   return `<article class="shopping-row ${item.completedAt ? "completed" : ""}" data-item-id="${escapeHtml(item.id)}">
     <button class="check-button" type="button" data-toggle-item aria-label="${
       item.completedAt ? "Wieder auf die Liste setzen" : "Als erledigt markieren"
@@ -372,6 +399,62 @@ function itemMarkup(item: ShoppingItem): string {
     </button>
     <span class="item-quantity">${quantities || "–"}</span>
   </article>`;
+}
+
+function openTilesMarkup(items: ReadonlyArray<ShoppingItem>): string {
+  if (sortMode === "alphabetical") {
+    return [...items]
+      .sort((left, right) => left.name.localeCompare(right.name, "de", { sensitivity: "base" }))
+      .map(tileMarkup)
+      .join("");
+  }
+  const sections = new Map<string, ShoppingItem[]>();
+  for (const item of items) {
+    const section = sections.get(item.category) || [];
+    section.push(item);
+    sections.set(item.category, section);
+  }
+  return [...sections]
+    .map(
+      ([category, section]) =>
+        `<div class="tile-category-heading">${escapeHtml(categoryLabels[category] || "Sonstiges")}</div>${section.map(tileMarkup).join("")}`,
+    )
+    .join("");
+}
+
+function tileMarkup(item: ShoppingItem): string {
+  const quantities = itemQuantityText(item);
+  const notes = [
+    item.purchaseNote ? `Diesmal: ${escapeHtml(item.purchaseNote)}` : "",
+    item.persistentNote ? escapeHtml(item.persistentNote) : "",
+  ].filter(Boolean);
+  const imageSource = item.imageId
+    ? applicationPath(`/api/images/${item.imageId}`)
+    : applicationPath(`/${productImageFile(productImageCatalog, item.name)}`);
+  const fallbackSource = applicationPath(`/${unknownProductImageFile}`);
+  return `<article class="product-tile" data-item-id="${escapeHtml(item.id)}">
+    <button class="product-tile-main" type="button" data-toggle-item aria-label="${escapeHtml(item.name)} als erledigt markieren">
+      <span class="product-tile-image">
+        <img src="${escapeHtml(imageSource)}" data-fallback-src="${escapeHtml(fallbackSource)}" alt="" loading="lazy" decoding="async">
+        <span class="tile-complete" aria-hidden="true">✓</span>
+      </span>
+      <span class="product-tile-info">
+        <strong>${escapeHtml(item.name)}</strong>
+        <span class="product-tile-quantity">${quantities || "–"}</span>
+        <small class="${item.purchaseNote ? "purchase-note" : ""}">${notes.length ? notes.join(" · ") : "&nbsp;"}</small>
+      </span>
+    </button>
+    <button class="product-tile-edit" type="button" data-edit-item aria-label="${escapeHtml(item.name)} bearbeiten">•••</button>
+  </article>`;
+}
+
+function itemQuantityText(item: ShoppingItem): string {
+  return item.quantities
+    .map(
+      (quantity) =>
+        `${escapeHtml(formatAmount(quantity.amount))}${quantity.unit ? ` ${escapeHtml(formatUnit(quantity.unit, quantity.amount))}` : ""}`,
+    )
+    .join(" + ");
 }
 
 function emptyListsMarkup(): string {
@@ -384,6 +467,13 @@ function emptyListsMarkup(): string {
 }
 
 function bindApplicationEvents(activeList: ShoppingList | null): void {
+  for (const button of app.querySelectorAll<HTMLButtonElement>("[data-shopping-view]")) {
+    button.addEventListener("click", () => {
+      shoppingView = button.dataset.shoppingView === "tiles" ? "tiles" : "list";
+      localStorage.setItem("shopping-view", shoppingView);
+      renderApplication();
+    });
+  }
   for (const tab of app.querySelectorAll<HTMLButtonElement>("[data-list-id]")) {
     tab.addEventListener("click", () => {
       activeListId = tab.dataset.listId || null;
@@ -450,6 +540,16 @@ function bindApplicationEvents(activeList: ShoppingList | null): void {
       }
     });
   }
+  for (const image of app.querySelectorAll<HTMLImageElement>("[data-fallback-src]")) {
+    image.addEventListener("error", () => {
+      const fallbackSource = image.dataset.fallbackSrc;
+      if (!fallbackSource || image.dataset.fallbackApplied) {
+        return;
+      }
+      image.dataset.fallbackApplied = "true";
+      image.src = fallbackSource;
+    });
+  }
 }
 
 function bindProductCompletion(): void {
@@ -506,10 +606,6 @@ function bindProductCompletion(): void {
   completion.addEventListener("pointerdown", (event) => event.preventDefault());
   completion.addEventListener("click", acceptCompletion);
   updateCompletion();
-}
-
-function normalizeProductName(value: string): string {
-  return value.trim().normalize("NFKC").replace(/\s+/g, " ").toLocaleLowerCase("de-DE");
 }
 
 function openMobileListActions(list: ShoppingList): void {

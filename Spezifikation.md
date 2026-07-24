@@ -54,7 +54,9 @@ Ein Item kann zwei getrennte Zusatztexte besitzen: Ein dauerhafter Produkthinwei
 
 ### Visuelles Konzept
 
-Die Hauptansicht wirkt wie ein klassischer Einkaufszettel, nicht wie ein Kachelraster. Jede Zeile besitzt links eine große Abhakfläche, daneben ein festes 44–48-Pixel-Bild oder Kategorie-Icon, in der Mitte Produktname und Zusatz und rechts die Menge. Eigene Fotos werden ausschnittfüllend dargestellt und lassen sich antippen. Erledigte Items stehen in einem einklappbaren Bereich am Ende. Kacheln sind nur für bildorientierte Auswahldialoge zulässig.
+Die Standardansicht wirkt wie ein klassischer Einkaufszettel. Jede Zeile besitzt links eine große Abhakfläche, in der Mitte Produktname und Zusatz und rechts die Menge. Als getrennten Einkaufsview kann der Benutzer ein bildorientiertes Kachelraster aktivieren; die Gerätepräferenz bleibt lokal gespeichert. Auf normalen Smartphones zeigt es drei Spalten, auf sehr schmalen Geräten zwei, auf Tablets typischerweise vier bis fünf und auf Rechnern bis zu acht.
+
+In jeder Kachel steht ein quadratisches Produktbild vollständig oberhalb der Informationen. Darunter folgen der höchstens zweizeilige Produktname, die Menge sowie eine einzeilige Notiz; die einmalige Einkaufsnotiz hat dabei Vorrang vor dem dauerhaften Produkthinweis. Ein eigenes Produktfoto hat Vorrang vor dem mitgelieferten Produktkatalog. Fehlt dort ebenfalls eine normalisierte Namenszuordnung, erscheint das allgemeine Unbekannt-Bild. Das Antippen der Kachel hakt das Item ab und bestätigt dies kurz über dem Bild; ein getrennter Detailknopf öffnet die Bearbeitung. Erledigte Items stehen in beiden Ansichten in einem einklappbaren Bereich am Ende.
 
 ### Produktnamen und Duplikate
 

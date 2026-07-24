@@ -158,6 +158,35 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();
   await expect(page.getByText("2 l", { exact: true })).toBeVisible();
 
+  await page.getByRole("button", { name: "Bilderansicht" }).click();
+  await expect(page.locator(".tile-shopping-items")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Listenansicht" })).toBeVisible();
+  let oatTile = page.locator(".product-tile").filter({ hasText: "Hafermilch" });
+  await expect(oatTile).toBeVisible();
+  await expect(oatTile.getByText("2 l", { exact: true })).toBeVisible();
+  await expect(oatTile.locator("img")).toHaveAttribute("src", /images\/products\/unbekannt\.jpg$/);
+  const tileGeometry = await page.locator(".tile-shopping-items").evaluate((grid) => {
+    const tile = grid.querySelector<HTMLElement>(".product-tile");
+    const image = tile?.querySelector<HTMLElement>(".product-tile-image");
+    if (!tile || !image) {
+      throw new Error("Produkt-Tile oder Bild fehlt.");
+    }
+    const imageRect = image.getBoundingClientRect();
+    return {
+      columns: getComputedStyle(grid).gridTemplateColumns.split(" ").length,
+      imageHeight: imageRect.height,
+      imageWidth: imageRect.width,
+    };
+  });
+  expect(tileGeometry.columns).toBe((page.viewportSize()?.width || 0) <= 340 ? 2 : 3);
+  expect(tileGeometry.imageHeight).toBeCloseTo(tileGeometry.imageWidth, 1);
+  await page.reload();
+  await expect(page.locator(".tile-shopping-items")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Listenansicht" })).toBeVisible();
+  oatTile = page.locator(".product-tile").filter({ hasText: "Hafermilch" });
+  await expect(oatTile).toBeVisible();
+  await page.getByRole("button", { name: "Listenansicht" }).click();
+
   await page.getByLabel("Produkt", { exact: true }).fill("Haf");
   const productCompletion = page.getByRole("button", { name: "Hafermilch vervollständigen" });
   await expect(productCompletion).toBeVisible();
@@ -188,8 +217,13 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   await expect(itemDialog.getByLabel("Nur für diesen Einkauf")).toHaveValue("");
   await itemDialog.getByRole("button", { name: "Schließen" }).click();
 
-  await creamRow.getByRole("button", { name: "Als erledigt markieren" }).click();
+  await page.getByRole("button", { name: "Bilderansicht" }).click();
+  const creamTile = page.locator(".product-tile").filter({ hasText: "Schlagsahne" });
+  await expect(creamTile.getByText("Das ist meine Sorte", { exact: true })).toBeVisible();
+  await expect(creamTile.locator("img")).toHaveAttribute("src", /api\/images\//);
+  await creamTile.locator(".product-tile-main").click();
   await expect(page.getByText("1 erledigt", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Listenansicht" }).click();
   await page.getByLabel("Produkt", { exact: true }).fill("Schlagsahne");
   await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();
   await expect(
