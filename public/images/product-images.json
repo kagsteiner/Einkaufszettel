@@ -142,11 +142,6 @@
       "products": ["fonds"]
     },
     {
-      "id": "fries-3",
-      "file": "images/products/fries-3.jpg",
-      "products": ["fries-3"]
-    },
-    {
       "id": "galiamelone",
       "file": "images/products/galiamelone.jpg",
       "products": ["galiamelone"]
@@ -350,6 +345,11 @@
       "id": "pflaume",
       "file": "images/products/pflaume.jpg",
       "products": ["pflaume"]
+    },
+    {
+      "id": "pommes",
+      "file": "images/products/pommes.jpg",
+      "products": ["pommes"]
     },
     {
       "id": "radieschen",
