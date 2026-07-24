@@ -97,7 +97,7 @@ function toAssetId(productName: string): string {
 function serializeManifest(manifest: ProductImageManifest): string {
   const entries = manifest.images
     .map((image) => {
-      const compactProducts = JSON.stringify(image.products);
+      const compactProducts = `[${image.products.map((product) => JSON.stringify(product)).join(", ")}]`;
       const productsLine = `      "products": ${compactProducts}`;
       const serializedProducts =
         productsLine.length <= 100
