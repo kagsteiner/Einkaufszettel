@@ -83,6 +83,32 @@ Die Queue-Logik kann ohne Modell und ohne Download getestet werden:
 npm run product-images:test
 ```
 
+## Ausgewählte Bilder in die App importieren
+
+Ausgewählte PNG-Dateien liegen lokal unter `tools/product-image-studio/results/`. Ihre Dateinamen
+werden als Produktnamen behandelt. Der Import erzeugt daraus 768 × 768 Pixel große, progressive
+JPEG-Dateien mit MozJPEG-Qualität 84:
+
+```bash
+npm run product-images:import
+```
+
+Die fertigen Assets stehen unter `public/images/products/`. Das Mapping
+`public/images/product-images.json` enthält für jedes Bild ein `products`-Array. Dort können einem
+generischen Bild mehrere Produktnamen zugeordnet werden:
+
+```json
+{
+  "id": "kaese",
+  "file": "images/products/kaese.jpg",
+  "products": ["käse", "bergkäse", "schnittkäse"]
+}
+```
+
+Ein erneuter Import konvertiert die PNG-Dateien neu, erhält aber bereits gepflegte
+`products`-Arrays anhand der stabilen Bild-ID. Die lokalen PNG-Quellen werden weder verändert noch
+in Git aufgenommen.
+
 ## Verifizierter Lauf auf dem Entwicklungs-Mac
 
 Erfolgreich geprüft am 24. Juli 2026 auf einem MacBook Pro mit Apple M5 Max und 48 GB
