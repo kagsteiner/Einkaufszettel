@@ -17,6 +17,7 @@ Das Studio bietet:
 
 - Produktname, optionale Stilbeschreibung und bis zu vier Referenzbilder,
 - 1 bis 10 Varianten mit 512, 768 oder 1024 Pixeln,
+- einen strikten textfreien Grundprompt, der auch Beschriftungen aus Referenzen ignoriert,
 - eine dauerhafte Warteschlange mit genau einem GPU-Worker,
 - Fortschritt, Abbruch und Löschen von Aufträgen,
 - Auswahl und Download des bevorzugten Ergebnisses.

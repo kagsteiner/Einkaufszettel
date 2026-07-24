@@ -29,16 +29,24 @@ WEB_DIRECTORY = STUDIO_DIRECTORY / "web"
 DEFAULT_PROMPT_TEMPLATE = (
     "Create a cheerful premium grocery catalog illustration of this exact item: "
     "{product_name}. Show one typical, unmistakable {product_name} with its characteristic "
-    "real-world shape and details; do not replace it with a symbolic object or a fruit. "
+    "real-world shape and details; never depict the written product name and do not replace "
+    "the product with a symbolic object or a fruit. "
     "Centered, fully visible, bold colorful stylized shapes, "
     "subtle tactile texture, soft studio lighting, gentle contact shadow, "
-    "clean warm off-white background, generous empty margin, instantly recognizable, "
-    "no packaging, no label, no logo, no watermark, no text."
+    "clean warm off-white background, generous empty margin, instantly recognizable."
 )
 REFERENCE_INSTRUCTION = (
     "Use the supplied images only as visual style references: follow their color language, "
-    "shape simplification, lighting, texture, and composition. Do not copy their depicted "
-    "objects; the only subject in the result must be {product_name}."
+    "shape simplification, lighting, texture, and composition. Ignore all writing, branding, "
+    "labels, and packaging visible in the references. Do not copy their depicted objects; "
+    "the only subject in the result must be {product_name}."
+)
+TEXT_FREE_INSTRUCTION = (
+    "The finished image must be purely visual and completely text-free. Leave every surface "
+    "and the background blank: do not render any letters, words, numbers, labels, price tags, "
+    "packaging print, logos, captions, signatures, watermarks, or writing-like marks. "
+    "If the real product normally has printed packaging, show it unwrapped or in plain, "
+    "entirely unmarked packaging. Zero readable or pseudo-readable text anywhere in the image."
 )
 MAX_REQUEST_BYTES = 36 * 1024 * 1024
 MAX_REFERENCE_BYTES = 6 * 1024 * 1024
@@ -65,7 +73,7 @@ def build_prompt(product_name: str, direction: str, has_references: bool) -> str
             f"{prompt} "
             f"{REFERENCE_INSTRUCTION.format(product_name=product_name)}"
         )
-    return prompt
+    return f"{prompt} {TEXT_FREE_INSTRUCTION}"
 
 
 def public_job(job: dict[str, Any]) -> dict[str, Any]:

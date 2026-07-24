@@ -17,7 +17,9 @@ PROMPT = (
     "Centered, fully visible, three-quarter view, bold colorful stylized shapes, "
     "subtle tactile texture, soft studio lighting, gentle contact shadow, "
     "clean warm off-white background, generous empty margin, instantly recognizable, "
-    "no packaging, no label, no logo, no watermark, no text."
+    "purely visual and completely text-free. Leave every surface and the background blank: "
+    "do not render letters, words, numbers, labels, packaging print, logos, captions, "
+    "signatures, watermarks, or writing-like marks. Zero readable or pseudo-readable text."
 )
 SEED = 20260724
 
