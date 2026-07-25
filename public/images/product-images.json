@@ -2,6 +2,10 @@
   "version": 2,
   "images": [
     {
+      "id": "ananas",
+      "file": "images/products/ananas.jpg"
+    },
+    {
       "id": "apfel",
       "file": "images/products/apfel.jpg"
     },
@@ -12,6 +16,10 @@
     {
       "id": "aubergine",
       "file": "images/products/aubergine.jpg"
+    },
+    {
+      "id": "avocado",
+      "file": "images/products/avocado.jpg"
     },
     {
       "id": "baguette",
@@ -62,6 +70,14 @@
       "file": "images/products/champignon.jpg"
     },
     {
+      "id": "chili",
+      "file": "images/products/chili.jpg"
+    },
+    {
+      "id": "chinakohl",
+      "file": "images/products/chinakohl.jpg"
+    },
+    {
       "id": "chips-4",
       "file": "images/products/chips-4.jpg"
     },
@@ -102,12 +118,20 @@
       "file": "images/products/eisamstiel.jpg"
     },
     {
+      "id": "eisbergsalat",
+      "file": "images/products/eisbergsalat.jpg"
+    },
+    {
       "id": "emmentaler",
       "file": "images/products/emmentaler.jpg"
     },
     {
       "id": "erbsen",
       "file": "images/products/erbsen.jpg"
+    },
+    {
+      "id": "erdbeere",
+      "file": "images/products/erdbeere.jpg"
     },
     {
       "id": "essiggurken",
@@ -118,12 +142,20 @@
       "file": "images/products/fenchel.jpg"
     },
     {
+      "id": "feuchtestoilettenpapier",
+      "file": "images/products/feuchtestoilettenpapier.jpg"
+    },
+    {
       "id": "fonds",
       "file": "images/products/fonds.jpg"
     },
     {
       "id": "galiamelone",
       "file": "images/products/galiamelone.jpg"
+    },
+    {
+      "id": "gemischtersalat",
+      "file": "images/products/gemischtersalat.jpg"
     },
     {
       "id": "gemuese",
@@ -140,6 +172,10 @@
     {
       "id": "gruener-spargel",
       "file": "images/products/gruener-spargel.jpg"
+    },
+    {
+      "id": "gurke",
+      "file": "images/products/gurke.jpg"
     },
     {
       "id": "hackfleisch",
@@ -162,6 +198,14 @@
       "file": "images/products/hefe.jpg"
     },
     {
+      "id": "heidelbeere",
+      "file": "images/products/heidelbeere.jpg"
+    },
+    {
+      "id": "himbeere",
+      "file": "images/products/himbeere.jpg"
+    },
+    {
       "id": "honig",
       "file": "images/products/honig.jpg"
     },
@@ -172,6 +216,10 @@
     {
       "id": "hundefutter",
       "file": "images/products/hundefutter.jpg"
+    },
+    {
+      "id": "ingwer",
+      "file": "images/products/ingwer.jpg"
     },
     {
       "id": "joghurt",
@@ -206,6 +254,14 @@
       "file": "images/products/katzenfutter.jpg"
     },
     {
+      "id": "kirsche",
+      "file": "images/products/kirsche.jpg"
+    },
+    {
+      "id": "kiwi",
+      "file": "images/products/kiwi.jpg"
+    },
+    {
       "id": "klopapier",
       "file": "images/products/klopapier.jpg"
     },
@@ -222,12 +278,24 @@
       "file": "images/products/kochschinken.jpg"
     },
     {
+      "id": "kohlrabi",
+      "file": "images/products/kohlrabi.jpg"
+    },
+    {
       "id": "kraeuterseitling",
       "file": "images/products/kraeuterseitling.jpg"
     },
     {
       "id": "kuechenrolle",
       "file": "images/products/kuechenrolle.jpg"
+    },
+    {
+      "id": "kuerbis",
+      "file": "images/products/kuerbis.jpg"
+    },
+    {
+      "id": "kurkuma",
+      "file": "images/products/kurkuma.jpg"
     },
     {
       "id": "lachs",
@@ -256,6 +324,18 @@
     {
       "id": "limette",
       "file": "images/products/limette.jpg"
+    },
+    {
+      "id": "lollorosso",
+      "file": "images/products/lollorosso.jpg"
+    },
+    {
+      "id": "mais",
+      "file": "images/products/mais.jpg"
+    },
+    {
+      "id": "mango",
+      "file": "images/products/mango.jpg"
     },
     {
       "id": "milch",
@@ -298,6 +378,10 @@
       "file": "images/products/parmesan.jpg"
     },
     {
+      "id": "pfirsich",
+      "file": "images/products/pfirsich.jpg"
+    },
+    {
       "id": "pflaume",
       "file": "images/products/pflaume.jpg"
     },
@@ -326,8 +410,16 @@
       "file": "images/products/rindfleisch.jpg"
     },
     {
+      "id": "rotebeete",
+      "file": "images/products/rotebeete.jpg"
+    },
+    {
       "id": "rotwein",
       "file": "images/products/rotwein.jpg"
+    },
+    {
+      "id": "rucula",
+      "file": "images/products/rucula.jpg"
     },
     {
       "id": "saft",
@@ -354,12 +446,20 @@
       "file": "images/products/scheibletten.jpg"
     },
     {
+      "id": "schinken",
+      "file": "images/products/schinken.jpg"
+    },
+    {
       "id": "schokopudding",
       "file": "images/products/schokopudding.jpg"
     },
     {
       "id": "sekt",
       "file": "images/products/sekt.jpg"
+    },
+    {
+      "id": "sellerie",
+      "file": "images/products/sellerie.jpg"
     },
     {
       "id": "spaghetti",
@@ -372,6 +472,14 @@
     {
       "id": "speck",
       "file": "images/products/speck.jpg"
+    },
+    {
+      "id": "spinat",
+      "file": "images/products/spinat.jpg"
+    },
+    {
+      "id": "spitzkohl",
+      "file": "images/products/spitzkohl.jpg"
     },
     {
       "id": "spitzpaprika",
@@ -400,6 +508,14 @@
     {
       "id": "tomatensaft",
       "file": "images/products/tomatensaft.jpg"
+    },
+    {
+      "id": "traubenblau",
+      "file": "images/products/traubenblau.jpg"
+    },
+    {
+      "id": "traubenweiss",
+      "file": "images/products/traubenweiss.jpg"
     },
     {
       "id": "unbekannt",
@@ -445,6 +561,11 @@
       "imageFallback": "honig"
     },
     {
+      "id": "ananas",
+      "names": ["ananas"],
+      "image": "ananas"
+    },
+    {
       "id": "apfel",
       "names": ["apfel", "äpfel"],
       "image": "apfel"
@@ -458,6 +579,11 @@
       "id": "aubergine",
       "names": ["aubergine", "auberginen"],
       "image": "aubergine"
+    },
+    {
+      "id": "avocado",
+      "names": ["avocado", "avocados"],
+      "image": "avocado"
     },
     {
       "id": "baguette",
@@ -536,6 +662,18 @@
       "image": "champignon"
     },
     {
+      "id": "chili",
+      "names": ["chili", "chilis", "chilischote", "chilischoten"],
+      "image": "chili",
+      "imageFallback": "paprika"
+    },
+    {
+      "id": "chinakohl",
+      "names": ["chinakohl", "chinesischer kohl"],
+      "image": "chinakohl",
+      "imageFallback": "gemuese"
+    },
+    {
       "id": "chips-4",
       "names": ["chips-4", "chip", "chips"],
       "image": "chips-4"
@@ -591,6 +729,12 @@
       "image": "eisamstiel"
     },
     {
+      "id": "eisbergsalat",
+      "names": ["eisbergsalat", "eisbergsalate"],
+      "image": "eisbergsalat",
+      "imageFallback": "salat"
+    },
+    {
       "id": "emmentaler",
       "names": ["emmentaler"],
       "image": "emmentaler",
@@ -602,6 +746,11 @@
       "image": "erbsen"
     },
     {
+      "id": "erdbeere",
+      "names": ["erdbeere", "erdbeeren"],
+      "image": "erdbeere"
+    },
+    {
       "id": "essiggurken",
       "names": ["essiggurken", "gürkchen"],
       "image": "essiggurken"
@@ -610,6 +759,17 @@
       "id": "fenchel",
       "names": ["fenchel"],
       "image": "fenchel"
+    },
+    {
+      "id": "feuchtestoilettenpapier",
+      "names": ["feuchtestoilettenpapier", "feuchtes toilettenpapier"],
+      "image": "feuchtestoilettenpapier",
+      "imageFallback": "klopapier"
+    },
+    {
+      "id": "feuchttuecher",
+      "names": ["feuchttücher"],
+      "imageFallback": "feuchtestoilettenpapier"
     },
     {
       "id": "fisch",
@@ -642,6 +802,18 @@
       "imageFallback": "dosentomaten"
     },
     {
+      "id": "gemischtersalat",
+      "names": [
+        "gemischtersalat",
+        "gemischter salat",
+        "gemischte salate",
+        "salatmischung",
+        "salatmischungen"
+      ],
+      "image": "gemischtersalat",
+      "imageFallback": "salat"
+    },
+    {
       "id": "gemuese",
       "names": ["gemüse"],
       "image": "gemuese"
@@ -666,6 +838,12 @@
       "id": "gruener-spargel",
       "names": ["grüner spargel", "grüne spargel"],
       "image": "gruener-spargel"
+    },
+    {
+      "id": "gurke",
+      "names": ["gurke", "gurken", "salatgurke", "salatgurken"],
+      "image": "gurke",
+      "imageFallback": "gemuese"
     },
     {
       "id": "hackfleisch",
@@ -694,6 +872,16 @@
       "image": "hefe"
     },
     {
+      "id": "heidelbeere",
+      "names": ["heidelbeere", "heidelbeeren", "blaubeere", "blaubeeren"],
+      "image": "heidelbeere"
+    },
+    {
+      "id": "himbeere",
+      "names": ["himbeere", "himbeeren"],
+      "image": "himbeere"
+    },
+    {
       "id": "honig",
       "names": ["honig"],
       "image": "honig"
@@ -707,6 +895,11 @@
       "id": "hundefutter",
       "names": ["hundefutter", "hundenahrung"],
       "image": "hundefutter"
+    },
+    {
+      "id": "ingwer",
+      "names": ["ingwer", "ingwerknolle", "ingwerknollen"],
+      "image": "ingwer"
     },
     {
       "id": "joghurt",
@@ -766,6 +959,16 @@
       "imageFallback": "unbekannt"
     },
     {
+      "id": "kirsche",
+      "names": ["kirsche", "kirschen"],
+      "image": "kirsche"
+    },
+    {
+      "id": "kiwi",
+      "names": ["kiwi", "kiwis"],
+      "image": "kiwi"
+    },
+    {
       "id": "klopapier",
       "names": ["klopapier", "toilettenpapier"],
       "image": "klopapier"
@@ -787,6 +990,12 @@
       "imageFallback": "schinken"
     },
     {
+      "id": "kohlrabi",
+      "names": ["kohlrabi", "kohlrabis"],
+      "image": "kohlrabi",
+      "imageFallback": "gemuese"
+    },
+    {
       "id": "kraeuterseitling",
       "names": ["kräuterseitling", "kräuterseitlinge"],
       "image": "kraeuterseitling"
@@ -795,6 +1004,18 @@
       "id": "kuechenrolle",
       "names": ["küchenrolle", "küchenrollen", "zewa"],
       "image": "kuechenrolle"
+    },
+    {
+      "id": "kuerbis",
+      "names": ["kürbis", "kürbisse"],
+      "image": "kuerbis",
+      "imageFallback": "gemuese"
+    },
+    {
+      "id": "kurkuma",
+      "names": ["kurkuma", "kurkumawurzel", "kurkumawurzeln"],
+      "image": "kurkuma",
+      "imageFallback": "ingwer"
     },
     {
       "id": "lachs",
@@ -850,9 +1071,26 @@
       "imageFallback": "spaghetti"
     },
     {
+      "id": "lollorosso",
+      "names": ["lollorosso", "lollo rosso", "lollo-rosso", "lollo rosso salat"],
+      "image": "lollorosso",
+      "imageFallback": "salat"
+    },
+    {
       "id": "maasdamer",
       "names": ["maasdamer"],
       "imageFallback": "kaese"
+    },
+    {
+      "id": "mais",
+      "names": ["mais", "zuckermais", "maiskolben"],
+      "image": "mais",
+      "imageFallback": "gemuese"
+    },
+    {
+      "id": "mango",
+      "names": ["mango", "mangos"],
+      "image": "mango"
     },
     {
       "id": "margarine",
@@ -937,6 +1175,11 @@
       "imageFallback": "dosentomaten"
     },
     {
+      "id": "pfirsich",
+      "names": ["pfirsich", "pfirsiche"],
+      "image": "pfirsich"
+    },
+    {
       "id": "pflaume",
       "names": ["pflaume", "pflaumen"],
       "image": "pflaume"
@@ -989,9 +1232,21 @@
       "imageFallback": "kaese"
     },
     {
+      "id": "rotebeete",
+      "names": ["rotebeete", "rote beete", "rote bete", "rote beten"],
+      "image": "rotebeete",
+      "imageFallback": "gemuese"
+    },
+    {
       "id": "rotwein",
       "names": ["rotwein", "rotweine"],
       "image": "rotwein"
+    },
+    {
+      "id": "rucula",
+      "names": ["rucula", "rucola", "rauke", "rauken"],
+      "image": "rucula",
+      "imageFallback": "salat"
     },
     {
       "id": "saft",
@@ -1028,7 +1283,7 @@
     {
       "id": "schinken",
       "names": ["schinken"],
-      "image": "kochschinken",
+      "image": "schinken",
       "imageFallback": "fleisch"
     },
     {
@@ -1045,6 +1300,12 @@
       "id": "sekt",
       "names": ["sekt", "sekte"],
       "image": "sekt"
+    },
+    {
+      "id": "sellerie",
+      "names": ["sellerie"],
+      "image": "sellerie",
+      "imageFallback": "gemuese"
     },
     {
       "id": "smarties",
@@ -1067,6 +1328,18 @@
       "names": ["speck"],
       "image": "speck",
       "imageFallback": "schinken"
+    },
+    {
+      "id": "spinat",
+      "names": ["spinat", "blattspinat", "babyspinat"],
+      "image": "spinat",
+      "imageFallback": "gemuese"
+    },
+    {
+      "id": "spitzkohl",
+      "names": ["spitzkohl"],
+      "image": "spitzkohl",
+      "imageFallback": "chinakohl"
     },
     {
       "id": "spitzpaprika",
@@ -1117,6 +1390,29 @@
       "id": "tomatensaft",
       "names": ["tomatensaft", "tomatensäfte"],
       "image": "tomatensaft"
+    },
+    {
+      "id": "trauben",
+      "names": ["trauben", "weintrauben"],
+      "image": "traubenweiss"
+    },
+    {
+      "id": "traubenblau",
+      "names": ["traubenblau", "blaue trauben", "blaue weintrauben", "dunkle trauben"],
+      "image": "traubenblau",
+      "imageFallback": "trauben"
+    },
+    {
+      "id": "traubenweiss",
+      "names": [
+        "traubenweiss",
+        "weiße trauben",
+        "weisse trauben",
+        "grüne trauben",
+        "grüne weintrauben"
+      ],
+      "image": "traubenweiss",
+      "imageFallback": "trauben"
     },
     {
       "id": "unbekannt",

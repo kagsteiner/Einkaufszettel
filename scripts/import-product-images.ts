@@ -88,7 +88,7 @@ for (const sourceFile of sourceFiles) {
     };
     products.push(product);
     productsById.set(id, product);
-  } else if (!existingProduct.image) {
+  } else if (existingProduct.image !== id) {
     existingProduct.image = id;
   }
 }

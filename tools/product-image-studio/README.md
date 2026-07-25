@@ -130,9 +130,10 @@ Die App folgt der visuellen Kette, bis sie ein Bild findet, zum Beispiel
 Namen werden von den Tests abgelehnt. Ein erneuter Import konvertiert die PNG-Dateien neu, erhält
 aber alle gepflegten Produktknoten und Fallbacks. Kataloge der alten Version 1 werden beim ersten
 Import automatisch nach Version 2 migriert. Neue PNG-Dateien erzeugen automatisch je ein Bild und
-einen gleichnamigen Produktknoten. Existiert bereits ein gleichnamiger reiner Fallback-Knoten,
-erhält er beim Import automatisch das neue eigene Bild und behält seinen bisherigen Fallback als
-Reserve. Die lokalen PNG-Quellen werden weder verändert noch in Git aufgenommen.
+einen gleichnamigen Produktknoten. Existiert bereits ein gleichnamiger Knoten, erhält er beim Import
+automatisch das neue eigene Bild und behält seinen bisherigen Fallback als Reserve. Damit ersetzt
+zum Beispiel ein später ergänztes `schinken.png` das bis dahin nur geliehene generische Bild. Die
+lokalen PNG-Quellen werden weder verändert noch in Git aufgenommen.
 
 ## Verifizierter Lauf auf dem Entwicklungs-Mac
 
