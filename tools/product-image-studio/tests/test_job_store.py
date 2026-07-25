@@ -86,6 +86,23 @@ class JobStoreTest(unittest.TestCase):
         self.store.claim_next()
         self.assertFalse(self.store.delete("job-1"))
 
+    def test_all_jobs_can_be_deleted_atomically(self) -> None:
+        create_job(self.store, "first")
+        create_job(self.store, "second")
+
+        deleted = self.store.delete_all()
+
+        self.assertCountEqual(deleted, ["first", "second"])
+        self.assertEqual(self.store.list(), [])
+
+    def test_running_job_prevents_deleting_all_jobs(self) -> None:
+        create_job(self.store, "first")
+        create_job(self.store, "second")
+        self.store.claim_next()
+
+        self.assertIsNone(self.store.delete_all())
+        self.assertEqual(len(self.store.list()), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

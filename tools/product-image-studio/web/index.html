@@ -119,8 +119,14 @@
             <p class="eyebrow">Generation queue</p>
             <h2 id="queue-title">Drafts</h2>
           </div>
-          <button class="quiet-button" type="button" data-refresh>Refresh</button>
+          <div class="section-actions">
+            <button class="quiet-button" type="button" data-refresh>Refresh</button>
+            <button class="quiet-button danger" type="button" data-delete-all disabled>
+              Delete all
+            </button>
+          </div>
         </div>
+        <p class="queue-message" data-queue-message role="status" aria-live="polite"></p>
         <div class="empty-state" data-empty-state>
           <span aria-hidden="true">◎</span>
           <h3>No drafts yet</h3>

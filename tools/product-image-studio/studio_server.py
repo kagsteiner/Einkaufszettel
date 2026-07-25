@@ -287,6 +287,14 @@ class StudioApplication:
         shutil.rmtree(self.jobs_directory / job_id, ignore_errors=True)
         return True
 
+    def delete_all_jobs(self) -> int | None:
+        job_ids = self.store.delete_all()
+        if job_ids is None:
+            return None
+        for job_id in job_ids:
+            shutil.rmtree(self.jobs_directory / job_id, ignore_errors=True)
+        return len(job_ids)
+
 
 class StudioRequestHandler(BaseHTTPRequestHandler):
     server_version = "ProductImageStudio/1.0"
@@ -389,6 +397,16 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
 
     def do_DELETE(self) -> None:
         path = unquote(urlparse(self.path).path)
+        if path == "/api/jobs":
+            deleted = self.application.delete_all_jobs()
+            if deleted is None:
+                self._send_error(
+                    HTTPStatus.CONFLICT,
+                    "Cancel the running job before deleting all drafts.",
+                )
+                return
+            self._send_json(HTTPStatus.OK, {"deleted": deleted})
+            return
         parts = path.strip("/").split("/")
         if len(parts) == 3 and parts[:2] == ["api", "jobs"]:
             if self.application.store.get(parts[2]) is None:

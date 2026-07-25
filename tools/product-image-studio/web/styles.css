@@ -371,6 +371,11 @@ textarea {
   margin-bottom: 24px;
 }
 
+.section-actions {
+  display: flex;
+  gap: 8px;
+}
+
 h2 {
   font-family: Georgia, "Times New Roman", serif;
   font-size: 42px;
@@ -396,6 +401,18 @@ h2 {
 
 .quiet-button.danger {
   color: var(--red);
+}
+
+.quiet-button:disabled,
+.icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.queue-message {
+  color: var(--muted);
+  font-size: 12px;
+  min-height: 18px;
 }
 
 .empty-state {

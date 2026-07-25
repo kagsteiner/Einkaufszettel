@@ -248,3 +248,15 @@ class JobStore:
                 (job_id,),
             )
         return cursor.rowcount > 0
+
+    def delete_all(self) -> list[str] | None:
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            running = connection.execute(
+                "SELECT 1 FROM generation_jobs WHERE status = 'running' LIMIT 1"
+            ).fetchone()
+            if running is not None:
+                return None
+            rows = connection.execute("SELECT id FROM generation_jobs").fetchall()
+            connection.execute("DELETE FROM generation_jobs")
+        return [str(row["id"]) for row in rows]

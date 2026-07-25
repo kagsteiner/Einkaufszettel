@@ -10,6 +10,8 @@ const emptyState = document.querySelector("[data-empty-state]");
 const jobTemplate = document.querySelector("[data-job-template]");
 const resultTemplate = document.querySelector("[data-result-template]");
 const refreshButton = document.querySelector("[data-refresh]");
+const deleteAllButton = document.querySelector("[data-delete-all]");
+const queueMessage = document.querySelector("[data-queue-message]");
 
 const statusLabels = {
   queued: "Queued",
@@ -53,6 +55,7 @@ function bindEvents() {
     addReferenceFiles([...event.dataTransfer.files]);
   });
   refreshButton.addEventListener("click", () => void loadJobs());
+  deleteAllButton.addEventListener("click", () => void deleteAllJobs());
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
       void loadJobs();
@@ -180,6 +183,9 @@ async function submitJob(event) {
 function renderJobs() {
   jobList.replaceChildren();
   emptyState.hidden = jobs.length > 0;
+  const hasRunningJob = jobs.some((job) => job.status === "running");
+  deleteAllButton.disabled = jobs.length === 0 || hasRunningJob;
+  deleteAllButton.title = hasRunningJob ? "Cancel the running job before deleting all drafts." : "";
   for (const job of jobs) {
     const fragment = jobTemplate.content.cloneNode(true);
     const card = fragment.querySelector(".job-card");
@@ -277,6 +283,29 @@ async function deleteJob(jobId) {
     renderJobs();
   } catch (error) {
     formMessage.textContent = messageFromError(error);
+  }
+}
+
+async function deleteAllJobs() {
+  if (
+    jobs.length === 0 ||
+    !window.confirm(
+      "Delete all drafts, references, and generated variants? Imported product images will not be affected.",
+    )
+  ) {
+    return;
+  }
+  deleteAllButton.disabled = true;
+  queueMessage.textContent = "";
+  try {
+    const response = await api("/api/jobs", { method: "DELETE" });
+    jobs = [];
+    renderJobs();
+    queueMessage.textContent = `${response.deleted} ${response.deleted === 1 ? "draft" : "drafts"} deleted.`;
+    schedulePoll();
+  } catch (error) {
+    queueMessage.textContent = messageFromError(error);
+    renderJobs();
   }
 }
 

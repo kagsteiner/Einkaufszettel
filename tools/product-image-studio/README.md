@@ -20,11 +20,17 @@ Das Studio bietet:
 - einen strikten textfreien Grundprompt, der auch Beschriftungen aus Referenzen ignoriert,
 - eine dauerhafte Warteschlange mit genau einem GPU-Worker,
 - Fortschritt, Abbruch und Löschen von Aufträgen,
+- sicheres Löschen aller Drafts einschließlich ihrer Referenzen und Varianten,
 - Auswahl und Download des bevorzugten Ergebnisses.
 
 Queue, Referenzen, Ergebnisse und Auswahl bleiben nach einem Neustart erhalten. Ein beim Beenden
 unterbrochener Auftrag wird beim nächsten Start wieder in die Warteschlange gestellt und setzt bei
 der nächsten noch fehlenden Variante fort.
+
+`Delete all` entfernt nach einer Bestätigung sämtliche Drafts, hochgeladenen Stilreferenzen und
+generierten Varianten. Bereits nach `tools/product-image-studio/results/` übernommene Produktbilder
+bleiben erhalten. Während eine Generierung läuft, ist die Funktion gesperrt; der Auftrag muss
+zuerst abgebrochen werden.
 
 Das Studio ist absichtlich nur an `127.0.0.1` gebunden. Es ist kein Bestandteil des produktiven
 VPS und besitzt keine Anmeldung. Um einen anderen lokalen Port zu verwenden:
