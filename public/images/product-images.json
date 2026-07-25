@@ -1,568 +1,1178 @@
 {
-  "version": 1,
+  "version": 2,
   "images": [
     {
       "id": "apfel",
-      "file": "images/products/apfel.jpg",
-      "products": ["apfel", "äpfel"]
+      "file": "images/products/apfel.jpg"
     },
     {
       "id": "apfelsaft",
-      "file": "images/products/apfelsaft.jpg",
-      "products": ["apfelsaft", "apfelsäfte"]
+      "file": "images/products/apfelsaft.jpg"
     },
     {
       "id": "aubergine",
-      "file": "images/products/aubergine.jpg",
-      "products": ["aubergine", "auberginen"]
+      "file": "images/products/aubergine.jpg"
     },
     {
       "id": "baguette",
-      "file": "images/products/baguette.jpg",
-      "products": ["baguette", "baguettes"]
+      "file": "images/products/baguette.jpg"
     },
     {
       "id": "banane",
-      "file": "images/products/banane.jpg",
-      "products": ["banane", "bananen"]
+      "file": "images/products/banane.jpg"
     },
     {
       "id": "bandnudeln",
-      "file": "images/products/bandnudeln.jpg",
-      "products": ["bandnudeln"]
+      "file": "images/products/bandnudeln.jpg"
     },
     {
       "id": "bier",
-      "file": "images/products/bier.jpg",
-      "products": ["bier", "biere"]
+      "file": "images/products/bier.jpg"
     },
     {
       "id": "blumenkohl",
-      "file": "images/products/blumenkohl.jpg",
-      "products": ["blumenkohl", "blumenkohle"]
+      "file": "images/products/blumenkohl.jpg"
     },
     {
       "id": "bohnen",
-      "file": "images/products/bohnen.jpg",
-      "products": ["bohnen"]
+      "file": "images/products/bohnen.jpg"
     },
     {
       "id": "brezel",
-      "file": "images/products/brezel.jpg",
-      "products": ["brezel", "brezeln"]
+      "file": "images/products/brezel.jpg"
     },
     {
       "id": "brokkoli",
-      "file": "images/products/brokkoli.jpg",
-      "products": ["brokkoli"]
+      "file": "images/products/brokkoli.jpg"
     },
     {
       "id": "brot",
-      "file": "images/products/brot.jpg",
-      "products": ["brot", "brote"]
+      "file": "images/products/brot.jpg"
     },
     {
       "id": "broetchen",
-      "file": "images/products/broetchen.jpg",
-      "products": ["brötchen", "semmeln", "semmel"]
+      "file": "images/products/broetchen.jpg"
     },
     {
       "id": "butter",
-      "file": "images/products/butter.jpg",
-      "products": ["butter", "margarine", "margarinen"]
+      "file": "images/products/butter.jpg"
     },
     {
       "id": "champignon",
-      "file": "images/products/champignon.jpg",
-      "products": ["champignon", "champignons"]
+      "file": "images/products/champignon.jpg"
     },
     {
       "id": "chips-4",
-      "file": "images/products/chips-4.jpg",
-      "products": ["chips-4", "chip", "chips"]
+      "file": "images/products/chips-4.jpg"
     },
     {
       "id": "cola",
-      "file": "images/products/cola.jpg",
-      "products": ["cola", "colas", "limo", "limos", "limonade", "limonaden", "sprite"]
+      "file": "images/products/cola.jpg"
     },
     {
       "id": "cracker",
-      "file": "images/products/cracker.jpg",
-      "products": ["cracker"]
+      "file": "images/products/cracker.jpg"
     },
     {
       "id": "croissant",
-      "file": "images/products/croissant.jpg",
-      "products": ["croissant", "croissants"]
+      "file": "images/products/croissant.jpg"
     },
     {
       "id": "dattel",
-      "file": "images/products/dattel.jpg",
-      "products": ["dattel", "datteln"]
+      "file": "images/products/dattel.jpg"
     },
     {
       "id": "dose",
-      "file": "images/products/dose.jpg",
-      "products": ["dose", "dosen"]
+      "file": "images/products/dose.jpg"
     },
     {
       "id": "dosenessen",
-      "file": "images/products/dosenessen.jpg",
-      "products": ["dosenessen"]
+      "file": "images/products/dosenessen.jpg"
     },
     {
       "id": "dosentomaten",
-      "file": "images/products/dosentomaten.jpg",
-      "products": ["dosentomaten", "pizzatomaten", "passierte tomaten", "gehackte tomaten"]
+      "file": "images/products/dosentomaten.jpg"
     },
     {
       "id": "ei",
-      "file": "images/products/ei.jpg",
-      "products": ["ei", "eier"]
+      "file": "images/products/ei.jpg"
     },
     {
       "id": "eisamstiel",
-      "file": "images/products/eisamstiel.jpg",
-      "products": ["eisamstiel", "eis", "eiscreme"]
+      "file": "images/products/eisamstiel.jpg"
     },
     {
       "id": "emmentaler",
-      "file": "images/products/emmentaler.jpg",
-      "products": ["emmentaler"]
+      "file": "images/products/emmentaler.jpg"
     },
     {
       "id": "erbsen",
-      "file": "images/products/erbsen.jpg",
-      "products": ["erbsen", "kaiserschoten", "zuckerschoten"]
+      "file": "images/products/erbsen.jpg"
     },
     {
       "id": "essiggurken",
-      "file": "images/products/essiggurken.jpg",
-      "products": ["essiggurken", "gürkchen"]
+      "file": "images/products/essiggurken.jpg"
     },
     {
       "id": "fenchel",
-      "file": "images/products/fenchel.jpg",
-      "products": ["fenchel"]
+      "file": "images/products/fenchel.jpg"
     },
     {
       "id": "fonds",
-      "file": "images/products/fonds.jpg",
-      "products": ["fonds", "fond", "brühe", "brühen"]
+      "file": "images/products/fonds.jpg"
     },
     {
       "id": "galiamelone",
-      "file": "images/products/galiamelone.jpg",
-      "products": ["galiamelone", "galiamelonen", "galia", "galia-melone", "galia-melonen"]
+      "file": "images/products/galiamelone.jpg"
     },
     {
       "id": "gemuese",
-      "file": "images/products/gemuese.jpg",
-      "products": ["gemüse"]
+      "file": "images/products/gemuese.jpg"
     },
     {
       "id": "gouda",
-      "file": "images/products/gouda.jpg",
-      "products": ["gouda", "goudas"]
+      "file": "images/products/gouda.jpg"
     },
     {
       "id": "grapefruit",
-      "file": "images/products/grapefruit.jpg",
-      "products": ["grapefruit", "grapefruits"]
+      "file": "images/products/grapefruit.jpg"
     },
     {
       "id": "gruener-spargel",
-      "file": "images/products/gruener-spargel.jpg",
-      "products": ["grüner spargel", "grüne spargel"]
+      "file": "images/products/gruener-spargel.jpg"
     },
     {
       "id": "hackfleisch",
-      "file": "images/products/hackfleisch.jpg",
-      "products": ["hackfleisch"]
+      "file": "images/products/hackfleisch.jpg"
     },
     {
       "id": "haferdrink",
-      "file": "images/products/haferdrink.jpg",
-      "products": ["haferdrink", "haferdrinks", "oatly"]
+      "file": "images/products/haferdrink.jpg"
     },
     {
       "id": "haferflocken",
-      "file": "images/products/haferflocken.jpg",
-      "products": ["haferflocken"]
+      "file": "images/products/haferflocken.jpg"
     },
     {
       "id": "haehnchen",
-      "file": "images/products/haehnchen.jpg",
-      "products": ["hähnchen", "hühnchen", "suppenhuhn", "suppenhühner"]
+      "file": "images/products/haehnchen.jpg"
     },
     {
       "id": "hefe",
-      "file": "images/products/hefe.jpg",
-      "products": ["hefe"]
+      "file": "images/products/hefe.jpg"
     },
     {
       "id": "honig",
-      "file": "images/products/honig.jpg",
-      "products": ["honig", "agavendicksaft", "agavensirup"]
+      "file": "images/products/honig.jpg"
     },
     {
       "id": "hund",
-      "file": "images/products/hund.jpg",
-      "products": ["hund", "hunde"]
+      "file": "images/products/hund.jpg"
     },
     {
       "id": "hundefutter",
-      "file": "images/products/hundefutter.jpg",
-      "products": ["hundefutter", "hundenahrung"]
+      "file": "images/products/hundefutter.jpg"
     },
     {
       "id": "joghurt",
-      "file": "images/products/joghurt.jpg",
-      "products": ["joghurt", "joghurts"]
+      "file": "images/products/joghurt.jpg"
     },
     {
       "id": "kaffee",
-      "file": "images/products/kaffee.jpg",
-      "products": ["kaffee", "kaffees"]
+      "file": "images/products/kaffee.jpg"
     },
     {
       "id": "kaffeefilter",
-      "file": "images/products/kaffeefilter.jpg",
-      "products": ["kaffeefilter"]
+      "file": "images/products/kaffeefilter.jpg"
     },
     {
       "id": "karotte",
-      "file": "images/products/karotte.jpg",
-      "products": ["karotte", "karotten", "möhren", "möhre"]
+      "file": "images/products/karotte.jpg"
     },
     {
       "id": "kartoffeln",
-      "file": "images/products/kartoffeln.jpg",
-      "products": ["kartoffeln", "kartoffel", "erdapfel", "erdäpfel"]
+      "file": "images/products/kartoffeln.jpg"
     },
     {
       "id": "kaese",
-      "file": "images/products/kaese.jpg",
-      "products": [
-        "käse",
-        "edamer",
-        "tilsiter",
-        "camenbert",
-        "camembert",
-        "camemberts",
-        "maasdamer",
-        "butterkäse",
-        "romandour",
-        "rebell"
-      ]
+      "file": "images/products/kaese.jpg"
     },
     {
       "id": "katze",
-      "file": "images/products/katze.jpg",
-      "products": ["katze", "katzen", "katzenstreu"]
+      "file": "images/products/katze.jpg"
     },
     {
       "id": "katzenfutter",
-      "file": "images/products/katzenfutter.jpg",
-      "products": [
+      "file": "images/products/katzenfutter.jpg"
+    },
+    {
+      "id": "klopapier",
+      "file": "images/products/klopapier.jpg"
+    },
+    {
+      "id": "knaeckebrot",
+      "file": "images/products/knaeckebrot.jpg"
+    },
+    {
+      "id": "knoblauch",
+      "file": "images/products/knoblauch.jpg"
+    },
+    {
+      "id": "kochschinken",
+      "file": "images/products/kochschinken.jpg"
+    },
+    {
+      "id": "kraeuterseitling",
+      "file": "images/products/kraeuterseitling.jpg"
+    },
+    {
+      "id": "kuechenrolle",
+      "file": "images/products/kuechenrolle.jpg"
+    },
+    {
+      "id": "lachs",
+      "file": "images/products/lachs.jpg"
+    },
+    {
+      "id": "lachsfilet",
+      "file": "images/products/lachsfilet.jpg"
+    },
+    {
+      "id": "lachssteak",
+      "file": "images/products/lachssteak.jpg"
+    },
+    {
+      "id": "lauch",
+      "file": "images/products/lauch.jpg"
+    },
+    {
+      "id": "laugenbroetchen",
+      "file": "images/products/laugenbroetchen.jpg"
+    },
+    {
+      "id": "laugenstange",
+      "file": "images/products/laugenstange.jpg"
+    },
+    {
+      "id": "limette",
+      "file": "images/products/limette.jpg"
+    },
+    {
+      "id": "milch",
+      "file": "images/products/milch.jpg"
+    },
+    {
+      "id": "mozzarella",
+      "file": "images/products/mozzarella.jpg"
+    },
+    {
+      "id": "multivitaminsaft",
+      "file": "images/products/multivitaminsaft.jpg"
+    },
+    {
+      "id": "mundm",
+      "file": "images/products/mundm.jpg"
+    },
+    {
+      "id": "muesli",
+      "file": "images/products/muesli.jpg"
+    },
+    {
+      "id": "nutella",
+      "file": "images/products/nutella.jpg"
+    },
+    {
+      "id": "orange",
+      "file": "images/products/orange.jpg"
+    },
+    {
+      "id": "orangensaft",
+      "file": "images/products/orangensaft.jpg"
+    },
+    {
+      "id": "paprika",
+      "file": "images/products/paprika.jpg"
+    },
+    {
+      "id": "parmesan",
+      "file": "images/products/parmesan.jpg"
+    },
+    {
+      "id": "pflaume",
+      "file": "images/products/pflaume.jpg"
+    },
+    {
+      "id": "pommes",
+      "file": "images/products/pommes.jpg"
+    },
+    {
+      "id": "radieschen",
+      "file": "images/products/radieschen.jpg"
+    },
+    {
+      "id": "reibekaese",
+      "file": "images/products/reibekaese.jpg"
+    },
+    {
+      "id": "reiniger",
+      "file": "images/products/reiniger.jpg"
+    },
+    {
+      "id": "rettich",
+      "file": "images/products/rettich.jpg"
+    },
+    {
+      "id": "rindfleisch",
+      "file": "images/products/rindfleisch.jpg"
+    },
+    {
+      "id": "rotwein",
+      "file": "images/products/rotwein.jpg"
+    },
+    {
+      "id": "saft",
+      "file": "images/products/saft.jpg"
+    },
+    {
+      "id": "sahne",
+      "file": "images/products/sahne.jpg"
+    },
+    {
+      "id": "salami",
+      "file": "images/products/salami.jpg"
+    },
+    {
+      "id": "salat",
+      "file": "images/products/salat.jpg"
+    },
+    {
+      "id": "schalotte",
+      "file": "images/products/schalotte.jpg"
+    },
+    {
+      "id": "scheibletten",
+      "file": "images/products/scheibletten.jpg"
+    },
+    {
+      "id": "schokopudding",
+      "file": "images/products/schokopudding.jpg"
+    },
+    {
+      "id": "sekt",
+      "file": "images/products/sekt.jpg"
+    },
+    {
+      "id": "spaghetti",
+      "file": "images/products/spaghetti.jpg"
+    },
+    {
+      "id": "spargel",
+      "file": "images/products/spargel.jpg"
+    },
+    {
+      "id": "speck",
+      "file": "images/products/speck.jpg"
+    },
+    {
+      "id": "spitzpaprika",
+      "file": "images/products/spitzpaprika.jpg"
+    },
+    {
+      "id": "spruehreiniger",
+      "file": "images/products/spruehreiniger.jpg"
+    },
+    {
+      "id": "steckerleis",
+      "file": "images/products/steckerleis.jpg"
+    },
+    {
+      "id": "steinpilz",
+      "file": "images/products/steinpilz.jpg"
+    },
+    {
+      "id": "tee",
+      "file": "images/products/tee.jpg"
+    },
+    {
+      "id": "toast",
+      "file": "images/products/toast.jpg"
+    },
+    {
+      "id": "tomatensaft",
+      "file": "images/products/tomatensaft.jpg"
+    },
+    {
+      "id": "unbekannt",
+      "file": "images/products/unbekannt.jpg"
+    },
+    {
+      "id": "veggiefleisch",
+      "file": "images/products/veggiefleisch.jpg"
+    },
+    {
+      "id": "wassermelone",
+      "file": "images/products/wassermelone.jpg"
+    },
+    {
+      "id": "weisswein",
+      "file": "images/products/weisswein.jpg"
+    },
+    {
+      "id": "weizenbier",
+      "file": "images/products/weizenbier.jpg"
+    },
+    {
+      "id": "wurst",
+      "file": "images/products/wurst.jpg"
+    },
+    {
+      "id": "zitrone",
+      "file": "images/products/zitrone.jpg"
+    },
+    {
+      "id": "zucchini",
+      "file": "images/products/zucchini.jpg"
+    },
+    {
+      "id": "zwiebel",
+      "file": "images/products/zwiebel.jpg"
+    }
+  ],
+  "products": [
+    {
+      "id": "agavendicksaft",
+      "names": ["agavendicksaft", "agavensirup"],
+      "imageFallback": "honig"
+    },
+    {
+      "id": "apfel",
+      "names": ["apfel", "äpfel"],
+      "image": "apfel"
+    },
+    {
+      "id": "apfelsaft",
+      "names": ["apfelsaft", "apfelsäfte"],
+      "image": "apfelsaft"
+    },
+    {
+      "id": "aubergine",
+      "names": ["aubergine", "auberginen"],
+      "image": "aubergine"
+    },
+    {
+      "id": "baguette",
+      "names": ["baguette", "baguettes"],
+      "image": "baguette"
+    },
+    {
+      "id": "banane",
+      "names": ["banane", "bananen"],
+      "image": "banane"
+    },
+    {
+      "id": "bandnudeln",
+      "names": ["bandnudeln"],
+      "image": "bandnudeln",
+      "imageFallback": "nudeln"
+    },
+    {
+      "id": "bier",
+      "names": ["bier", "biere"],
+      "image": "bier"
+    },
+    {
+      "id": "blumenkohl",
+      "names": ["blumenkohl", "blumenkohle"],
+      "image": "blumenkohl"
+    },
+    {
+      "id": "bohnen",
+      "names": ["bohnen"],
+      "image": "bohnen"
+    },
+    {
+      "id": "brezel",
+      "names": ["brezel", "brezeln"],
+      "image": "brezel"
+    },
+    {
+      "id": "broetchen",
+      "names": ["brötchen", "semmeln", "semmel"],
+      "image": "broetchen"
+    },
+    {
+      "id": "brokkoli",
+      "names": ["brokkoli"],
+      "image": "brokkoli"
+    },
+    {
+      "id": "brot",
+      "names": ["brot", "brote"],
+      "image": "brot"
+    },
+    {
+      "id": "bruehe",
+      "names": ["brühe", "brühen"],
+      "imageFallback": "fonds"
+    },
+    {
+      "id": "butter",
+      "names": ["butter"],
+      "image": "butter"
+    },
+    {
+      "id": "butterkaese",
+      "names": ["butterkäse"],
+      "imageFallback": "kaese"
+    },
+    {
+      "id": "camembert",
+      "names": ["camenbert", "camembert", "camemberts"],
+      "imageFallback": "kaese"
+    },
+    {
+      "id": "champignon",
+      "names": ["champignon", "champignons"],
+      "image": "champignon"
+    },
+    {
+      "id": "chips-4",
+      "names": ["chips-4", "chip", "chips"],
+      "image": "chips-4"
+    },
+    {
+      "id": "cola",
+      "names": ["cola", "colas"],
+      "image": "cola"
+    },
+    {
+      "id": "cracker",
+      "names": ["cracker"],
+      "image": "cracker"
+    },
+    {
+      "id": "croissant",
+      "names": ["croissant", "croissants"],
+      "image": "croissant"
+    },
+    {
+      "id": "dattel",
+      "names": ["dattel", "datteln"],
+      "image": "dattel"
+    },
+    {
+      "id": "dose",
+      "names": ["dose", "dosen"],
+      "image": "dose"
+    },
+    {
+      "id": "dosenessen",
+      "names": ["dosenessen"],
+      "image": "dosenessen"
+    },
+    {
+      "id": "dosentomaten",
+      "names": ["dosentomaten"],
+      "image": "dosentomaten"
+    },
+    {
+      "id": "edamer",
+      "names": ["edamer"],
+      "imageFallback": "kaese"
+    },
+    {
+      "id": "ei",
+      "names": ["ei", "eier"],
+      "image": "ei"
+    },
+    {
+      "id": "eisamstiel",
+      "names": ["eisamstiel", "eis", "eiscreme"],
+      "image": "eisamstiel"
+    },
+    {
+      "id": "emmentaler",
+      "names": ["emmentaler"],
+      "image": "emmentaler",
+      "imageFallback": "kaese"
+    },
+    {
+      "id": "erbsen",
+      "names": ["erbsen"],
+      "image": "erbsen"
+    },
+    {
+      "id": "essiggurken",
+      "names": ["essiggurken", "gürkchen"],
+      "image": "essiggurken"
+    },
+    {
+      "id": "fenchel",
+      "names": ["fenchel"],
+      "image": "fenchel"
+    },
+    {
+      "id": "fisch",
+      "names": ["fisch", "fische"],
+      "image": "lachs"
+    },
+    {
+      "id": "fleisch",
+      "names": ["fleisch"],
+      "image": "rindfleisch"
+    },
+    {
+      "id": "fonds",
+      "names": ["fonds", "fond"],
+      "image": "fonds"
+    },
+    {
+      "id": "forelle",
+      "names": ["forelle", "forellen"],
+      "imageFallback": "fisch"
+    },
+    {
+      "id": "galiamelone",
+      "names": ["galiamelone", "galiamelonen", "galia", "galia-melone", "galia-melonen"],
+      "image": "galiamelone"
+    },
+    {
+      "id": "gehackte-tomaten",
+      "names": ["gehackte tomaten"],
+      "imageFallback": "dosentomaten"
+    },
+    {
+      "id": "gemuese",
+      "names": ["gemüse"],
+      "image": "gemuese"
+    },
+    {
+      "id": "gouda",
+      "names": ["gouda", "goudas"],
+      "image": "gouda",
+      "imageFallback": "kaese"
+    },
+    {
+      "id": "gouda-gerieben",
+      "names": ["gouda gerieben"],
+      "imageFallback": "reibekaese"
+    },
+    {
+      "id": "grapefruit",
+      "names": ["grapefruit", "grapefruits"],
+      "image": "grapefruit"
+    },
+    {
+      "id": "gruener-spargel",
+      "names": ["grüner spargel", "grüne spargel"],
+      "image": "gruener-spargel"
+    },
+    {
+      "id": "hackfleisch",
+      "names": ["hackfleisch"],
+      "image": "hackfleisch",
+      "imageFallback": "fleisch"
+    },
+    {
+      "id": "haehnchen",
+      "names": ["hähnchen", "hühnchen"],
+      "image": "haehnchen"
+    },
+    {
+      "id": "haferdrink",
+      "names": ["haferdrink", "haferdrinks"],
+      "image": "haferdrink"
+    },
+    {
+      "id": "haferflocken",
+      "names": ["haferflocken"],
+      "image": "haferflocken"
+    },
+    {
+      "id": "hefe",
+      "names": ["hefe"],
+      "image": "hefe"
+    },
+    {
+      "id": "honig",
+      "names": ["honig"],
+      "image": "honig"
+    },
+    {
+      "id": "hund",
+      "names": ["hund", "hunde"],
+      "image": "hund"
+    },
+    {
+      "id": "hundefutter",
+      "names": ["hundefutter", "hundenahrung"],
+      "image": "hundefutter"
+    },
+    {
+      "id": "joghurt",
+      "names": ["joghurt", "joghurts"],
+      "image": "joghurt"
+    },
+    {
+      "id": "kaese",
+      "names": ["käse"],
+      "image": "kaese"
+    },
+    {
+      "id": "kaffee",
+      "names": ["kaffee", "kaffees"],
+      "image": "kaffee"
+    },
+    {
+      "id": "kaffeefilter",
+      "names": ["kaffeefilter"],
+      "image": "kaffeefilter"
+    },
+    {
+      "id": "kaiserschoten",
+      "names": ["kaiserschoten"],
+      "imageFallback": "erbsen"
+    },
+    {
+      "id": "karotte",
+      "names": ["karotte", "karotten", "möhren", "möhre"],
+      "image": "karotte"
+    },
+    {
+      "id": "kartoffeln",
+      "names": ["kartoffeln", "kartoffel", "erdapfel", "erdäpfel"],
+      "image": "kartoffeln"
+    },
+    {
+      "id": "katze",
+      "names": ["katze", "katzen"],
+      "image": "katze"
+    },
+    {
+      "id": "katzenfutter",
+      "names": [
         "katzenfutter",
         "katzennahrung",
         "katzensuppe",
         "katzensuppen",
         "katzensüppchen",
         "stängli"
-      ]
+      ],
+      "image": "katzenfutter"
+    },
+    {
+      "id": "katzenstreu",
+      "names": ["katzenstreu"],
+      "imageFallback": "unbekannt"
     },
     {
       "id": "klopapier",
-      "file": "images/products/klopapier.jpg",
-      "products": ["klopapier", "toilettenpapier"]
+      "names": ["klopapier", "toilettenpapier"],
+      "image": "klopapier"
     },
     {
       "id": "knaeckebrot",
-      "file": "images/products/knaeckebrot.jpg",
-      "products": ["knäckebrot", "knäckebrote", "wasa"]
+      "names": ["knäckebrot", "knäckebrote", "wasa"],
+      "image": "knaeckebrot"
     },
     {
       "id": "knoblauch",
-      "file": "images/products/knoblauch.jpg",
-      "products": ["knoblauch"]
+      "names": ["knoblauch"],
+      "image": "knoblauch"
     },
     {
       "id": "kochschinken",
-      "file": "images/products/kochschinken.jpg",
-      "products": ["kochschinken", "schinken"]
+      "names": ["kochschinken"],
+      "image": "kochschinken",
+      "imageFallback": "schinken"
     },
     {
       "id": "kraeuterseitling",
-      "file": "images/products/kraeuterseitling.jpg",
-      "products": ["kräuterseitling", "kräuterseitlinge"]
+      "names": ["kräuterseitling", "kräuterseitlinge"],
+      "image": "kraeuterseitling"
     },
     {
       "id": "kuechenrolle",
-      "file": "images/products/kuechenrolle.jpg",
-      "products": ["küchenrolle", "küchenrollen", "zewa"]
+      "names": ["küchenrolle", "küchenrollen", "zewa"],
+      "image": "kuechenrolle"
     },
     {
       "id": "lachs",
-      "file": "images/products/lachs.jpg",
-      "products": ["lachs", "lachse", "fisch", "fische", "forelle", "forellen"]
+      "names": ["lachs", "lachse"],
+      "image": "lachs",
+      "imageFallback": "fisch"
     },
     {
       "id": "lachsfilet",
-      "file": "images/products/lachsfilet.jpg",
-      "products": ["lachsfilet", "lachsfilets"]
+      "names": ["lachsfilet", "lachsfilets"],
+      "image": "lachsfilet",
+      "imageFallback": "lachs"
     },
     {
       "id": "lachssteak",
-      "file": "images/products/lachssteak.jpg",
-      "products": ["lachssteak", "lachssteaks"]
+      "names": ["lachssteak", "lachssteaks"],
+      "image": "lachssteak",
+      "imageFallback": "lachs"
     },
     {
       "id": "lauch",
-      "file": "images/products/lauch.jpg",
-      "products": ["lauch"]
+      "names": ["lauch"],
+      "image": "lauch"
     },
     {
       "id": "laugenbroetchen",
-      "file": "images/products/laugenbroetchen.jpg",
-      "products": ["laugenbrötchen"]
+      "names": ["laugenbrötchen"],
+      "image": "laugenbroetchen"
     },
     {
       "id": "laugenstange",
-      "file": "images/products/laugenstange.jpg",
-      "products": ["laugenstange", "laugenstangen"]
+      "names": ["laugenstange", "laugenstangen"],
+      "image": "laugenstange"
+    },
+    {
+      "id": "like-chicken",
+      "names": ["like chicken"],
+      "imageFallback": "veggiefleisch"
     },
     {
       "id": "limette",
-      "file": "images/products/limette.jpg",
-      "products": ["limette", "limetten"]
+      "names": ["limette", "limetten"],
+      "image": "limette"
+    },
+    {
+      "id": "limo",
+      "names": ["limo", "limos", "limonade", "limonaden"],
+      "imageFallback": "cola"
+    },
+    {
+      "id": "linguine",
+      "names": ["linguine"],
+      "imageFallback": "spaghetti"
+    },
+    {
+      "id": "maasdamer",
+      "names": ["maasdamer"],
+      "imageFallback": "kaese"
+    },
+    {
+      "id": "margarine",
+      "names": ["margarine", "margarinen"],
+      "imageFallback": "butter"
     },
     {
       "id": "milch",
-      "file": "images/products/milch.jpg",
-      "products": ["milch"]
+      "names": ["milch"],
+      "image": "milch"
     },
     {
       "id": "mozzarella",
-      "file": "images/products/mozzarella.jpg",
-      "products": ["mozzarella", "mozzarellas"]
+      "names": ["mozzarella", "mozzarellas"],
+      "image": "mozzarella",
+      "imageFallback": "kaese"
     },
     {
-      "id": "multivitaminsaft",
-      "file": "images/products/multivitaminsaft.jpg",
-      "products": ["multivitaminsaft", "multivitaminsäfte"]
-    },
-    {
-      "id": "mundm",
-      "file": "images/products/mundm.jpg",
-      "products": ["mundm", "m&m", "m&ms", "m&m's", "smarties"]
+      "id": "mozzarella-gerieben",
+      "names": ["mozzarella gerieben"],
+      "imageFallback": "reibekaese"
     },
     {
       "id": "muesli",
-      "file": "images/products/muesli.jpg",
-      "products": ["müsli", "müslis"]
+      "names": ["müsli", "müslis"],
+      "image": "muesli"
+    },
+    {
+      "id": "multivitaminsaft",
+      "names": ["multivitaminsaft", "multivitaminsäfte"],
+      "image": "multivitaminsaft"
+    },
+    {
+      "id": "mundm",
+      "names": ["mundm", "m&m", "m&ms", "m&m's"],
+      "image": "mundm"
+    },
+    {
+      "id": "nudeln",
+      "names": ["nudeln", "pasta"],
+      "image": "spaghetti"
+    },
+    {
+      "id": "nusscreme",
+      "names": ["nusscreme", "nusscremes", "nuss-nougat-creme", "nuss-nougat-cremes"],
+      "imageFallback": "nutella"
     },
     {
       "id": "nutella",
-      "file": "images/products/nutella.jpg",
-      "products": ["nutella", "nusscreme", "nusscremes", "nuss-nougat-creme", "nuss-nougat-cremes"]
+      "names": ["nutella"],
+      "image": "nutella"
+    },
+    {
+      "id": "oatly",
+      "names": ["oatly"],
+      "imageFallback": "haferdrink"
     },
     {
       "id": "orange",
-      "file": "images/products/orange.jpg",
-      "products": ["orange", "orangen"]
+      "names": ["orange", "orangen"],
+      "image": "orange"
     },
     {
       "id": "orangensaft",
-      "file": "images/products/orangensaft.jpg",
-      "products": ["orangensaft", "orangensäfte"]
+      "names": ["orangensaft", "orangensäfte"],
+      "image": "orangensaft"
     },
     {
       "id": "paprika",
-      "file": "images/products/paprika.jpg",
-      "products": ["paprika", "paprikas"]
+      "names": ["paprika", "paprikas"],
+      "image": "paprika"
     },
     {
       "id": "parmesan",
-      "file": "images/products/parmesan.jpg",
-      "products": ["parmesan"]
+      "names": ["parmesan"],
+      "image": "parmesan",
+      "imageFallback": "kaese"
+    },
+    {
+      "id": "passierte-tomaten",
+      "names": ["passierte tomaten"],
+      "imageFallback": "dosentomaten"
     },
     {
       "id": "pflaume",
-      "file": "images/products/pflaume.jpg",
-      "products": ["pflaume", "pflaumen"]
+      "names": ["pflaume", "pflaumen"],
+      "image": "pflaume"
+    },
+    {
+      "id": "pizzatomaten",
+      "names": ["pizzatomaten"],
+      "imageFallback": "dosentomaten"
     },
     {
       "id": "pommes",
-      "file": "images/products/pommes.jpg",
-      "products": ["pommes"]
+      "names": ["pommes"],
+      "image": "pommes"
     },
     {
       "id": "radieschen",
-      "file": "images/products/radieschen.jpg",
-      "products": ["radieschen"]
+      "names": ["radieschen"],
+      "image": "radieschen"
+    },
+    {
+      "id": "rebell",
+      "names": ["rebell"],
+      "imageFallback": "kaese"
     },
     {
       "id": "reibekaese",
-      "file": "images/products/reibekaese.jpg",
-      "products": ["reibekäse", "gouda gerieben", "mozzarella gerieben"]
+      "names": ["reibekäse"],
+      "image": "reibekaese",
+      "imageFallback": "kaese"
     },
     {
       "id": "reiniger",
-      "file": "images/products/reiniger.jpg",
-      "products": ["reiniger", "putzmittel"]
+      "names": ["reiniger", "putzmittel"],
+      "image": "reiniger"
     },
     {
       "id": "rettich",
-      "file": "images/products/rettich.jpg",
-      "products": ["rettich", "rettiche"]
+      "names": ["rettich", "rettiche"],
+      "image": "rettich"
     },
     {
       "id": "rindfleisch",
-      "file": "images/products/rindfleisch.jpg",
-      "products": ["rindfleisch", "fleisch", "schweinefleisch"]
+      "names": ["rindfleisch"],
+      "image": "rindfleisch",
+      "imageFallback": "fleisch"
+    },
+    {
+      "id": "romandour",
+      "names": ["romandour"],
+      "imageFallback": "kaese"
     },
     {
       "id": "rotwein",
-      "file": "images/products/rotwein.jpg",
-      "products": ["rotwein", "rotweine"]
+      "names": ["rotwein", "rotweine"],
+      "image": "rotwein"
     },
     {
       "id": "saft",
-      "file": "images/products/saft.jpg",
-      "products": ["saft", "säfte"]
+      "names": ["saft", "säfte"],
+      "image": "saft"
     },
     {
       "id": "sahne",
-      "file": "images/products/sahne.jpg",
-      "products": ["sahne"]
+      "names": ["sahne"],
+      "image": "sahne"
     },
     {
       "id": "salami",
-      "file": "images/products/salami.jpg",
-      "products": ["salami", "salamis"]
+      "names": ["salami", "salamis"],
+      "image": "salami",
+      "imageFallback": "fleisch"
     },
     {
       "id": "salat",
-      "file": "images/products/salat.jpg",
-      "products": ["salat", "salate"]
+      "names": ["salat", "salate"],
+      "image": "salat"
     },
     {
       "id": "schalotte",
-      "file": "images/products/schalotte.jpg",
-      "products": ["schalotte", "schalotten"]
+      "names": ["schalotte", "schalotten"],
+      "image": "schalotte"
     },
     {
       "id": "scheibletten",
-      "file": "images/products/scheibletten.jpg",
-      "products": ["scheibletten"]
+      "names": ["scheibletten"],
+      "image": "scheibletten",
+      "imageFallback": "kaese"
+    },
+    {
+      "id": "schinken",
+      "names": ["schinken"],
+      "image": "kochschinken",
+      "imageFallback": "fleisch"
     },
     {
       "id": "schokopudding",
-      "file": "images/products/schokopudding.jpg",
-      "products": ["schokopudding", "schokopuddings"]
+      "names": ["schokopudding", "schokopuddings"],
+      "image": "schokopudding"
+    },
+    {
+      "id": "schweinefleisch",
+      "names": ["schweinefleisch"],
+      "imageFallback": "fleisch"
     },
     {
       "id": "sekt",
-      "file": "images/products/sekt.jpg",
-      "products": ["sekt", "sekte"]
+      "names": ["sekt", "sekte"],
+      "image": "sekt"
+    },
+    {
+      "id": "smarties",
+      "names": ["smarties"],
+      "imageFallback": "mundm"
     },
     {
       "id": "spaghetti",
-      "file": "images/products/spaghetti.jpg",
-      "products": ["spaghetti", "linguine"]
+      "names": ["spaghetti"],
+      "image": "spaghetti",
+      "imageFallback": "nudeln"
     },
     {
       "id": "spargel",
-      "file": "images/products/spargel.jpg",
-      "products": ["spargel", "weisser spargel", "weisse spargel"]
+      "names": ["spargel", "weisser spargel", "weisse spargel"],
+      "image": "spargel"
     },
     {
       "id": "speck",
-      "file": "images/products/speck.jpg",
-      "products": ["speck"]
+      "names": ["speck"],
+      "image": "speck",
+      "imageFallback": "schinken"
     },
     {
       "id": "spitzpaprika",
-      "file": "images/products/spitzpaprika.jpg",
-      "products": ["spitzpaprika", "spitzpaprikas"]
+      "names": ["spitzpaprika", "spitzpaprikas"],
+      "image": "spitzpaprika"
+    },
+    {
+      "id": "sprite",
+      "names": ["sprite"],
+      "imageFallback": "limo"
     },
     {
       "id": "spruehreiniger",
-      "file": "images/products/spruehreiniger.jpg",
-      "products": ["sprühreiniger"]
+      "names": ["sprühreiniger"],
+      "image": "spruehreiniger"
     },
     {
       "id": "steckerleis",
-      "file": "images/products/steckerleis.jpg",
-      "products": ["steckerleis"]
+      "names": ["steckerleis"],
+      "image": "steckerleis"
     },
     {
       "id": "steinpilz",
-      "file": "images/products/steinpilz.jpg",
-      "products": ["steinpilz", "steinpilze"]
+      "names": ["steinpilz", "steinpilze"],
+      "image": "steinpilz"
+    },
+    {
+      "id": "suppenhuhn",
+      "names": ["suppenhuhn", "suppenhühner"],
+      "imageFallback": "haehnchen"
     },
     {
       "id": "tee",
-      "file": "images/products/tee.jpg",
-      "products": ["tee", "tees"]
+      "names": ["tee", "tees"],
+      "image": "tee"
+    },
+    {
+      "id": "tilsiter",
+      "names": ["tilsiter"],
+      "imageFallback": "kaese"
     },
     {
       "id": "toast",
-      "file": "images/products/toast.jpg",
-      "products": ["toast", "toasts"]
+      "names": ["toast", "toasts"],
+      "image": "toast"
     },
     {
       "id": "tomatensaft",
-      "file": "images/products/tomatensaft.jpg",
-      "products": ["tomatensaft", "tomatensäfte"]
+      "names": ["tomatensaft", "tomatensäfte"],
+      "image": "tomatensaft"
     },
     {
       "id": "unbekannt",
-      "file": "images/products/unbekannt.jpg",
-      "products": ["unbekannt"]
+      "names": ["unbekannt"],
+      "image": "unbekannt"
     },
     {
       "id": "veggiefleisch",
-      "file": "images/products/veggiefleisch.jpg",
-      "products": ["veggiefleisch", "veganes fleisch", "fleischersatz", "like chicken"]
+      "names": ["veggiefleisch", "veganes fleisch", "fleischersatz"],
+      "image": "veggiefleisch"
+    },
+    {
+      "id": "wacholderschinken",
+      "names": ["wacholderschinken"],
+      "imageFallback": "schinken"
     },
     {
       "id": "wassermelone",
-      "file": "images/products/wassermelone.jpg",
-      "products": ["wassermelone", "wassermelonen"]
+      "names": ["wassermelone", "wassermelonen"],
+      "image": "wassermelone"
     },
     {
       "id": "weisswein",
-      "file": "images/products/weisswein.jpg",
-      "products": ["weisswein", "weissweine", "weißwein", "weißweine"]
+      "names": ["weisswein", "weissweine", "weißwein", "weißweine"],
+      "image": "weisswein"
     },
     {
       "id": "weizenbier",
-      "file": "images/products/weizenbier.jpg",
-      "products": ["weizenbier", "weizenbiere"]
+      "names": ["weizenbier", "weizenbiere"],
+      "image": "weizenbier"
     },
     {
       "id": "wurst",
-      "file": "images/products/wurst.jpg",
-      "products": ["wurst", "würste"]
+      "names": ["wurst", "würste"],
+      "image": "wurst",
+      "imageFallback": "fleisch"
     },
     {
       "id": "zitrone",
-      "file": "images/products/zitrone.jpg",
-      "products": ["zitrone", "zitronen"]
+      "names": ["zitrone", "zitronen"],
+      "image": "zitrone"
     },
     {
       "id": "zucchini",
-      "file": "images/products/zucchini.jpg",
-      "products": ["zucchini", "zucchinis"]
+      "names": ["zucchini", "zucchinis"],
+      "image": "zucchini"
+    },
+    {
+      "id": "zuckerschoten",
+      "names": ["zuckerschoten"],
+      "imageFallback": "erbsen"
     },
     {
       "id": "zwiebel",
-      "file": "images/products/zwiebel.jpg",
-      "products": ["zwiebel", "zwiebeln"]
+      "names": ["zwiebel", "zwiebeln"],
+      "image": "zwiebel"
     }
   ]
 }

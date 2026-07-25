@@ -37,7 +37,7 @@ let sortMode: "alphabetical" | "store" =
   localStorage.getItem("sort-mode") === "store" ? "store" : "alphabetical";
 let shoppingView: "list" | "tiles" =
   localStorage.getItem("shopping-view") === "tiles" ? "tiles" : "list";
-let productImageCatalog: ReadonlyMap<string, string> = new Map();
+let productImageCatalog = createProductImageCatalog(null);
 let eventSource: EventSource | null = null;
 let refreshQueued = false;
 let queuedRefreshPreserveFocus = true;

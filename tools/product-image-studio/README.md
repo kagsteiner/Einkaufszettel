@@ -93,21 +93,40 @@ JPEG-Dateien mit MozJPEG-Qualität 84:
 npm run product-images:import
 ```
 
-Die fertigen Assets stehen unter `public/images/products/`. Das Mapping
-`public/images/product-images.json` enthält für jedes Bild ein `products`-Array. Dort können einem
-generischen Bild mehrere Produktnamen zugeordnet werden:
+Die fertigen Assets stehen unter `public/images/products/`. Der Katalog
+`public/images/product-images.json` trennt die verfügbaren Bilddateien von visuellen
+Produktknoten. Echte Synonyme stehen gemeinsam in `names`:
 
 ```json
 {
-  "id": "kaese",
-  "file": "images/products/kaese.jpg",
-  "products": ["käse", "bergkäse", "schnittkäse"]
+  "id": "mozzarella",
+  "names": ["mozzarella", "mozzarellas"],
+  "image": "mozzarella",
+  "imageFallback": "kaese"
 }
 ```
 
-Ein erneuter Import konvertiert die PNG-Dateien neu, erhält aber bereits gepflegte
-`products`-Arrays anhand der stabilen Bild-ID. Die lokalen PNG-Quellen werden weder verändert noch
-in Git aufgenommen.
+Verschiedene Produkte erhalten getrennte Knoten, auch wenn sie zunächst dasselbe Bild verwenden.
+Besitzt ein Produkt kein eigenes Bild, verweist `imageFallback` auf den visuell sinnvollsten
+Produktknoten. Das ist ausdrücklich keine natürliche Produkthierarchie. Geriebener Mozzarella
+sieht beispielsweise eher wie anderer Reibekäse als wie eine Mozzarellakugel aus:
+
+```json
+{
+  "id": "mozzarella-gerieben",
+  "names": ["mozzarella gerieben"],
+  "imageFallback": "reibekaese"
+}
+```
+
+Die App folgt der visuellen Kette, bis sie ein Bild findet, zum Beispiel
+`wacholderschinken → schinken → fleisch`. Zyklen, fehlende Referenzen und doppelte normalisierte
+Namen werden von den Tests abgelehnt. Ein erneuter Import konvertiert die PNG-Dateien neu, erhält
+aber alle gepflegten Produktknoten und Fallbacks. Kataloge der alten Version 1 werden beim ersten
+Import automatisch nach Version 2 migriert. Neue PNG-Dateien erzeugen automatisch je ein Bild und
+einen gleichnamigen Produktknoten. Existiert bereits ein gleichnamiger reiner Fallback-Knoten,
+erhält er beim Import automatisch das neue eigene Bild und behält seinen bisherigen Fallback als
+Reserve. Die lokalen PNG-Quellen werden weder verändert noch in Git aufgenommen.
 
 ## Verifizierter Lauf auf dem Entwicklungs-Mac
 
