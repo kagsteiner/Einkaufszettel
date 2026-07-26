@@ -46,6 +46,10 @@
       "file": "images/products/bandnudeln.jpg"
     },
     {
+      "id": "basilikum",
+      "file": "images/products/basilikum.jpg"
+    },
+    {
       "id": "basmati",
       "file": "images/products/basmati.jpg"
     },
@@ -110,6 +114,10 @@
       "file": "images/products/camembert.jpg"
     },
     {
+      "id": "cayennepfeffer",
+      "file": "images/products/cayennepfeffer.jpg"
+    },
+    {
       "id": "champignon",
       "file": "images/products/champignon.jpg"
     },
@@ -124,6 +132,10 @@
     {
       "id": "chips-4",
       "file": "images/products/chips-4.jpg"
+    },
+    {
+      "id": "cocktailsauce",
+      "file": "images/products/cocktailsauce.jpg"
     },
     {
       "id": "cola",
@@ -274,8 +286,16 @@
       "file": "images/products/greenolive.jpg"
     },
     {
+      "id": "grillsauce",
+      "file": "images/products/grillsauce.jpg"
+    },
+    {
       "id": "gruener-spargel",
       "file": "images/products/gruener-spargel.jpg"
+    },
+    {
+      "id": "gruenerpfeffer",
+      "file": "images/products/gruenerpfeffer.jpg"
     },
     {
       "id": "gurke",
@@ -304,6 +324,10 @@
     {
       "id": "haehnchenschenkel",
       "file": "images/products/haehnchenschenkel.jpg"
+    },
+    {
+      "id": "haselnuss",
+      "file": "images/products/haselnuss.jpg"
     },
     {
       "id": "hefe",
@@ -382,6 +406,10 @@
       "file": "images/products/katzenfutter.jpg"
     },
     {
+      "id": "ketchup",
+      "file": "images/products/ketchup.jpg"
+    },
+    {
       "id": "kichererbsen",
       "file": "images/products/kichererbsen.jpg"
     },
@@ -406,12 +434,24 @@
       "file": "images/products/knoblauch.jpg"
     },
     {
+      "id": "knoblauchsauce",
+      "file": "images/products/knoblauchsauce.jpg"
+    },
+    {
       "id": "kochschinken",
       "file": "images/products/kochschinken.jpg"
     },
     {
       "id": "kohlrabi",
       "file": "images/products/kohlrabi.jpg"
+    },
+    {
+      "id": "kokosnuss",
+      "file": "images/products/kokosnuss.jpg"
+    },
+    {
+      "id": "koriander",
+      "file": "images/products/koriander.jpg"
     },
     {
       "id": "krabbensalat",
@@ -422,8 +462,16 @@
       "file": "images/products/kraeuterseitling.jpg"
     },
     {
+      "id": "kreuzkuemmel",
+      "file": "images/products/kreuzkuemmel.jpg"
+    },
+    {
       "id": "kuechenrolle",
       "file": "images/products/kuechenrolle.jpg"
+    },
+    {
+      "id": "kuemmel",
+      "file": "images/products/kuemmel.jpg"
     },
     {
       "id": "kuerbis",
@@ -470,12 +518,24 @@
       "file": "images/products/lollorosso.jpg"
     },
     {
+      "id": "lorbeer",
+      "file": "images/products/lorbeer.jpg"
+    },
+    {
+      "id": "macadamia",
+      "file": "images/products/macadamia.jpg"
+    },
+    {
       "id": "mais",
       "file": "images/products/mais.jpg"
     },
     {
       "id": "maltvinegar",
       "file": "images/products/maltvinegar.jpg"
+    },
+    {
+      "id": "mandel",
+      "file": "images/products/mandel.jpg"
     },
     {
       "id": "mango",
@@ -488,6 +548,14 @@
     {
       "id": "maultasche",
       "file": "images/products/maultasche.jpg"
+    },
+    {
+      "id": "mayonnaise",
+      "file": "images/products/mayonnaise.jpg"
+    },
+    {
+      "id": "mehl",
+      "file": "images/products/mehl.jpg"
     },
     {
       "id": "milch",
@@ -504,6 +572,10 @@
     {
       "id": "mundm",
       "file": "images/products/mundm.jpg"
+    },
+    {
+      "id": "muskatnuss",
+      "file": "images/products/muskatnuss.jpg"
     },
     {
       "id": "muesli",
@@ -530,6 +602,10 @@
       "file": "images/products/orangensaft.jpg"
     },
     {
+      "id": "oregano",
+      "file": "images/products/oregano.jpg"
+    },
+    {
       "id": "packung",
       "file": "images/products/packung.jpg"
     },
@@ -548,6 +624,14 @@
     {
       "id": "penne",
       "file": "images/products/penne.jpg"
+    },
+    {
+      "id": "petersilie",
+      "file": "images/products/petersilie.jpg"
+    },
+    {
+      "id": "pfeffer",
+      "file": "images/products/pfeffer.jpg"
     },
     {
       "id": "pfirsich",
@@ -570,12 +654,20 @@
       "file": "images/products/pommes.jpg"
     },
     {
+      "id": "puderzucker",
+      "file": "images/products/puderzucker.jpg"
+    },
+    {
       "id": "putensteak",
       "file": "images/products/putensteak.jpg"
     },
     {
       "id": "radieschen",
       "file": "images/products/radieschen.jpg"
+    },
+    {
+      "id": "rapsoel",
+      "file": "images/products/rapsoel.jpg"
     },
     {
       "id": "reibekaese",
@@ -602,6 +694,10 @@
       "file": "images/products/risottoreis.jpg"
     },
     {
+      "id": "rosmarin",
+      "file": "images/products/rosmarin.jpg"
+    },
+    {
       "id": "roesti",
       "file": "images/products/roesti.jpg"
     },
@@ -618,6 +714,10 @@
       "file": "images/products/rucula.jpg"
     },
     {
+      "id": "safran",
+      "file": "images/products/safran.jpg"
+    },
+    {
       "id": "saft",
       "file": "images/products/saft.jpg"
     },
@@ -632,6 +732,14 @@
     {
       "id": "salat",
       "file": "images/products/salat.jpg"
+    },
+    {
+      "id": "salbei",
+      "file": "images/products/salbei.jpg"
+    },
+    {
+      "id": "sambaloelek",
+      "file": "images/products/sambaloelek.jpg"
     },
     {
       "id": "schalotte",
@@ -686,6 +794,18 @@
       "file": "images/products/semmelknoedel.jpg"
     },
     {
+      "id": "senf",
+      "file": "images/products/senf.jpg"
+    },
+    {
+      "id": "sojasauce",
+      "file": "images/products/sojasauce.jpg"
+    },
+    {
+      "id": "sonnenblumenoel",
+      "file": "images/products/sonnenblumenoel.jpg"
+    },
+    {
       "id": "spaghetti",
       "file": "images/products/spaghetti.jpg"
     },
@@ -734,12 +854,20 @@
       "file": "images/products/tee.jpg"
     },
     {
+      "id": "thymian",
+      "file": "images/products/thymian.jpg"
+    },
+    {
       "id": "tiefkuehlgemuese",
       "file": "images/products/tiefkuehlgemuese.jpg"
     },
     {
       "id": "toast",
       "file": "images/products/toast.jpg"
+    },
+    {
+      "id": "tomatenmark",
+      "file": "images/products/tomatenmark.jpg"
     },
     {
       "id": "tomatensaft",
@@ -770,6 +898,14 @@
       "file": "images/products/waffeleis.jpg"
     },
     {
+      "id": "walnuss",
+      "file": "images/products/walnuss.jpg"
+    },
+    {
+      "id": "wasabi",
+      "file": "images/products/wasabi.jpg"
+    },
+    {
       "id": "wassermelone",
       "file": "images/products/wassermelone.jpg"
     },
@@ -786,12 +922,20 @@
       "file": "images/products/wurst.jpg"
     },
     {
+      "id": "zimt",
+      "file": "images/products/zimt.jpg"
+    },
+    {
       "id": "zitrone",
       "file": "images/products/zitrone.jpg"
     },
     {
       "id": "zucchini",
       "file": "images/products/zucchini.jpg"
+    },
+    {
+      "id": "zucker",
+      "file": "images/products/zucker.jpg"
     },
     {
       "id": "zwieback",
@@ -869,6 +1013,12 @@
       "names": ["bandnudeln"],
       "image": "bandnudeln",
       "imageFallback": "nudeln"
+    },
+    {
+      "id": "basilikum",
+      "names": ["basilikum"],
+      "image": "basilikum",
+      "imageFallback": "kraeuter"
     },
     {
       "id": "basmati",
@@ -979,6 +1129,12 @@
       "imageFallback": "kaese"
     },
     {
+      "id": "cayennepfeffer",
+      "names": ["cayennepfeffer", "cayenne-pfeffer"],
+      "image": "cayennepfeffer",
+      "imageFallback": "gewuerze"
+    },
+    {
       "id": "champignon",
       "names": ["champignon", "champignons"],
       "image": "champignon"
@@ -999,6 +1155,12 @@
       "id": "chips-4",
       "names": ["chips-4", "chip", "chips"],
       "image": "chips-4"
+    },
+    {
+      "id": "cocktailsauce",
+      "names": ["cocktailsauce", "cocktailsoße", "cocktail sauce"],
+      "image": "cocktailsauce",
+      "imageFallback": "sauce"
     },
     {
       "id": "cola",
@@ -1242,6 +1404,11 @@
       "imageFallback": "packung"
     },
     {
+      "id": "gewuerze",
+      "names": ["gewürz", "gewürze"],
+      "image": "pfeffer"
+    },
+    {
       "id": "gnocchi",
       "names": ["gnocchi", "gnocchis"],
       "image": "gnocchi"
@@ -1274,9 +1441,21 @@
       "imageFallback": "oliven"
     },
     {
+      "id": "grillsauce",
+      "names": ["grillsauce", "grillsaucen", "grillsoße", "grillsoßen"],
+      "image": "grillsauce",
+      "imageFallback": "sauce"
+    },
+    {
       "id": "gruener-spargel",
       "names": ["grüner spargel", "grüne spargel"],
       "image": "gruener-spargel"
+    },
+    {
+      "id": "gruenerpfeffer",
+      "names": ["grünerpfeffer", "grüner pfeffer", "grüne pfefferkörner"],
+      "image": "gruenerpfeffer",
+      "imageFallback": "pfeffer"
     },
     {
       "id": "gurke",
@@ -1316,6 +1495,12 @@
       "id": "haferflocken",
       "names": ["haferflocken"],
       "image": "haferflocken"
+    },
+    {
+      "id": "haselnuss",
+      "names": ["haselnuss", "haselnüsse"],
+      "image": "haselnuss",
+      "imageFallback": "nuesse"
     },
     {
       "id": "hefe",
@@ -1434,6 +1619,12 @@
       "imageFallback": "unbekannt"
     },
     {
+      "id": "ketchup",
+      "names": ["ketchup", "tomatenketchup"],
+      "image": "ketchup",
+      "imageFallback": "sauce"
+    },
+    {
       "id": "kichererbsen",
       "names": ["kichererbse", "kichererbsen"],
       "image": "kichererbsen"
@@ -1464,6 +1655,12 @@
       "image": "knoblauch"
     },
     {
+      "id": "knoblauchsauce",
+      "names": ["knoblauchsauce", "knoblauchsoße", "knoblauchsaucen", "knoblauchsoßen"],
+      "image": "knoblauchsauce",
+      "imageFallback": "sauce"
+    },
+    {
       "id": "kochschinken",
       "names": ["kochschinken"],
       "image": "kochschinken",
@@ -1476,9 +1673,26 @@
       "imageFallback": "gemuese"
     },
     {
+      "id": "kokosnuss",
+      "names": ["kokosnuss", "kokosnüsse"],
+      "image": "kokosnuss",
+      "imageFallback": "nuesse"
+    },
+    {
+      "id": "koriander",
+      "names": ["koriander", "koriandergrün"],
+      "image": "koriander",
+      "imageFallback": "kraeuter"
+    },
+    {
       "id": "krabbensalat",
       "names": ["krabbensalat", "krabbensalate", "garnelensalat"],
       "image": "krabbensalat"
+    },
+    {
+      "id": "kraeuter",
+      "names": ["kräuter", "küchenkräuter"],
+      "image": "petersilie"
     },
     {
       "id": "kraeuterseitling",
@@ -1486,9 +1700,21 @@
       "image": "kraeuterseitling"
     },
     {
+      "id": "kreuzkuemmel",
+      "names": ["kreuzkümmel", "cumin"],
+      "image": "kreuzkuemmel",
+      "imageFallback": "gewuerze"
+    },
+    {
       "id": "kuechenrolle",
       "names": ["küchenrolle", "küchenrollen", "zewa"],
       "image": "kuechenrolle"
+    },
+    {
+      "id": "kuemmel",
+      "names": ["kümmel"],
+      "image": "kuemmel",
+      "imageFallback": "gewuerze"
     },
     {
       "id": "kuerbis",
@@ -1572,9 +1798,21 @@
       "imageFallback": "salat"
     },
     {
+      "id": "lorbeer",
+      "names": ["lorbeer", "lorbeerblatt", "lorbeerblätter"],
+      "image": "lorbeer",
+      "imageFallback": "kraeuter"
+    },
+    {
       "id": "maasdamer",
       "names": ["maasdamer"],
       "imageFallback": "kaese"
+    },
+    {
+      "id": "macadamia",
+      "names": ["macadamia", "macadamias", "macadamianuss", "macadamianüsse"],
+      "image": "macadamia",
+      "imageFallback": "nuesse"
     },
     {
       "id": "mais",
@@ -1587,6 +1825,12 @@
       "names": ["maltvinegar", "malt vinegar", "malzessig"],
       "image": "maltvinegar",
       "imageFallback": "essig"
+    },
+    {
+      "id": "mandel",
+      "names": ["mandel", "mandeln"],
+      "image": "mandel",
+      "imageFallback": "nuesse"
     },
     {
       "id": "mango",
@@ -1607,6 +1851,17 @@
       "id": "maultasche",
       "names": ["maultasche", "maultaschen"],
       "image": "maultasche"
+    },
+    {
+      "id": "mayonnaise",
+      "names": ["mayonnaise", "mayo"],
+      "image": "mayonnaise",
+      "imageFallback": "sauce"
+    },
+    {
+      "id": "mehl",
+      "names": ["mehl"],
+      "image": "mehl"
     },
     {
       "id": "milch",
@@ -1645,6 +1900,12 @@
       "image": "mundm"
     },
     {
+      "id": "muskatnuss",
+      "names": ["muskatnuss", "muskatnüsse", "muskat"],
+      "image": "muskatnuss",
+      "imageFallback": "nuesse"
+    },
+    {
       "id": "natron",
       "names": ["natron", "natronpulver"],
       "imageFallback": "packung"
@@ -1653,6 +1914,11 @@
       "id": "nudeln",
       "names": ["nudeln", "pasta"],
       "image": "spaghetti"
+    },
+    {
+      "id": "nuesse",
+      "names": ["nuss", "nüsse"],
+      "image": "walnuss"
     },
     {
       "id": "nusscreme",
@@ -1668,6 +1934,11 @@
       "id": "oatly",
       "names": ["oatly"],
       "imageFallback": "haferdrink"
+    },
+    {
+      "id": "oel",
+      "names": ["öl", "oel", "speiseöl", "speiseoel"],
+      "image": "rapsoel"
     },
     {
       "id": "oliven",
@@ -1693,6 +1964,12 @@
       "id": "orangensaft",
       "names": ["orangensaft", "orangensäfte"],
       "image": "orangensaft"
+    },
+    {
+      "id": "oregano",
+      "names": ["oregano"],
+      "image": "oregano",
+      "imageFallback": "kraeuter"
     },
     {
       "id": "packung",
@@ -1728,6 +2005,18 @@
       "imageFallback": "nudeln"
     },
     {
+      "id": "petersilie",
+      "names": ["petersilie"],
+      "image": "petersilie",
+      "imageFallback": "kraeuter"
+    },
+    {
+      "id": "pfeffer",
+      "names": ["pfeffer", "pfefferkorn", "pfefferkörner"],
+      "image": "pfeffer",
+      "imageFallback": "gewuerze"
+    },
+    {
       "id": "pfirsich",
       "names": ["pfirsich", "pfirsiche"],
       "image": "pfirsich"
@@ -1758,6 +2047,12 @@
       "image": "pommes"
     },
     {
+      "id": "puderzucker",
+      "names": ["puderzucker"],
+      "image": "puderzucker",
+      "imageFallback": "zucker"
+    },
+    {
       "id": "putenfleisch",
       "names": ["pute", "putenfleisch"],
       "imageFallback": "putensteak"
@@ -1772,6 +2067,12 @@
       "id": "radieschen",
       "names": ["radieschen"],
       "image": "radieschen"
+    },
+    {
+      "id": "rapsoel",
+      "names": ["rapsöl", "rapsoel"],
+      "image": "rapsoel",
+      "imageFallback": "oel"
     },
     {
       "id": "rebell",
@@ -1823,6 +2124,12 @@
       "imageFallback": "kaese"
     },
     {
+      "id": "rosmarin",
+      "names": ["rosmarin"],
+      "image": "rosmarin",
+      "imageFallback": "kraeuter"
+    },
+    {
       "id": "rotebeete",
       "names": ["rotebeete", "rote beete", "rote bete", "rote beten"],
       "image": "rotebeete",
@@ -1843,6 +2150,12 @@
       "id": "rumaroma",
       "names": ["rumaroma"],
       "imageFallback": "aroma"
+    },
+    {
+      "id": "safran",
+      "names": ["safran"],
+      "image": "safran",
+      "imageFallback": "gewuerze"
     },
     {
       "id": "saft",
@@ -1869,6 +2182,23 @@
       "id": "salat",
       "names": ["salat", "salate"],
       "image": "salat"
+    },
+    {
+      "id": "salbei",
+      "names": ["salbei"],
+      "image": "salbei",
+      "imageFallback": "kraeuter"
+    },
+    {
+      "id": "sambaloelek",
+      "names": ["sambaloelek", "sambal oelek"],
+      "image": "sambaloelek",
+      "imageFallback": "sauce"
+    },
+    {
+      "id": "sauce",
+      "names": ["sauce", "saucen", "soße", "soßen"],
+      "image": "grillsauce"
     },
     {
       "id": "schalotte",
@@ -1948,9 +2278,27 @@
       "image": "semmelknoedel"
     },
     {
+      "id": "senf",
+      "names": ["senf"],
+      "image": "senf",
+      "imageFallback": "sauce"
+    },
+    {
       "id": "smarties",
       "names": ["smarties"],
       "imageFallback": "mundm"
+    },
+    {
+      "id": "sojasauce",
+      "names": ["sojasauce", "soja sauce", "sojasoße"],
+      "image": "sojasauce",
+      "imageFallback": "sauce"
+    },
+    {
+      "id": "sonnenblumenoel",
+      "names": ["sonnenblumenöl", "sonnenblumenoel"],
+      "image": "sonnenblumenoel",
+      "imageFallback": "oel"
     },
     {
       "id": "spaghetti",
@@ -2033,6 +2381,12 @@
       "image": "tee"
     },
     {
+      "id": "thymian",
+      "names": ["thymian"],
+      "image": "thymian",
+      "imageFallback": "kraeuter"
+    },
+    {
       "id": "tiefkuehlgemuese",
       "names": ["tiefkühlgemüse", "tiefkühl-gemüse", "tk-gemüse", "tk gemüse"],
       "image": "tiefkuehlgemuese",
@@ -2047,6 +2401,12 @@
       "id": "toast",
       "names": ["toast", "toasts"],
       "image": "toast"
+    },
+    {
+      "id": "tomatenmark",
+      "names": ["tomatenmark", "tomatenpaste"],
+      "image": "tomatenmark",
+      "imageFallback": "sauce"
     },
     {
       "id": "tomatensaft",
@@ -2138,6 +2498,18 @@
       "imageFallback": "eis"
     },
     {
+      "id": "walnuss",
+      "names": ["walnuss", "walnüsse"],
+      "image": "walnuss",
+      "imageFallback": "nuesse"
+    },
+    {
+      "id": "wasabi",
+      "names": ["wasabi"],
+      "image": "wasabi",
+      "imageFallback": "sauce"
+    },
+    {
       "id": "wassermelone",
       "names": ["wassermelone", "wassermelonen"],
       "image": "wassermelone"
@@ -2159,6 +2531,12 @@
       "imageFallback": "fleisch"
     },
     {
+      "id": "zimt",
+      "names": ["zimt", "zimtstange", "zimtstangen"],
+      "image": "zimt",
+      "imageFallback": "gewuerze"
+    },
+    {
       "id": "zitrone",
       "names": ["zitrone", "zitronen"],
       "image": "zitrone"
@@ -2172,6 +2550,11 @@
       "id": "zucchini",
       "names": ["zucchini", "zucchinis"],
       "image": "zucchini"
+    },
+    {
+      "id": "zucker",
+      "names": ["zucker"],
+      "image": "zucker"
     },
     {
       "id": "zuckerschoten",
