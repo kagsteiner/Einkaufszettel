@@ -882,6 +882,11 @@
       "image": "bier"
     },
     {
+      "id": "bittermandelaroma",
+      "names": ["bittermandel", "bittermandelaroma"],
+      "imageFallback": "aroma"
+    },
+    {
       "id": "blackolive",
       "names": ["blackolive", "black olive", "schwarze olive", "schwarze oliven"],
       "image": "blackolive",
@@ -956,6 +961,11 @@
       "id": "butter",
       "names": ["butter"],
       "image": "butter"
+    },
+    {
+      "id": "butter-vanille-aroma",
+      "names": ["butter-vanille-aroma", "butter vanille aroma", "buttervanillearoma"],
+      "imageFallback": "aroma"
     },
     {
       "id": "butterkaese",
@@ -1830,6 +1840,11 @@
       "imageFallback": "salat"
     },
     {
+      "id": "rumaroma",
+      "names": ["rumaroma"],
+      "imageFallback": "aroma"
+    },
+    {
       "id": "saft",
       "names": ["saft", "säfte"],
       "image": "saft"
@@ -2087,6 +2102,16 @@
       "image": "unbekannt"
     },
     {
+      "id": "vanillearoma",
+      "names": ["vanillearoma"],
+      "imageFallback": "aroma"
+    },
+    {
+      "id": "vanilleextrakt",
+      "names": ["vanilleextrakt"],
+      "imageFallback": "aroma"
+    },
+    {
       "id": "vanilleschote",
       "names": ["vanilleschote", "vanilleschoten"],
       "image": "vanilleschote"
@@ -2137,6 +2162,11 @@
       "id": "zitrone",
       "names": ["zitrone", "zitronen"],
       "image": "zitrone"
+    },
+    {
+      "id": "zitronenaroma",
+      "names": ["zitronenaroma"],
+      "imageFallback": "aroma"
     },
     {
       "id": "zucchini",
