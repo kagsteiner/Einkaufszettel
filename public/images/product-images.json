@@ -839,6 +839,11 @@
       "image": "avocado"
     },
     {
+      "id": "backpulver",
+      "names": ["backpulver"],
+      "imageFallback": "packung"
+    },
+    {
       "id": "bacon",
       "names": ["bacon", "frühstücksspeck"],
       "image": "bacon",
@@ -1180,6 +1185,16 @@
       "imageFallback": "dosentomaten"
     },
     {
+      "id": "gelatine",
+      "names": ["blattgelatine", "gelatine"],
+      "imageFallback": "packung"
+    },
+    {
+      "id": "geliermittel",
+      "names": ["geliermittel"],
+      "imageFallback": "packung"
+    },
+    {
       "id": "gemischtersalat",
       "names": [
         "gemischtersalat",
@@ -1195,6 +1210,26 @@
       "id": "gemuese",
       "names": ["gemüse"],
       "image": "gemuese"
+    },
+    {
+      "id": "geriebene-orangenschale",
+      "names": [
+        "geriebene orangenschale",
+        "geriebene orangenschalen",
+        "orangenschale gerieben",
+        "orangenschalen gerieben"
+      ],
+      "imageFallback": "packung"
+    },
+    {
+      "id": "geriebene-zitronenschale",
+      "names": [
+        "geriebene zitronenschale",
+        "geriebene zitronenschalen",
+        "zitronenschale gerieben",
+        "zitronenschalen gerieben"
+      ],
+      "imageFallback": "packung"
     },
     {
       "id": "gnocchi",
@@ -1569,6 +1604,11 @@
       "image": "milch"
     },
     {
+      "id": "mohnfix",
+      "names": ["mohnfix"],
+      "imageFallback": "packung"
+    },
+    {
       "id": "mozzarella",
       "names": ["mozzarella", "mozzarellas"],
       "image": "mozzarella",
@@ -1593,6 +1633,11 @@
       "id": "mundm",
       "names": ["mundm", "m&m", "m&ms", "m&m's"],
       "image": "mundm"
+    },
+    {
+      "id": "natron",
+      "names": ["natron", "natronpulver"],
+      "imageFallback": "packung"
     },
     {
       "id": "nudeln",
@@ -1795,6 +1840,11 @@
       "image": "sahne"
     },
     {
+      "id": "sahnesteif",
+      "names": ["sahnesteif"],
+      "imageFallback": "packung"
+    },
+    {
       "id": "salami",
       "names": ["salami", "salamis"],
       "image": "salami",
@@ -1905,6 +1955,11 @@
       "imageFallback": "schinken"
     },
     {
+      "id": "speisestaerke",
+      "names": ["speisestärke", "speisestaerke"],
+      "imageFallback": "packung"
+    },
+    {
       "id": "spinat",
       "names": ["spinat", "blattspinat", "babyspinat"],
       "image": "spinat",
@@ -1984,6 +2039,21 @@
       "image": "tomatensaft"
     },
     {
+      "id": "tortenguss",
+      "names": ["tortenguss", "tortengüsse"],
+      "imageFallback": "packung"
+    },
+    {
+      "id": "tortenguss-rot",
+      "names": ["tortenguss rot", "roter tortenguss"],
+      "imageFallback": "tortenguss"
+    },
+    {
+      "id": "tortenguss-weiss",
+      "names": ["tortenguss weiss", "tortenguss weiß", "weißer tortenguss", "weisser tortenguss"],
+      "imageFallback": "tortenguss"
+    },
+    {
       "id": "trauben",
       "names": ["trauben", "weintrauben"],
       "image": "traubenweiss"
@@ -2007,6 +2077,11 @@
       "imageFallback": "trauben"
     },
     {
+      "id": "trockenhefe",
+      "names": ["trockenhefe"],
+      "imageFallback": "packung"
+    },
+    {
       "id": "unbekannt",
       "names": ["unbekannt"],
       "image": "unbekannt"
@@ -2015,6 +2090,11 @@
       "id": "vanilleschote",
       "names": ["vanilleschote", "vanilleschoten"],
       "image": "vanilleschote"
+    },
+    {
+      "id": "vanillezucker",
+      "names": ["vanillezucker"],
+      "imageFallback": "packung"
     },
     {
       "id": "veggiefleisch",
