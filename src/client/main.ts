@@ -42,6 +42,7 @@ let eventSource: EventSource | null = null;
 let refreshQueued = false;
 let queuedRefreshPreserveFocus = true;
 let refreshPromise: Promise<void> | null = null;
+const clientInstanceId = window.crypto.randomUUID();
 
 void boot();
 
@@ -67,9 +68,7 @@ async function boot(): Promise<void> {
 
 async function loadProductImageCatalog(): Promise<void> {
   try {
-    const response = await fetch(applicationPath("/images/product-images.json"), {
-      cache: "force-cache",
-    });
+    const response = await fetch(applicationPath("/images/product-images.json"));
     if (!response.ok) {
       return;
     }
@@ -257,6 +256,8 @@ async function refreshStateOnce(preserveFocus: boolean): Promise<void> {
       )
     : null;
   try {
+    const previousState = currentState;
+    const previousActiveListId = activeListId;
     const previousHouseholdId = currentState?.household.id || null;
     currentState = await api<AppState>("/api/state");
     if (previousHouseholdId && previousHouseholdId !== currentState.household.id) {
@@ -269,7 +270,11 @@ async function refreshStateOnce(preserveFocus: boolean): Promise<void> {
     if (activeListId) {
       localStorage.setItem("active-list-id", activeListId);
     }
-    renderApplication();
+    if (canSyncActiveList(previousState, currentState, previousActiveListId)) {
+      syncActiveListItems();
+    } else {
+      renderApplication();
+    }
     if (focusedName) {
       document.querySelector<HTMLInputElement>(`[name="${focusedName}"]`)?.focus();
     }
@@ -383,14 +388,14 @@ function openItemsMarkup(items: ReadonlyArray<ShoppingItem>): string {
   return [...sections]
     .map(
       ([category, section]) =>
-        `<div class="category-heading">${escapeHtml(categoryLabels[category] || "Sonstiges")}</div>${section.map(itemMarkup).join("")}`,
+        `<div class="category-heading" data-category-heading="${escapeHtml(category)}">${escapeHtml(categoryLabels[category] || "Sonstiges")}</div>${section.map(itemMarkup).join("")}`,
     )
     .join("");
 }
 
 function itemMarkup(item: ShoppingItem): string {
   const quantities = itemQuantityText(item);
-  return `<article class="shopping-row ${item.completedAt ? "completed" : ""}" data-item-id="${escapeHtml(item.id)}">
+  return `<article class="shopping-row ${item.completedAt ? "completed" : ""}" data-item-id="${escapeHtml(item.id)}" data-item-version="${escapeHtml(item.updatedAt)}">
     <button class="check-button" type="button" data-toggle-item aria-label="${
       item.completedAt ? "Wieder auf die Liste setzen" : "Als erledigt markieren"
     }"><span aria-hidden="true">✓</span></button>
@@ -417,7 +422,7 @@ function openTilesMarkup(items: ReadonlyArray<ShoppingItem>): string {
   return [...sections]
     .map(
       ([category, section]) =>
-        `<div class="tile-category-heading">${escapeHtml(categoryLabels[category] || "Sonstiges")}</div>${section.map(tileMarkup).join("")}`,
+        `<div class="tile-category-heading" data-category-heading="${escapeHtml(category)}">${escapeHtml(categoryLabels[category] || "Sonstiges")}</div>${section.map(tileMarkup).join("")}`,
     )
     .join("");
 }
@@ -432,7 +437,7 @@ function tileMarkup(item: ShoppingItem): string {
     ? applicationPath(`/api/images/${item.imageId}`)
     : applicationPath(`/${productImageFile(productImageCatalog, item.name)}`);
   const fallbackSource = applicationPath(`/${unknownProductImageFile}`);
-  return `<article class="product-tile" data-item-id="${escapeHtml(item.id)}">
+  return `<article class="product-tile" data-item-id="${escapeHtml(item.id)}" data-item-version="${escapeHtml(item.updatedAt)}">
     <button class="product-tile-main" type="button" data-toggle-item aria-label="${escapeHtml(item.name)} als erledigt markieren">
       <span class="product-tile-image">
         <img src="${escapeHtml(imageSource)}" data-fallback-src="${escapeHtml(fallbackSource)}" alt="" loading="lazy" decoding="async">
@@ -525,22 +530,40 @@ function bindApplicationEvents(activeList: ShoppingList | null): void {
       void analyzeRecipe(file, activeList.id);
     }
   });
-  for (const button of app.querySelectorAll<HTMLButtonElement>("[data-toggle-item]")) {
+  bindItemEvents(app);
+}
+
+function bindItemEvents(root: ParentNode): void {
+  for (const button of root.querySelectorAll<HTMLButtonElement>("[data-toggle-item]")) {
+    if (button.dataset.listenerBound) {
+      continue;
+    }
+    button.dataset.listenerBound = "true";
     button.addEventListener(
       "click",
       () => void toggleItem(button.closest<HTMLElement>("[data-item-id]")),
     );
   }
-  for (const button of app.querySelectorAll<HTMLButtonElement>("[data-edit-item]")) {
+  for (const button of root.querySelectorAll<HTMLButtonElement>("[data-edit-item]")) {
+    if (button.dataset.listenerBound) {
+      continue;
+    }
+    button.dataset.listenerBound = "true";
     button.addEventListener("click", () => {
       const id = button.closest<HTMLElement>("[data-item-id]")?.dataset.itemId;
-      const item = activeList?.items.find((candidate) => candidate.id === id);
+      const item = currentState?.lists
+        .find((candidate) => candidate.id === activeListId)
+        ?.items.find((candidate) => candidate.id === id);
       if (item) {
         openItemDialog(item);
       }
     });
   }
-  for (const image of app.querySelectorAll<HTMLImageElement>("[data-fallback-src]")) {
+  for (const image of root.querySelectorAll<HTMLImageElement>("[data-fallback-src]")) {
+    if (image.dataset.listenerBound) {
+      continue;
+    }
+    image.dataset.listenerBound = "true";
     image.addEventListener("error", () => {
       const fallbackSource = image.dataset.fallbackSrc;
       if (!fallbackSource || image.dataset.fallbackApplied) {
@@ -699,15 +722,139 @@ async function toggleItem(row: HTMLElement | null): Promise<void> {
   }
   row?.classList.toggle("leaving", !item.completedAt);
   try {
-    await api(`/api/items/${encodeURIComponent(item.id)}/completed`, {
-      body: { completed: !item.completedAt },
-      method: "PUT",
-    });
-    await refreshState(false);
+    const result = await api<{ item: ShoppingItem }>(
+      `/api/items/${encodeURIComponent(item.id)}/completed`,
+      {
+        body: { clientInstanceId, completed: !item.completedAt },
+        method: "PUT",
+      },
+    );
+    replaceItemInCurrentState(result.item);
+    syncActiveListItems();
   } catch (error) {
     row?.classList.remove("leaving");
     showToast(messageFromError(error), "error");
   }
+}
+
+function replaceItemInCurrentState(updatedItem: ShoppingItem): void {
+  if (!currentState || !activeListId) {
+    return;
+  }
+  currentState = {
+    ...currentState,
+    lists: currentState.lists.map((list) =>
+      list.id === activeListId
+        ? {
+            ...list,
+            items: list.items.map((item) => (item.id === updatedItem.id ? updatedItem : item)),
+          }
+        : list,
+    ),
+  };
+}
+
+function syncActiveListItems(): void {
+  const list = currentState?.lists.find((candidate) => candidate.id === activeListId);
+  const openContainer = app.querySelector<HTMLElement>(".shopping-items");
+  const quickAdd = app.querySelector<HTMLElement>(".quick-add");
+  if (!list || !openContainer || !quickAdd) {
+    renderApplication();
+    return;
+  }
+
+  const activeItems = list.items.filter((item) => !item.completedAt);
+  const completedItems = list.items.filter((item) => item.completedAt);
+  const openMarkup = activeItems.length
+    ? shoppingView === "tiles"
+      ? openTilesMarkup(activeItems)
+      : openItemsMarkup(activeItems)
+    : `<div class="empty-note"><span aria-hidden="true">✓</span><strong>Alles erledigt</strong><p>Füge unten etwas hinzu, sobald euch wieder etwas einfällt.</p></div>`;
+  reconcileOpenItems(openContainer, openMarkup);
+
+  const completedWasOpen = app.querySelector<HTMLDetailsElement>(".completed-items")?.open || false;
+  app.querySelector(".completed-items")?.remove();
+  if (completedItems.length) {
+    quickAdd.insertAdjacentHTML(
+      "beforebegin",
+      `<details class="completed-items" ${completedWasOpen ? "open" : ""}><summary>${completedItems.length} erledigt</summary>${completedItems.map(itemMarkup).join("")}</details>`,
+    );
+  }
+  for (const currentList of currentState?.lists || []) {
+    const tabCount = app.querySelector<HTMLElement>(
+      `[data-list-id="${CSS.escape(currentList.id)}"] span`,
+    );
+    if (tabCount) {
+      tabCount.textContent = String(currentList.items.filter((item) => !item.completedAt).length);
+    }
+  }
+  bindItemEvents(app);
+}
+
+function reconcileOpenItems(container: HTMLElement, markup: string): void {
+  const template = document.createElement("template");
+  template.innerHTML = markup;
+  const existing = new Map<string, Element>();
+  for (const element of container.children) {
+    const key = renderKey(element);
+    if (key) {
+      existing.set(key, element);
+    }
+  }
+
+  let cursor: ChildNode | null = container.firstChild;
+  for (const desired of [...template.content.children]) {
+    const key = renderKey(desired);
+    const existingElement = key ? existing.get(key) : undefined;
+    const candidate =
+      existingElement && canReuseRenderedElement(existingElement, desired)
+        ? existingElement
+        : desired;
+    if (candidate === cursor) {
+      cursor = cursor.nextSibling;
+    } else {
+      container.insertBefore(candidate, cursor);
+      cursor = candidate.nextSibling;
+    }
+  }
+  while (cursor) {
+    const next = cursor.nextSibling;
+    cursor.remove();
+    cursor = next;
+  }
+}
+
+function canReuseRenderedElement(existing: Element, desired: Element): boolean {
+  const existingElement = existing as HTMLElement;
+  const desiredElement = desired as HTMLElement;
+  return (
+    existing.className === desired.className &&
+    existingElement.dataset.itemVersion === desiredElement.dataset.itemVersion
+  );
+}
+
+function renderKey(element: Element): string | null {
+  const itemId = (element as HTMLElement).dataset.itemId;
+  if (itemId) {
+    return `item:${itemId}`;
+  }
+  const category = (element as HTMLElement).dataset.categoryHeading;
+  return category ? `category:${category}` : null;
+}
+
+function canSyncActiveList(
+  previousState: AppState | null,
+  nextState: AppState,
+  previousActiveListId: string | null,
+): boolean {
+  if (!previousState || previousActiveListId !== activeListId || !app.querySelector(".app-shell")) {
+    return false;
+  }
+  const stateChrome = (state: AppState) => ({
+    household: state.household,
+    lists: state.lists.map(({ id, imageId, name }) => ({ id, imageId, name })),
+  });
+  return JSON.stringify(stateChrome(previousState)) === JSON.stringify(stateChrome(nextState));
 }
 
 async function openListDialog(list?: ShoppingList): Promise<void> {
@@ -1293,7 +1440,19 @@ async function handleInvitationPath(): Promise<void> {
 function openEventStream(): void {
   closeEventStream();
   eventSource = new EventSource(applicationPath("/api/events"));
-  eventSource.addEventListener("state-changed", () => void refreshState());
+  eventSource.addEventListener("state-changed", (event) => {
+    let sourceClientInstanceId: unknown;
+    try {
+      sourceClientInstanceId = (
+        JSON.parse((event as MessageEvent<string>).data) as { clientInstanceId?: unknown }
+      ).clientInstanceId;
+    } catch {
+      // A malformed live event still triggers a safe state reconciliation.
+    }
+    if (sourceClientInstanceId !== clientInstanceId) {
+      void refreshState();
+    }
+  });
   eventSource.addEventListener("ready", () => {
     void verifyVersion();
     void refreshState();

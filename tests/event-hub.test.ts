@@ -29,3 +29,23 @@ test("closing the event hub ends active live-update responses", () => {
   assert.equal(ended, true);
   assert.equal(writes.length, 1);
 });
+
+test("state change events identify the client that initiated a mutation", () => {
+  const request = new EventEmitter() as IncomingMessage;
+  const writes: string[] = [];
+  const response = {
+    end: () => undefined,
+    write: (value: string) => {
+      writes.push(value);
+      return true;
+    },
+    writeHead: () => response,
+  } as unknown as ServerResponse;
+  const eventHub = new EventHub();
+
+  eventHub.subscribe("household", request, response);
+  eventHub.publish("household", "client-123");
+
+  assert.match(writes[1] || "", /"clientInstanceId":"client-123"/);
+  eventHub.close();
+});

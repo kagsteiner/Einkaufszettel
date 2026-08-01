@@ -80,11 +80,15 @@ export async function servePublicFile(
 
   const extension = extname(requestedPath).toLowerCase();
   const isHashedAsset = pathname.startsWith("/assets/");
+  const isProductImage = pathname.startsWith("/images/products/");
+  const isProductImageCatalog = pathname === "/images/product-images.json";
   const cacheControl = isHashedAsset
     ? "public, max-age=31536000, immutable"
-    : pathname === "/manifest.webmanifest"
-      ? "public, max-age=0, must-revalidate"
-      : "no-store";
+    : isProductImage || isProductImageCatalog
+      ? "public, max-age=86400, stale-while-revalidate=604800"
+      : pathname === "/manifest.webmanifest"
+        ? "public, max-age=0, must-revalidate"
+        : "no-store";
   response.writeHead(200, {
     "Cache-Control": cacheControl,
     "Content-Length": fileStats.size,

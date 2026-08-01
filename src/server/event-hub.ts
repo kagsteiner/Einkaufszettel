@@ -46,9 +46,9 @@ export class EventHub {
     });
   }
 
-  publish(householdId: string): void {
+  publish(householdId: string, clientInstanceId?: string): void {
     this.revision += 1;
-    const event = `id: ${this.revision}\nevent: state-changed\ndata: ${JSON.stringify({ revision: this.revision })}\n\n`;
+    const event = `id: ${this.revision}\nevent: state-changed\ndata: ${JSON.stringify({ clientInstanceId, revision: this.revision })}\n\n`;
     for (const subscription of this.subscriptions.get(householdId) || []) {
       subscription.response.write(event);
     }

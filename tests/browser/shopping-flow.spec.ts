@@ -117,6 +117,11 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   const assetPath = scriptSource ? new URL(scriptSource, page.url()).pathname : "";
   const assetResponse = await page.request.get(assetPath);
   expect(assetResponse.headers()["cache-control"]).toContain("immutable");
+  const productImageResponse = await page.request.get("/images/products/unbekannt.jpg");
+  expect(productImageResponse.headers()["cache-control"]).toContain("max-age=86400");
+  expect(productImageResponse.headers()["cache-control"]).toContain("stale-while-revalidate");
+  const productCatalogResponse = await page.request.get("/images/product-images.json");
+  expect(productCatalogResponse.headers()["cache-control"]).toContain("max-age=86400");
   const versionResponse = await page.request.get("/api/version");
   expect(versionResponse.headers()["cache-control"]).toBe("no-store");
   await page.getByRole("button", { name: "Neu hier" }).click();
@@ -221,8 +226,28 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   const creamTile = page.locator(".product-tile").filter({ hasText: "Schlagsahne" });
   await expect(creamTile.getByText("Das ist meine Sorte", { exact: true })).toBeVisible();
   await expect(creamTile.locator("img")).toHaveAttribute("src", /api\/images\//);
+  const uploadedImagePath = await creamTile.locator("img").getAttribute("src");
+  const uploadedImageResponse = await page.request.get(uploadedImagePath || "");
+  expect(uploadedImageResponse.headers()["cache-control"]).toContain("private");
+  expect(uploadedImageResponse.headers()["cache-control"]).toContain("immutable");
+  const retainedProductImage = page
+    .locator(".product-tile")
+    .filter({ hasText: "Hafermilch" })
+    .locator("img");
+  await retainedProductImage.evaluate((image) => {
+    image.dataset.retainedAcrossToggle = "true";
+  });
+  let stateRefreshesAfterToggle = 0;
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname === "/api/state") {
+      stateRefreshesAfterToggle += 1;
+    }
+  });
   await creamTile.locator(".product-tile-main").click();
   await expect(page.getByText("1 erledigt", { exact: true })).toBeVisible();
+  await expect(retainedProductImage).toHaveAttribute("data-retained-across-toggle", "true");
+  await page.waitForTimeout(100);
+  expect(stateRefreshesAfterToggle).toBe(0);
   await page.getByRole("button", { name: "Listenansicht" }).click();
   await page.getByLabel("Produkt", { exact: true }).fill("Schlagsahne");
   await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();

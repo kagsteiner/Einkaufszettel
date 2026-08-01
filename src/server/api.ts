@@ -95,7 +95,7 @@ export async function handleApiRequest(
       const user = authService.authenticate(sessionToken);
       const image = await imageService.readImage(user, imageMatch[1]);
       response.writeHead(200, {
-        "Cache-Control": "private, no-store",
+        "Cache-Control": "private, max-age=31536000, immutable",
         "Content-Length": image.buffer.length,
         "Content-Type": image.mimeType,
       });
@@ -301,7 +301,10 @@ export async function handleApiRequest(
         throw new AppError(400, "invalid_input", "Der Erledigt-Status ist ungültig.");
       }
       const item = shoppingService.setCompleted(user, itemCompletedMatch[1], body.completed);
-      eventHub.publish(user.householdId);
+      eventHub.publish(
+        user.householdId,
+        typeof body.clientInstanceId === "string" ? body.clientInstanceId : undefined,
+      );
       sendJson(response, 200, { item });
       return true;
     }
