@@ -22,8 +22,16 @@
       "file": "images/products/aubergine.jpg"
     },
     {
+      "id": "augenmaske",
+      "file": "images/products/augenmaske.jpg"
+    },
+    {
       "id": "avocado",
       "file": "images/products/avocado.jpg"
+    },
+    {
+      "id": "backpapier",
+      "file": "images/products/backpapier.jpg"
     },
     {
       "id": "bacon",
@@ -106,6 +114,10 @@
       "file": "images/products/burgerpatty.jpg"
     },
     {
+      "id": "buerste",
+      "file": "images/products/buerste.jpg"
+    },
+    {
       "id": "butter",
       "file": "images/products/butter.jpg"
     },
@@ -162,6 +174,18 @@
       "file": "images/products/dattel.jpg"
     },
     {
+      "id": "deoroller",
+      "file": "images/products/deoroller.jpg"
+    },
+    {
+      "id": "deospray",
+      "file": "images/products/deospray.jpg"
+    },
+    {
+      "id": "desinfektion",
+      "file": "images/products/desinfektion.jpg"
+    },
+    {
       "id": "doeschen",
       "file": "images/products/doeschen.jpg"
     },
@@ -176,6 +200,10 @@
     {
       "id": "dosentomaten",
       "file": "images/products/dosentomaten.jpg"
+    },
+    {
+      "id": "duschgel",
+      "file": "images/products/duschgel.jpg"
     },
     {
       "id": "ei",
@@ -264,6 +292,10 @@
     {
       "id": "gemuese",
       "file": "images/products/gemuese.jpg"
+    },
+    {
+      "id": "geschirrspueltab",
+      "file": "images/products/geschirrspueltab.jpg"
     },
     {
       "id": "gnocchi",
@@ -378,6 +410,14 @@
       "file": "images/products/kaffeefilter.jpg"
     },
     {
+      "id": "kaffeepad",
+      "file": "images/products/kaffeepad.jpg"
+    },
+    {
+      "id": "kamm",
+      "file": "images/products/kamm.jpg"
+    },
+    {
       "id": "karotte",
       "file": "images/products/karotte.jpg"
     },
@@ -422,6 +462,10 @@
       "file": "images/products/kiwi.jpg"
     },
     {
+      "id": "klobuerste",
+      "file": "images/products/klobuerste.jpg"
+    },
+    {
       "id": "klopapier",
       "file": "images/products/klopapier.jpg"
     },
@@ -452,6 +496,10 @@
     {
       "id": "koriander",
       "file": "images/products/koriander.jpg"
+    },
+    {
+      "id": "kosmetikmuellbeutel",
+      "file": "images/products/kosmetikmuellbeutel.jpg"
     },
     {
       "id": "krabbensalat",
@@ -566,6 +614,10 @@
       "file": "images/products/mozzarella.jpg"
     },
     {
+      "id": "muellbeutel",
+      "file": "images/products/muellbeutel.jpg"
+    },
+    {
       "id": "multivitaminsaft",
       "file": "images/products/multivitaminsaft.jpg"
     },
@@ -580,6 +632,10 @@
     {
       "id": "muesli",
       "file": "images/products/muesli.jpg"
+    },
+    {
+      "id": "nagelfeile",
+      "file": "images/products/nagelfeile.jpg"
     },
     {
       "id": "nutella",
@@ -662,6 +718,10 @@
       "file": "images/products/putensteak.jpg"
     },
     {
+      "id": "putzschwamm",
+      "file": "images/products/putzschwamm.jpg"
+    },
+    {
       "id": "radieschen",
       "file": "images/products/radieschen.jpg"
     },
@@ -676,6 +736,10 @@
     {
       "id": "reiniger",
       "file": "images/products/reiniger.jpg"
+    },
+    {
+      "id": "reinigungspad",
+      "file": "images/products/reinigungspad.jpg"
     },
     {
       "id": "rettich",
@@ -782,6 +846,10 @@
       "file": "images/products/schweinefilet.jpg"
     },
     {
+      "id": "seife",
+      "file": "images/products/seife.jpg"
+    },
+    {
       "id": "sekt",
       "file": "images/products/sekt.jpg"
     },
@@ -796,6 +864,14 @@
     {
       "id": "senf",
       "file": "images/products/senf.jpg"
+    },
+    {
+      "id": "serviette",
+      "file": "images/products/serviette.jpg"
+    },
+    {
+      "id": "shampoo",
+      "file": "images/products/shampoo.jpg"
     },
     {
       "id": "sojasauce",
@@ -858,6 +934,10 @@
       "file": "images/products/thymian.jpg"
     },
     {
+      "id": "tiefkuehlbeutel",
+      "file": "images/products/tiefkuehlbeutel.jpg"
+    },
+    {
       "id": "tiefkuehlgemuese",
       "file": "images/products/tiefkuehlgemuese.jpg"
     },
@@ -904,6 +984,14 @@
     {
       "id": "wasabi",
       "file": "images/products/wasabi.jpg"
+    },
+    {
+      "id": "waescheklammer",
+      "file": "images/products/waescheklammer.jpg"
+    },
+    {
+      "id": "waschmittel",
+      "file": "images/products/waschmittel.jpg"
     },
     {
       "id": "wassermelone",
@@ -978,9 +1066,19 @@
       "image": "aubergine"
     },
     {
+      "id": "augenmaske",
+      "names": ["augenmaske", "augenmasken", "schlafmaske", "schlafmasken"],
+      "image": "augenmaske"
+    },
+    {
       "id": "avocado",
       "names": ["avocado", "avocados"],
       "image": "avocado"
+    },
+    {
+      "id": "backpapier",
+      "names": ["backpapier"],
+      "image": "backpapier"
     },
     {
       "id": "backpulver",
@@ -1096,6 +1194,11 @@
       "imageFallback": "nudeln"
     },
     {
+      "id": "buerste",
+      "names": ["bürste", "bürsten", "haarbürste", "haarbürsten"],
+      "image": "buerste"
+    },
+    {
       "id": "burgerbun",
       "names": ["burgerbun", "burger buns", "burgerbrötchen", "hamburgerbrötchen"],
       "image": "burgerbun",
@@ -1193,6 +1296,28 @@
       "image": "dattel"
     },
     {
+      "id": "deo",
+      "names": ["deo", "deodorant", "deodorants"],
+      "image": "deospray"
+    },
+    {
+      "id": "deoroller",
+      "names": ["deoroller", "deo roller", "deo-roll-on", "roll-on-deo"],
+      "image": "deoroller",
+      "imageFallback": "deo"
+    },
+    {
+      "id": "deospray",
+      "names": ["deospray", "deo spray"],
+      "image": "deospray",
+      "imageFallback": "deo"
+    },
+    {
+      "id": "desinfektion",
+      "names": ["desinfektion", "desinfektionsmittel", "desinfektionsspray"],
+      "image": "desinfektion"
+    },
+    {
       "id": "doeschen",
       "names": ["döschen"],
       "image": "doeschen"
@@ -1211,6 +1336,11 @@
       "id": "dosentomaten",
       "names": ["dosentomaten"],
       "image": "dosentomaten"
+    },
+    {
+      "id": "duschgel",
+      "names": ["duschgel", "duschgels"],
+      "image": "duschgel"
     },
     {
       "id": "edamer",
@@ -1404,6 +1534,11 @@
       "imageFallback": "packung"
     },
     {
+      "id": "geschirrspueltab",
+      "names": ["geschirrspültab", "geschirrspültabs", "spülmaschinentab", "spülmaschinentabs"],
+      "image": "geschirrspueltab"
+    },
+    {
       "id": "gewuerze",
       "names": ["gewürz", "gewürze"],
       "image": "pfeffer"
@@ -1570,9 +1705,20 @@
       "image": "kaffeefilter"
     },
     {
+      "id": "kaffeepad",
+      "names": ["kaffeepad", "kaffeepads", "coffee pad", "coffee pads"],
+      "image": "kaffeepad",
+      "imageFallback": "kaffee"
+    },
+    {
       "id": "kaiserschoten",
       "names": ["kaiserschoten"],
       "imageFallback": "erbsen"
+    },
+    {
+      "id": "kamm",
+      "names": ["kamm", "kämme"],
+      "image": "kamm"
     },
     {
       "id": "karotte",
@@ -1640,6 +1786,12 @@
       "image": "kiwi"
     },
     {
+      "id": "klobuerste",
+      "names": ["klobürste", "klobürsten", "toilettenbürste", "toilettenbürsten"],
+      "image": "klobuerste",
+      "imageFallback": "buerste"
+    },
+    {
       "id": "klopapier",
       "names": ["klopapier", "toilettenpapier"],
       "image": "klopapier"
@@ -1683,6 +1835,12 @@
       "names": ["koriander", "koriandergrün"],
       "image": "koriander",
       "imageFallback": "kraeuter"
+    },
+    {
+      "id": "kosmetikmuellbeutel",
+      "names": ["kosmetikmüllbeutel", "kosmetik müllbeutel"],
+      "image": "kosmetikmuellbeutel",
+      "imageFallback": "muellbeutel"
     },
     {
       "id": "krabbensalat",
@@ -1885,6 +2043,11 @@
       "imageFallback": "reibekaese"
     },
     {
+      "id": "muellbeutel",
+      "names": ["müllbeutel", "müllsäcke", "müllsack"],
+      "image": "muellbeutel"
+    },
+    {
       "id": "muesli",
       "names": ["müsli", "müslis"],
       "image": "muesli"
@@ -1904,6 +2067,11 @@
       "names": ["muskatnuss", "muskatnüsse", "muskat"],
       "image": "muskatnuss",
       "imageFallback": "nuesse"
+    },
+    {
+      "id": "nagelfeile",
+      "names": ["nagelfeile", "nagelfeilen"],
+      "image": "nagelfeile"
     },
     {
       "id": "natron",
@@ -2064,6 +2232,11 @@
       "imageFallback": "fleisch"
     },
     {
+      "id": "putzschwamm",
+      "names": ["putzschwamm", "putzschwämme", "reinigungsschwamm", "reinigungsschwämme"],
+      "image": "putzschwamm"
+    },
+    {
       "id": "radieschen",
       "names": ["radieschen"],
       "image": "radieschen"
@@ -2089,6 +2262,18 @@
       "id": "reiniger",
       "names": ["reiniger", "putzmittel"],
       "image": "reiniger"
+    },
+    {
+      "id": "reinigungspad",
+      "names": [
+        "reinigungspad",
+        "reinigungspads",
+        "abschminkpad",
+        "abschminkpads",
+        "wattepad",
+        "wattepads"
+      ],
+      "image": "reinigungspad"
     },
     {
       "id": "rettich",
@@ -2262,6 +2447,11 @@
       "imageFallback": "fleisch"
     },
     {
+      "id": "seife",
+      "names": ["seife", "seifen"],
+      "image": "seife"
+    },
+    {
       "id": "sekt",
       "names": ["sekt", "sekte"],
       "image": "sekt"
@@ -2282,6 +2472,16 @@
       "names": ["senf"],
       "image": "senf",
       "imageFallback": "sauce"
+    },
+    {
+      "id": "serviette",
+      "names": ["serviette", "servietten"],
+      "image": "serviette"
+    },
+    {
+      "id": "shampoo",
+      "names": ["shampoo", "shampoos"],
+      "image": "shampoo"
     },
     {
       "id": "smarties",
@@ -2385,6 +2585,11 @@
       "names": ["thymian"],
       "image": "thymian",
       "imageFallback": "kraeuter"
+    },
+    {
+      "id": "tiefkuehlbeutel",
+      "names": ["tiefkühlbeutel", "gefrierbeutel"],
+      "image": "tiefkuehlbeutel"
     },
     {
       "id": "tiefkuehlgemuese",
@@ -2492,6 +2697,11 @@
       "imageFallback": "schinken"
     },
     {
+      "id": "waescheklammer",
+      "names": ["wäscheklammer", "wäscheklammern"],
+      "image": "waescheklammer"
+    },
+    {
       "id": "waffeleis",
       "names": ["waffeleis", "eiswaffel", "eiswaffeln", "eistüte", "eistüten"],
       "image": "waffeleis",
@@ -2508,6 +2718,11 @@
       "names": ["wasabi"],
       "image": "wasabi",
       "imageFallback": "sauce"
+    },
+    {
+      "id": "waschmittel",
+      "names": ["waschmittel", "flüssigwaschmittel"],
+      "image": "waschmittel"
     },
     {
       "id": "wassermelone",
