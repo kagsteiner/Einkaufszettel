@@ -23,7 +23,56 @@ test("product image mappings support aliases and normalized German product names
   assert.equal(normalizeProductName("  BERGKÄSE  "), "bergkäse");
   assert.equal(productImageFile(catalog, "Bergkäse"), "images/products/kaese.jpg");
   assert.equal(productImageFile(catalog, "schnittkäse"), "images/products/kaese.jpg");
-  assert.equal(productImageFile(catalog, "Frischkäse"), unknownProductImageFile);
+  assert.equal(productImageFile(catalog, "Frischkäse"), "images/products/kaese.jpg");
+});
+
+test("multi-word product names use the first known word", () => {
+  const catalog = createProductImageCatalog({
+    images: [
+      { file: "images/products/deo.jpg", id: "deo" },
+      { file: "images/products/milch.jpg", id: "milch" },
+    ],
+    products: [
+      { id: "deo", image: "deo", names: ["Deo"] },
+      { id: "milch", image: "milch", names: ["Milch"] },
+    ],
+    version: 2,
+  });
+
+  assert.equal(productImageFile(catalog, "Deo Karlheinz"), "images/products/deo.jpg");
+  assert.equal(productImageFile(catalog, "Milch -L"), "images/products/milch.jpg");
+  assert.equal(productImageFile(catalog, "Unbekannt Deo"), "images/products/deo.jpg");
+  assert.equal(productImageFile(catalog, "Milch Deo"), "images/products/milch.jpg");
+});
+
+test("German compounds use the longest safe catalog suffix", () => {
+  const catalog = createProductImageCatalog({
+    images: [
+      { file: "images/products/buttermilch.jpg", id: "buttermilch" },
+      { file: "images/products/ei.jpg", id: "ei" },
+      { file: "images/products/milch.jpg", id: "milch" },
+      { file: "images/products/reis.jpg", id: "reis" },
+      { file: "images/products/salz.jpg", id: "salz" },
+      { file: "images/products/sekt.jpg", id: "sekt" },
+    ],
+    products: [
+      { id: "buttermilch", image: "buttermilch", names: ["Buttermilch"] },
+      { id: "ei", image: "ei", names: ["Ei"] },
+      { id: "milch", image: "milch", names: ["Milch"] },
+      { id: "reis", image: "reis", names: ["Reis"] },
+      { id: "salz", image: "salz", names: ["Salz"] },
+      { id: "sekt", image: "sekt", names: ["Sekt"] },
+    ],
+    version: 2,
+  });
+
+  assert.equal(productImageFile(catalog, "Frischmilch"), "images/products/milch.jpg");
+  assert.equal(productImageFile(catalog, "Jodsalz"), "images/products/salz.jpg");
+  assert.equal(productImageFile(catalog, "BioButtermilch"), "images/products/buttermilch.jpg");
+  assert.equal(productImageFile(catalog, "Frischmilch Salz"), "images/products/milch.jpg");
+  assert.equal(productImageFile(catalog, "Spiegelei"), unknownProductImageFile);
+  assert.equal(productImageFile(catalog, "Preis"), unknownProductImageFile);
+  assert.equal(productImageFile(catalog, "Insekt"), unknownProductImageFile);
 });
 
 test("visual fallbacks do not imply a natural product hierarchy", () => {

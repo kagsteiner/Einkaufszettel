@@ -169,7 +169,7 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   let oatTile = page.locator(".product-tile").filter({ hasText: "Hafermilch" });
   await expect(oatTile).toBeVisible();
   await expect(oatTile.getByText("2 l", { exact: true })).toBeVisible();
-  await expect(oatTile.locator("img")).toHaveAttribute("src", /images\/products\/unbekannt\.jpg$/);
+  await expect(oatTile.locator("img")).toHaveAttribute("src", /images\/products\/milch\.jpg$/);
   const tileGeometry = await page.locator(".tile-shopping-items").evaluate((grid) => {
     const tile = grid.querySelector<HTMLElement>(".product-tile");
     const image = tile?.querySelector<HTMLElement>(".product-tile-image");
