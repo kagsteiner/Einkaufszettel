@@ -288,7 +288,10 @@ export async function handleApiRequest(
         purchaseNote: body.purchaseNote,
         quantities: body.quantities,
       });
-      eventHub.publish(user.householdId);
+      eventHub.publish(
+        user.householdId,
+        typeof body.clientInstanceId === "string" ? body.clientInstanceId : undefined,
+      );
       sendJson(response, result.merge === "created" ? 201 : 200, result);
       return true;
     }

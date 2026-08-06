@@ -244,22 +244,22 @@ async function runRefreshQueue(preserveFocus: boolean): Promise<void> {
 }
 
 async function refreshStateOnce(preserveFocus: boolean): Promise<void> {
-  const focusedName = preserveFocus
-    ? (document.activeElement as HTMLInputElement | null)?.name || null
-    : null;
-  const quickAddDraft = preserveFocus
-    ? Object.fromEntries(
-        [...document.querySelectorAll<HTMLInputElement>("[data-add-item] input")].map((input) => [
-          input.name,
-          input.value,
-        ]),
-      )
-    : null;
   try {
     const previousState = currentState;
     const previousActiveListId = activeListId;
     const previousHouseholdId = currentState?.household.id || null;
     currentState = await api<AppState>("/api/state");
+    const focusedName = preserveFocus
+      ? (document.activeElement as HTMLInputElement | null)?.name || null
+      : null;
+    const quickAddDraft = preserveFocus
+      ? Object.fromEntries(
+          [...document.querySelectorAll<HTMLInputElement>("[data-add-item] input")].map((input) => [
+            input.name,
+            input.value,
+          ]),
+        )
+      : null;
     if (previousHouseholdId && previousHouseholdId !== currentState.household.id) {
       currentUser = (await api<{ user: User }>("/api/session")).user;
       openEventStream();
@@ -692,6 +692,7 @@ async function submitItem(event: SubmitEvent, listId: string): Promise<void> {
       merge: "appended" | "created" | "increased" | "reactivated" | "unchanged";
     }>(`/api/lists/${encodeURIComponent(listId)}/items`, {
       body: {
+        clientInstanceId,
         name: values.get("name"),
         quantities: amount ? [{ amount, unit }] : undefined,
       },

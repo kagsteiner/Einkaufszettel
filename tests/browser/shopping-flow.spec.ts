@@ -162,6 +162,9 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   await page.getByLabel("Einheit", { exact: true }).fill("l");
   await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();
   await expect(page.getByText("2 l", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Produkt", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Menge", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Einheit", { exact: true })).toHaveValue("");
 
   await page.getByRole("button", { name: "Bilderansicht" }).click();
   await expect(page.locator(".tile-shopping-items")).toBeVisible();
