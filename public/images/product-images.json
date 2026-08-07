@@ -946,6 +946,10 @@
       "file": "images/products/toast.jpg"
     },
     {
+      "id": "tomate",
+      "file": "images/products/tomate.jpg"
+    },
+    {
       "id": "tomatenmark",
       "file": "images/products/tomatenmark.jpg"
     },
@@ -2606,6 +2610,11 @@
       "id": "toast",
       "names": ["toast", "toasts"],
       "image": "toast"
+    },
+    {
+      "id": "tomate",
+      "names": ["tomate", "tomaten"],
+      "image": "tomate"
     },
     {
       "id": "tomatenmark",
