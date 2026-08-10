@@ -758,6 +758,10 @@
       "file": "images/products/risottoreis.jpg"
     },
     {
+      "id": "roehrchen",
+      "file": "images/products/roehrchen.jpg"
+    },
+    {
       "id": "rosmarin",
       "file": "images/products/rosmarin.jpg"
     },
@@ -2300,6 +2304,11 @@
       "names": ["risottoreis"],
       "image": "risottoreis",
       "imageFallback": "rice"
+    },
+    {
+      "id": "roehrchen",
+      "names": ["röhrchen"],
+      "image": "roehrchen"
     },
     {
       "id": "roesti",
