@@ -106,6 +106,17 @@ test("removing a household member updates the open settings immediately", async 
   await expect(
     page.locator(".household-title").getByText("1 Person", { exact: true }),
   ).toBeVisible();
+  await expect(refreshedSettings.getByRole("button", { name: "Bilder neu laden" })).toBeVisible();
+  const [catalogResponse] = await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/images/product-images.json" &&
+        new URL(response.url()).searchParams.has("refresh"),
+    ),
+    refreshedSettings.getByRole("button", { name: "Bilder neu laden" }).click(),
+  ]);
+  expect(catalogResponse.ok()).toBe(true);
+  await expect(page.getByText("Produktbilder neu geladen.", { exact: true })).toBeVisible();
   await invitedContext.close();
 });
 

@@ -38,6 +38,7 @@ let sortMode: "alphabetical" | "store" =
 let shoppingView: "list" | "tiles" =
   localStorage.getItem("shopping-view") === "tiles" ? "tiles" : "list";
 let productImageCatalog = createProductImageCatalog(null);
+let productImageCacheKey = localStorage.getItem("product-image-cache-key") || "";
 let eventSource: EventSource | null = null;
 let refreshQueued = false;
 let queuedRefreshPreserveFocus = true;
@@ -66,15 +67,19 @@ async function boot(): Promise<void> {
   }
 }
 
-async function loadProductImageCatalog(): Promise<void> {
+async function loadProductImageCatalog(refresh = false): Promise<boolean> {
   try {
-    const response = await fetch(applicationPath("/images/product-images.json"));
+    const response = await fetch(productImageUrl("images/product-images.json"), {
+      cache: refresh ? "reload" : "default",
+    });
     if (!response.ok) {
-      return;
+      return false;
     }
     productImageCatalog = createProductImageCatalog(await response.json());
+    return true;
   } catch {
     // The shopping list remains usable with the unknown-product fallback.
+    return false;
   }
 }
 
@@ -435,8 +440,8 @@ function tileMarkup(item: ShoppingItem): string {
   ].filter(Boolean);
   const imageSource = item.imageId
     ? applicationPath(`/api/images/${item.imageId}`)
-    : applicationPath(`/${productImageFile(productImageCatalog, item.name)}`);
-  const fallbackSource = applicationPath(`/${unknownProductImageFile}`);
+    : productImageUrl(productImageFile(productImageCatalog, item.name));
+  const fallbackSource = productImageUrl(unknownProductImageFile);
   return `<article class="product-tile" data-item-id="${escapeHtml(item.id)}" data-item-version="${escapeHtml(item.updatedAt)}">
     <button class="product-tile-main" type="button" data-toggle-item aria-label="${escapeHtml(item.name)} als erledigt markieren">
       <span class="product-tile-image">
@@ -451,6 +456,13 @@ function tileMarkup(item: ShoppingItem): string {
     </button>
     <button class="product-tile-edit" type="button" data-edit-item aria-label="${escapeHtml(item.name)} bearbeiten">•••</button>
   </article>`;
+}
+
+function productImageUrl(path: string): string {
+  const basePath = applicationPath(`/${path.replace(/^\/+/, "")}`);
+  return productImageCacheKey
+    ? `${basePath}?refresh=${encodeURIComponent(productImageCacheKey)}`
+    : basePath;
 }
 
 function itemQuantityText(item: ShoppingItem): string {
@@ -1216,6 +1228,7 @@ function openSettingsDialog(): void {
         .join("")}</div></section>
       <section><h3>Haushalt einladen</h3><p class="settings-copy">Der Link ist sieben Tage gültig und funktioniert nur für die angegebene E-Mail-Adresse.</p><form data-invite-form><label>E-Mail<input name="email" type="email" required></label><button class="secondary-button" type="submit">Link erzeugen</button></form><div class="copy-output" data-invite-output hidden></div></section>
       <section><h3>Vorrat</h3><form class="inline-form" data-pantry-form><label><span class="sr-only">Vorratsprodukt</span><input name="name" placeholder="z. B. Salz" required></label><button class="secondary-button" type="submit">Hinzufügen</button></form><div class="pantry-chips">${currentState.pantry.map((item) => `<button type="button" data-pantry-id="${escapeHtml(item.id)}" title="Aus Vorrat entfernen">${escapeHtml(item.name)} <span>×</span></button>`).join("") || "<small>Noch nichts eingetragen.</small>"}</div></section>
+      <section><h3>Produktbilder</h3><p class="settings-copy">Lädt den aktuellen Bildkatalog und alle Produktbilder frisch vom Server. Persönliche Fotos bleiben unverändert.</p><button class="secondary-button" type="button" data-reload-product-images>Bilder neu laden</button></section>
       <p class="form-error" role="alert"></p>
       <button class="text-button danger-text logout-button" type="button" data-logout>Abmelden</button>
     </div>`);
@@ -1244,9 +1257,28 @@ function openSettingsDialog(): void {
     chip.addEventListener("click", () => void deletePantry(chip.dataset.pantryId || "", dialog));
   }
   dialog
+    .querySelector<HTMLButtonElement>("[data-reload-product-images]")
+    ?.addEventListener("click", () => void reloadProductImages(dialog));
+  dialog
     .querySelector<HTMLButtonElement>("[data-logout]")
     ?.addEventListener("click", () => void logout(dialog));
   dialog.showModal();
+}
+
+async function reloadProductImages(dialog: HTMLDialogElement): Promise<void> {
+  const button = dialog.querySelector<HTMLButtonElement>("[data-reload-product-images]");
+  setBusy(button, true);
+  productImageCacheKey = window.crypto.randomUUID();
+  localStorage.setItem("product-image-cache-key", productImageCacheKey);
+  const catalogLoaded = await loadProductImageCatalog(true);
+  if (!catalogLoaded) {
+    setBusy(button, false);
+    setDialogError(dialog, "Die Produktbilder konnten gerade nicht neu geladen werden.");
+    return;
+  }
+  dialog.close();
+  renderApplication();
+  showToast("Produktbilder neu geladen.");
 }
 
 async function removeHouseholdMember(
