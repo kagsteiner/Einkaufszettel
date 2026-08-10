@@ -2,6 +2,10 @@
   "version": 2,
   "images": [
     {
+      "id": "alufolie",
+      "file": "images/products/alufolie.jpg"
+    },
+    {
       "id": "ananas",
       "file": "images/products/ananas.jpg"
     },
@@ -432,6 +436,10 @@
     {
       "id": "kartoffeln",
       "file": "images/products/kartoffeln.jpg"
+    },
+    {
+      "id": "karton",
+      "file": "images/products/karton.jpg"
     },
     {
       "id": "kaese",
@@ -1049,6 +1057,11 @@
       "imageFallback": "honig"
     },
     {
+      "id": "alufolie",
+      "names": ["alufolie"],
+      "image": "alufolie"
+    },
+    {
       "id": "ananas",
       "names": ["ananas"],
       "image": "ananas"
@@ -1065,7 +1078,7 @@
     },
     {
       "id": "aroma",
-      "names": ["aroma", "aromen", "backaroma", "backaromen"],
+      "names": ["aroma", "aromen", "backaroma", "backaromen", "zitronensäure", "citronensäure"],
       "image": "aroma"
     },
     {
@@ -1327,7 +1340,13 @@
     },
     {
       "id": "desinfektion",
-      "names": ["desinfektion", "desinfektionsmittel", "desinfektionsspray"],
+      "names": [
+        "desinfektion",
+        "desinfektionsmittel",
+        "desinfektionsspray",
+        "allzweckreiniger",
+        "badreiniger"
+      ],
       "image": "desinfektion"
     },
     {
@@ -1352,7 +1371,7 @@
     },
     {
       "id": "duschgel",
-      "names": ["duschgel", "duschgels"],
+      "names": ["duschgel", "duschgels", "handspülmittel", "spülbalsam"],
       "image": "duschgel"
     },
     {
@@ -1759,6 +1778,11 @@
       "id": "kartoffeln",
       "names": ["kartoffeln", "kartoffel", "erdapfel", "erdäpfel"],
       "image": "kartoffeln"
+    },
+    {
+      "id": "karton",
+      "names": ["karton", "wasserenthärter", "spülmaschinensalz"],
+      "image": "karton"
     },
     {
       "id": "katze",
@@ -2283,7 +2307,7 @@
     },
     {
       "id": "reiniger",
-      "names": ["reiniger", "putzmittel"],
+      "names": ["reiniger", "putzmittel", "wc-reiniger", "toilettenreiniger"],
       "image": "reiniger"
     },
     {
@@ -2508,7 +2532,7 @@
     },
     {
       "id": "shampoo",
-      "names": ["shampoo", "shampoos"],
+      "names": ["shampoo", "shampoos", "entkalker", "scheuermilch"],
       "image": "shampoo"
     },
     {
@@ -2616,7 +2640,7 @@
     },
     {
       "id": "tiefkuehlbeutel",
-      "names": ["tiefkühlbeutel", "gefrierbeutel"],
+      "names": ["tiefkühlbeutel", "gefrierbeutel", "frischhaltefolie"],
       "image": "tiefkuehlbeutel"
     },
     {
@@ -2754,7 +2778,14 @@
     },
     {
       "id": "waschmittel",
-      "names": ["waschmittel", "flüssigwaschmittel"],
+      "names": [
+        "waschmittel",
+        "flüssigwaschmittel",
+        "colorwaschmittel",
+        "feinwaschmittel",
+        "vollwaschmittel",
+        "weichspüler"
+      ],
       "image": "waschmittel"
     },
     {

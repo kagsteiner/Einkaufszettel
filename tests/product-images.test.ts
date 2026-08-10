@@ -150,6 +150,47 @@ test("product image manifest contains a complete visual fallback graph", async (
   }
 });
 
+test("household-product aliases resolve to their chosen visual product", async () => {
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as ProductImageManifest;
+  assert.ok(Array.isArray(manifest.products));
+
+  const visualProductByName = new Map<string, string>();
+  for (const candidate of manifest.products) {
+    const product = candidate as ProductEntry;
+    if (typeof product.id !== "string" || !Array.isArray(product.names)) {
+      continue;
+    }
+    for (const name of product.names) {
+      if (typeof name === "string") {
+        visualProductByName.set(normalizeProductName(name), product.id);
+      }
+    }
+  }
+
+  const expectedAliases = {
+    allzweckreiniger: "desinfektion",
+    badreiniger: "desinfektion",
+    calcium: "calcium",
+    citronensäure: "aroma",
+    elektrolyte: "elektrolyte",
+    entkalker: "shampoo",
+    frischhaltefolie: "tiefkuehlbeutel",
+    handspülmittel: "duschgel",
+    magnesium: "magnesium",
+    scheuermilch: "shampoo",
+    spülbalsam: "duschgel",
+    spülmaschinensalz: "karton",
+    toilettenreiniger: "reiniger",
+    wasserenthärter: "karton",
+    "wc-reiniger": "reiniger",
+    weichspüler: "waschmittel",
+    zitronensäure: "aroma",
+  };
+  for (const [name, productId] of Object.entries(expectedAliases)) {
+    assert.equal(visualProductByName.get(name), productId, `wrong visual product for ${name}`);
+  }
+});
+
 function normalizeProductName(value: string): string {
   return value.trim().normalize("NFKC").replace(/\s+/g, " ").toLocaleLowerCase("de-DE");
 }
