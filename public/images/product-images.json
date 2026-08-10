@@ -1234,6 +1234,11 @@
       "imageFallback": "kaese"
     },
     {
+      "id": "calcium",
+      "names": ["calcium", "calciumtablette", "calciumtabletten"],
+      "imageFallback": "roehrchen"
+    },
+    {
       "id": "camembert",
       "names": ["camenbert", "camembert", "camemberts"],
       "image": "camembert",
@@ -1381,6 +1386,11 @@
       "names": ["eisbergsalat", "eisbergsalate"],
       "image": "eisbergsalat",
       "imageFallback": "salat"
+    },
+    {
+      "id": "elektrolyte",
+      "names": ["elektrolyt", "elektrolyte", "elektrolyttablette", "elektrolyttabletten"],
+      "imageFallback": "roehrchen"
     },
     {
       "id": "emmentaler",
@@ -1979,6 +1989,11 @@
       "names": ["macadamia", "macadamias", "macadamianuss", "macadamianüsse"],
       "image": "macadamia",
       "imageFallback": "nuesse"
+    },
+    {
+      "id": "magnesium",
+      "names": ["magnesium", "magnesiumtablette", "magnesiumtabletten"],
+      "imageFallback": "roehrchen"
     },
     {
       "id": "mais",
