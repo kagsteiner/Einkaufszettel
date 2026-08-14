@@ -176,6 +176,7 @@ test("household-product aliases resolve to their chosen visual product", async (
     entkalker: "shampoo",
     frischhaltefolie: "tiefkuehlbeutel",
     handspülmittel: "duschgel",
+    laktase: "doeschen",
     magnesium: "magnesium",
     putenschnitzel: "putensteak",
     scheuermilch: "shampoo",
