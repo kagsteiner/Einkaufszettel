@@ -2274,7 +2274,7 @@
     },
     {
       "id": "putensteak",
-      "names": ["putensteak", "putensteaks"],
+      "names": ["putensteak", "putensteaks", "putenschnitzel"],
       "image": "putensteak",
       "imageFallback": "fleisch"
     },

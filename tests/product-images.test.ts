@@ -177,6 +177,7 @@ test("household-product aliases resolve to their chosen visual product", async (
     frischhaltefolie: "tiefkuehlbeutel",
     handspülmittel: "duschgel",
     magnesium: "magnesium",
+    putenschnitzel: "putensteak",
     scheuermilch: "shampoo",
     spülbalsam: "duschgel",
     spülmaschinensalz: "karton",
