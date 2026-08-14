@@ -74,6 +74,10 @@
       "file": "images/products/blackolive.jpg"
     },
     {
+      "id": "blume",
+      "file": "images/products/blume.jpg"
+    },
+    {
       "id": "blumenkohl",
       "file": "images/products/blumenkohl.jpg"
     },
@@ -890,6 +894,10 @@
       "file": "images/products/sojasauce.jpg"
     },
     {
+      "id": "sonnenblume",
+      "file": "images/products/sonnenblume.jpg"
+    },
+    {
       "id": "sonnenblumenoel",
       "file": "images/products/sonnenblumenoel.jpg"
     },
@@ -1160,6 +1168,11 @@
       "names": ["blackolive", "black olive", "schwarze olive", "schwarze oliven"],
       "image": "blackolive",
       "imageFallback": "oliven"
+    },
+    {
+      "id": "blume",
+      "names": ["blume", "blumen"],
+      "image": "blume"
     },
     {
       "id": "blumenkohl",
@@ -2545,6 +2558,11 @@
       "names": ["sojasauce", "soja sauce", "sojasoße"],
       "image": "sojasauce",
       "imageFallback": "sauce"
+    },
+    {
+      "id": "sonnenblume",
+      "names": ["sonnenblume", "sonnenblumen"],
+      "image": "sonnenblume"
     },
     {
       "id": "sonnenblumenoel",
