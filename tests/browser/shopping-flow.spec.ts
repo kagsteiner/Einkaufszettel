@@ -258,11 +258,23 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
     }
   });
   await creamTile.locator(".product-tile-main").click();
-  await expect(page.getByText("1 erledigt", { exact: true })).toBeVisible();
+  await expect(page.getByText("Bereits gekauft (1)", { exact: true })).toBeVisible();
   await expect(retainedProductImage).toHaveAttribute("data-retained-across-toggle", "true");
   await page.waitForTimeout(100);
   expect(stateRefreshesAfterToggle).toBe(0);
   await page.getByRole("button", { name: "Listenansicht" }).click();
+  await page.getByText("Bereits gekauft (1)", { exact: true }).click();
+  const completedCreamRow = page
+    .locator(".completed-items .shopping-row")
+    .filter({ hasText: "Schlagsahne" });
+  await completedCreamRow.locator(".item-copy").click();
+  itemDialog = page.getByRole("dialog");
+  await itemDialog.getByRole("button", { name: "Speichern" }).click();
+  creamRow = page.locator(".shopping-items .shopping-row").filter({ hasText: "Schlagsahne" });
+  await expect(creamRow).toBeVisible();
+  await expect(page.locator(".completed-items")).toHaveCount(0);
+  await creamRow.getByRole("button", { name: "Als erledigt markieren" }).click();
+  await expect(page.getByText("Bereits gekauft (1)", { exact: true })).toBeVisible();
   await page.getByLabel("Produkt", { exact: true }).fill("Schlagsahne");
   await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();
   await expect(
@@ -440,7 +452,7 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
     .filter({ hasText: "Hafermilch" })
     .getByRole("button", { name: "Als erledigt markieren" })
     .click();
-  await expect(page.getByText("1 erledigt", { exact: true })).toBeVisible();
+  await expect(page.getByText("Bereits gekauft (1)", { exact: true })).toBeVisible();
 
   const registrations = await page.evaluate(async () => navigator.serviceWorker.getRegistrations());
   expect(registrations).toHaveLength(0);

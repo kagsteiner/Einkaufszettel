@@ -363,7 +363,7 @@ function listMarkup(list: ShoppingList): string {
       </section>
       ${
         completedItems.length
-          ? `<details class="completed-items"><summary>${completedItems.length} erledigt</summary>${completedItems
+          ? `<details class="completed-items"><summary>Bereits gekauft (${completedItems.length})</summary>${completedItems
               .map(itemMarkup)
               .join("")}</details>`
           : ""
@@ -790,7 +790,7 @@ function syncActiveListItems(): void {
   if (completedItems.length) {
     quickAdd.insertAdjacentHTML(
       "beforebegin",
-      `<details class="completed-items" ${completedWasOpen ? "open" : ""}><summary>${completedItems.length} erledigt</summary>${completedItems.map(itemMarkup).join("")}</details>`,
+      `<details class="completed-items" ${completedWasOpen ? "open" : ""}><summary>Bereits gekauft (${completedItems.length})</summary>${completedItems.map(itemMarkup).join("")}</details>`,
     );
   }
   for (const currentList of currentState?.lists || []) {
@@ -996,6 +996,12 @@ function openItemDialog(item: ShoppingItem): void {
         } else if (formData.get("removeImage")) {
           await api(`/api/items/${item.id}/image`, {
             body: { imageId: null },
+            method: "PUT",
+          });
+        }
+        if (item.completedAt) {
+          await api(`/api/items/${item.id}/completed`, {
+            body: { clientInstanceId, completed: false },
             method: "PUT",
           });
         }
