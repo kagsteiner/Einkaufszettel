@@ -120,6 +120,108 @@ test("removing a household member updates the open settings immediately", async 
   await invitedContext.close();
 });
 
+test("voice mode keeps a reviewable draft and adds it only after confirmation", async ({
+  page,
+}, testInfo) => {
+  await page.addInitScript(() => {
+    class FakeMediaRecorder extends EventTarget {
+      static isTypeSupported(): boolean {
+        return true;
+      }
+
+      readonly mimeType: string;
+      state: "inactive" | "paused" | "recording" = "inactive";
+
+      constructor(_stream: MediaStream, options?: MediaRecorderOptions) {
+        super();
+        this.mimeType = options?.mimeType || "audio/webm";
+      }
+
+      start(): void {
+        this.state = "recording";
+      }
+
+      pause(): void {
+        this.state = "paused";
+      }
+
+      resume(): void {
+        this.state = "recording";
+      }
+
+      stop(): void {
+        const dataEvent = new Event("dataavailable");
+        Object.defineProperty(dataEvent, "data", {
+          value: new Blob(["fake-audio"], { type: this.mimeType }),
+        });
+        this.dispatchEvent(dataEvent);
+        this.state = "inactive";
+        this.dispatchEvent(new Event("stop"));
+      }
+    }
+
+    Object.defineProperty(window, "MediaRecorder", { value: FakeMediaRecorder });
+    Object.defineProperty(navigator, "mediaDevices", {
+      value: {
+        async getUserMedia() {
+          return { getTracks: () => [{ stop() {} }] };
+        },
+      },
+    });
+  });
+  await page.route("**/api/ai/voice-analysis", async (route) => {
+    expect(route.request().headers()["content-type"]).toContain("audio/webm");
+    await route.fulfill({
+      body: JSON.stringify({
+        analysis: {
+          items: [{ amount: "2", name: "Milch", note: "Bio", unit: "l" }],
+          transcript: "Zwei Liter Biomilch, bitte.",
+        },
+      }),
+      contentType: "application/json",
+    });
+  });
+
+  await register(page, "Voice Browser", `voice-${testInfo.project.name}@example.com`);
+  await page.getByRole("button", { exact: true, name: "Zettel anlegen" }).click();
+  await page.getByRole("dialog").getByLabel("Name", { exact: true }).fill("Wochenmarkt");
+  await page.getByRole("dialog").getByRole("button", { name: "Speichern" }).click();
+
+  await page.getByRole("button", { name: "Aktionen" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: /Voice Mode/ })
+    .click();
+  let voiceDialog = page.getByRole("dialog");
+  await expect(voiceDialog.getByRole("heading", { name: "Voice Mode" })).toBeVisible();
+  await voiceDialog.getByRole("button", { name: "Aufnahme starten" }).click();
+  await expect(voiceDialog.getByText("Ich höre zu …", { exact: true })).toBeVisible();
+  await voiceDialog.getByRole("button", { name: "Pause" }).click();
+  await expect(voiceDialog.getByText(/Pausiert/)).toBeVisible();
+  await voiceDialog.getByRole("button", { name: "Weiter aufnehmen" }).click();
+  await voiceDialog.getByRole("button", { name: "Aufnahme stoppen" }).click();
+
+  await expect(voiceDialog.locator('input[name="name"]')).toHaveValue("Milch");
+  await expect(voiceDialog.locator('input[name="amount"]')).toHaveValue("2");
+  await expect(voiceDialog.locator('input[name="unit"]')).toHaveValue("l");
+  await voiceDialog.getByText("Letztes Transkript", { exact: true }).click();
+  await expect(voiceDialog.getByText("Zwei Liter Biomilch, bitte.")).toBeVisible();
+  await voiceDialog.getByRole("button", { name: "Schließen" }).click();
+
+  await page.getByRole("button", { name: "Aktionen" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: /Voice Mode/ })
+    .click();
+  voiceDialog = page.getByRole("dialog");
+  await expect(voiceDialog.locator('input[name="name"]')).toHaveValue("Milch");
+  await voiceDialog.getByRole("button", { name: "1 Produkt hinzufügen" }).click();
+
+  await expect(page.locator(".shopping-items").getByText("Milch", { exact: true })).toBeVisible();
+  await expect(page.getByText("2 l", { exact: true })).toBeVisible();
+  await expect(page.getByText("Diesmal: Bio", { exact: true })).toBeVisible();
+});
+
 test("a household can maintain a live mobile shopping list", async ({ page }, testInfo) => {
   const documentResponse = await page.goto("/");
   expect(documentResponse?.headers()["cache-control"]).toBe("no-store");
@@ -487,6 +589,9 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
 });
 
 async function register(page: import("@playwright/test").Page, name: string, email: string) {
+  const addressSuffix =
+    [...email].reduce((total, character) => total + character.charCodeAt(0), 0) % 250;
+  await page.setExtraHTTPHeaders({ "X-Forwarded-For": `198.51.100.${addressSuffix + 1}` });
   await page.goto("/");
   await page.getByRole("button", { name: "Neu hier" }).click();
   await page.getByLabel("Name", { exact: true }).fill(name);

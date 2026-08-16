@@ -426,6 +426,13 @@ h2 {
   white-space: nowrap;
   background: var(--green-light);
 }
+.voice-button {
+  border-radius: 99rem;
+  padding-inline: 0.85rem;
+  color: #fff;
+  background: var(--green);
+  white-space: nowrap;
+}
 .mobile-actions-sheet {
   display: grid;
   gap: 1rem;
@@ -1081,6 +1088,133 @@ h2 {
 .recipe-preview {
   padding-bottom: 2rem;
 }
+.voice-modal {
+  width: min(calc(100% - 1.5rem), 39rem);
+}
+.voice-dialog {
+  padding-bottom: 2rem;
+}
+.voice-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.65rem;
+}
+.voice-record-button {
+  min-height: 4.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  border: 0;
+  border-radius: 1rem;
+  padding: 0.8rem 1rem;
+  color: #fff;
+  background: var(--green);
+  cursor: pointer;
+}
+.voice-record-button > span {
+  color: #ffb4a5;
+  font-size: 1.25rem;
+}
+.voice-hold-button {
+  min-height: 4.25rem;
+  touch-action: none;
+  user-select: none;
+}
+.voice-pause-button {
+  grid-column: 1 / -1;
+  justify-self: center;
+  min-height: 2.5rem;
+}
+.is-recording .voice-record-button,
+.is-recording .voice-hold-button:not(:disabled) {
+  background: #a83f31;
+  box-shadow: 0 0 0 0.35rem rgb(168 63 49 / 14%);
+}
+.voice-status {
+  min-height: 1.4rem;
+  margin: -0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-align: center;
+}
+.is-recording .voice-status {
+  color: #91372c;
+  font-weight: 750;
+}
+.voice-draft-section {
+  display: grid;
+  gap: 0.75rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+}
+.voice-draft-heading,
+.voice-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+.voice-draft-heading h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.voice-draft-heading > span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.voice-draft-list {
+  display: grid;
+  gap: 0.75rem;
+}
+.voice-draft-item {
+  background: rgb(255 253 248 / 70%);
+}
+.voice-item-top .danger-text {
+  margin-left: auto;
+  padding: 0.4rem;
+}
+.voice-existing {
+  border-radius: 99rem;
+  padding: 0.3rem 0.55rem;
+  color: #725849;
+  background: #eee1cf;
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+.voice-processing,
+.voice-draft-empty {
+  min-height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border: 1px dashed #c6c0b5;
+  border-radius: 0.85rem;
+  color: var(--muted);
+}
+.voice-draft-empty {
+  flex-direction: column;
+  padding: 1rem;
+  text-align: center;
+}
+.voice-draft-empty span {
+  max-width: 24rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+.voice-transcript {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.voice-transcript summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.voice-transcript p {
+  margin: 0.5rem 0 0;
+  line-height: 1.45;
+}
 .ingredient-list {
   display: grid;
   gap: 0.75rem;
@@ -1317,6 +1451,23 @@ h2 {
     inset: auto 0 0;
     margin: 0;
     border-radius: 1.3rem 1.3rem 0 0;
+  }
+  .voice-modal {
+    width: 100%;
+    max-width: none;
+    max-height: 94dvh;
+    inset: auto 0 0;
+    margin: 0;
+    border-radius: 1.3rem 1.3rem 0 0;
+  }
+  .voice-dialog {
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+  .voice-controls {
+    grid-template-columns: 1fr;
+  }
+  .voice-pause-button {
+    grid-column: auto;
   }
   .quick-add {
     right: 0.55rem;

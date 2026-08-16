@@ -13,6 +13,7 @@ import { RateLimiter } from "./rate-limiter.ts";
 import { RecipeService } from "./recipe-service.ts";
 import { SettingsService } from "./settings-service.ts";
 import { ShoppingService } from "./shopping-service.ts";
+import { VoiceService } from "./voice-service.ts";
 
 const config = loadConfig();
 const database = await openDatabase(config.databasePath);
@@ -22,6 +23,7 @@ const shoppingService = new ShoppingService(database);
 const settingsService = new SettingsService(database, config);
 const imageService = new ImageService(database, config);
 const recipeService = new RecipeService(database, imageService, settingsService);
+const voiceService = new VoiceService(database, settingsService);
 const eventHub = new EventHub();
 const rateLimiter = new RateLimiter();
 const versionFile = resolve(config.publicDirectory, "version.json");
@@ -60,6 +62,7 @@ const server = createServer(async (request, response) => {
         settingsService,
         imageService,
         recipeService,
+        voiceService,
         eventHub,
         rateLimiter,
         config,

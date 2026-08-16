@@ -11,6 +11,8 @@ import type { RateLimiter } from "./rate-limiter.ts";
 import type { RecipeService } from "./recipe-service.ts";
 import type { SettingsService } from "./settings-service.ts";
 import type { ShoppingService } from "./shopping-service.ts";
+import type { VoiceService } from "./voice-service.ts";
+import { maximumVoiceBytes } from "./voice-service.ts";
 
 const sessionCookieName = "zettel_session";
 const csrfCookieName = "zettel_csrf";
@@ -26,6 +28,7 @@ export async function handleApiRequest(
   settingsService: SettingsService,
   imageService: ImageService,
   recipeService: RecipeService,
+  voiceService: VoiceService,
   eventHub: EventHub,
   rateLimiter: RateLimiter,
   config: AppConfig,
@@ -198,6 +201,18 @@ export async function handleApiRequest(
       return true;
     }
 
+    if (request.method === "POST" && pathname === "/api/ai/voice-analysis") {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      rateLimiter.consume(`voice:${user.id}`, 120, 60 * 60 * 1_000);
+      const analysis = await voiceService.analyzeVoice(
+        user,
+        await readRequestBody(request, maximumVoiceBytes),
+        requestContentType(request),
+      );
+      sendJson(response, 200, { analysis });
+      return true;
+    }
+
     if (request.method === "PATCH" && pathname === "/api/settings/profile") {
       const user = authenticateWrite(request, authService, sessionToken, config);
       const body = await readJson(request);
@@ -265,6 +280,18 @@ export async function handleApiRequest(
       const body = await readJson(request);
       const results = shoppingService.addRecipeItems(user, recipeItemsMatch[1], body.items);
       eventHub.publish(user.householdId);
+      sendJson(response, 200, { results });
+      return true;
+    }
+    const voiceItemsMatch = pathname.match(/^\/api\/lists\/([^/]+)\/voice-items$/);
+    if (request.method === "POST" && voiceItemsMatch?.[1]) {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      const body = await readJson(request);
+      const results = shoppingService.addVoiceItems(user, voiceItemsMatch[1], body.items);
+      eventHub.publish(
+        user.householdId,
+        typeof body.clientInstanceId === "string" ? body.clientInstanceId : undefined,
+      );
       sendJson(response, 200, { results });
       return true;
     }

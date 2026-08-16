@@ -45,6 +45,23 @@ let queuedRefreshPreserveFocus = true;
 let refreshPromise: Promise<void> | null = null;
 const clientInstanceId = window.crypto.randomUUID();
 
+type VoiceDraftItem = {
+  amount: string;
+  id: string;
+  name: string;
+  note: string;
+  selected: boolean;
+  unit: string;
+};
+
+type VoiceDraftState = {
+  items: VoiceDraftItem[];
+  lastTranscript: string;
+  pending: number;
+};
+
+const voiceDrafts = new Map<string, VoiceDraftState>();
+
 void boot();
 
 async function boot(): Promise<void> {
@@ -348,7 +365,7 @@ function listMarkup(list: ShoppingList): string {
             <button type="button" data-shopping-view="list" aria-label="Listenansicht" aria-pressed="${shoppingView === "list"}" class="${shoppingView === "list" ? "active" : ""}"><span aria-hidden="true">☷</span><span class="desktop-label">Liste</span></button>
             <button type="button" data-shopping-view="tiles" aria-label="Bilderansicht" aria-pressed="${shoppingView === "tiles"}" class="${shoppingView === "tiles" ? "active" : ""}"><span aria-hidden="true">▦</span><span class="desktop-label">Bilder</span></button>
           </div>
-          <div class="heading-actions"><button class="quiet-button sort-button" type="button" data-sort-mode aria-label="Sortierung wechseln">${sortMode === "alphabetical" ? "A–Z" : "Laden"}</button><button class="quiet-button recurring-button" type="button" data-recurring-items><span class="desktop-label">Was ist dran?</span><span class="mobile-label">Dran</span></button><label class="quiet-button recipe-button"><span class="desktop-label">Rezeptfoto</span><span class="mobile-label">Foto</span><input type="file" data-recipe-file accept="image/*,.heic,.heif"></label><button class="quiet-button" type="button" data-list-menu aria-label="Zettel bearbeiten"><span class="desktop-label">Bearbeiten</span><span class="mobile-label" aria-hidden="true">•••</span></button></div>
+          <div class="heading-actions"><button class="quiet-button sort-button" type="button" data-sort-mode aria-label="Sortierung wechseln">${sortMode === "alphabetical" ? "A–Z" : "Laden"}</button><button class="quiet-button voice-button" type="button" data-voice-mode>Voice Mode</button><button class="quiet-button recurring-button" type="button" data-recurring-items><span class="desktop-label">Was ist dran?</span><span class="mobile-label">Dran</span></button><label class="quiet-button recipe-button"><span class="desktop-label">Rezeptfoto</span><span class="mobile-label">Foto</span><input type="file" data-recipe-file accept="image/*,.heic,.heif"></label><button class="quiet-button" type="button" data-list-menu aria-label="Zettel bearbeiten"><span class="desktop-label">Bearbeiten</span><span class="mobile-label" aria-hidden="true">•••</span></button></div>
           <button class="quiet-button mobile-list-actions" type="button" data-mobile-list-actions aria-haspopup="dialog">Aktionen</button>
         </div>
       </header>
@@ -530,6 +547,11 @@ function bindApplicationEvents(activeList: ShoppingList | null): void {
         void openRecurringDialog(activeList.id, event.currentTarget as HTMLButtonElement);
       }
     });
+  app.querySelector<HTMLButtonElement>("[data-voice-mode]")?.addEventListener("click", () => {
+    if (activeList) {
+      openVoiceDialog(activeList.id);
+    }
+  });
   app.querySelector<HTMLFormElement>("[data-add-item]")?.addEventListener("submit", (event) => {
     if (activeList) {
       void submitItem(event, activeList.id);
@@ -652,6 +674,7 @@ function openMobileListActions(list: ShoppingList): void {
     <section class="mobile-actions-sheet">
       <div class="dialog-heading"><div><p class="eyebrow">${escapeHtml(list.name)}</p><h2>Aktionen</h2></div><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div>
       <div class="mobile-action-menu">
+        <button class="mobile-action-item" type="button" data-mobile-voice><strong>Voice Mode</strong><span>Fehlende Produkte einfach einsprechen</span></button>
         <button class="mobile-action-item" type="button" data-mobile-sort><strong>${nextSortLabel}</strong><span>${currentSortLabel}</span></button>
         <button class="mobile-action-item" type="button" data-mobile-recurring><strong>Wieder kaufen</strong><span>Regelmäßig benötigte Produkte vorschlagen</span></button>
         <label class="mobile-action-item mobile-recipe-action"><strong>Rezept einlesen</strong><span>Zutaten aus einem Foto übernehmen</span><input type="file" data-mobile-recipe-file accept="image/*,.heic,.heif"></label>
@@ -659,6 +682,10 @@ function openMobileListActions(list: ShoppingList): void {
       </div>
     </section>`);
   dialog.classList.add("mobile-actions-modal");
+  dialog.querySelector<HTMLButtonElement>("[data-mobile-voice]")?.addEventListener("click", () => {
+    dialog.close();
+    openVoiceDialog(list.id);
+  });
   dialog.querySelector<HTMLButtonElement>("[data-mobile-sort]")?.addEventListener("click", () => {
     sortMode = sortMode === "alphabetical" ? "store" : "alphabetical";
     localStorage.setItem("sort-mode", sortMode);
@@ -1158,6 +1185,381 @@ async function openRecurringDialog(listId: string, trigger: HTMLButtonElement): 
   } finally {
     setBusy(trigger, false);
   }
+}
+
+function openVoiceDialog(listId: string): void {
+  if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+    showToast("Dieser Browser unterstützt keine Mikrofonaufnahme.", "error");
+    return;
+  }
+  const draft = voiceDrafts.get(listId) || { items: [], lastTranscript: "", pending: 0 };
+  voiceDrafts.set(listId, draft);
+  const dialog = createDialog(`<form class="dialog-form voice-dialog" data-voice-form>
+    <div class="dialog-heading"><div><p class="eyebrow">Freihändig ergänzen</p><h2>Voice Mode</h2></div><button class="close-button" type="button" data-close aria-label="Schließen">×</button></div>
+    <p class="settings-copy">Sprich nur dann, wenn die App zuhören soll. Gespräche dazwischen werden nicht aufgenommen. Am Zettel wird erst nach deiner Bestätigung etwas geändert.</p>
+    <div class="voice-controls">
+      <button class="voice-record-button" type="button" data-voice-toggle><span aria-hidden="true">●</span><strong>Aufnahme starten</strong></button>
+      <button class="secondary-button voice-hold-button" type="button" data-voice-hold>Zum Sprechen halten</button>
+      <button class="text-button voice-pause-button" type="button" data-voice-pause hidden>Pause</button>
+    </div>
+    <p class="voice-status" data-voice-status aria-live="polite">Bereit für dein Einkaufsdiktat.</p>
+    <section class="voice-draft-section" aria-labelledby="voice-draft-title">
+      <div class="voice-draft-heading"><div><p class="eyebrow">Entwurf</p><h3 id="voice-draft-title">Erkannte Produkte</h3></div><span data-voice-count></span></div>
+      <div class="voice-draft-list" data-voice-draft-list></div>
+      <details class="voice-transcript" data-voice-transcript-wrap><summary>Letztes Transkript</summary><p data-voice-transcript></p></details>
+    </section>
+    <p class="form-error" role="alert"></p>
+    <div class="dialog-actions"><button class="primary-button" type="submit" data-voice-submit>Zur Einkaufsliste hinzufügen</button></div>
+  </form>`);
+  dialog.classList.add("voice-modal");
+
+  const toggle = dialog.querySelector<HTMLButtonElement>("[data-voice-toggle]");
+  const hold = dialog.querySelector<HTMLButtonElement>("[data-voice-hold]");
+  const pause = dialog.querySelector<HTMLButtonElement>("[data-voice-pause]");
+  const status = dialog.querySelector<HTMLElement>("[data-voice-status]");
+  let recorder: MediaRecorder | null = null;
+  let stream: MediaStream | null = null;
+  let chunks: Blob[] = [];
+  let recordingMode: "hold" | "locked" | null = null;
+  let holdPressed = false;
+  let discardRecording = false;
+  let maximumTimer: number | null = null;
+
+  const renderDraft = (): void => {
+    if (!dialog.isConnected) return;
+    const list = dialog.querySelector<HTMLElement>("[data-voice-draft-list]");
+    const count = dialog.querySelector<HTMLElement>("[data-voice-count]");
+    const submit = dialog.querySelector<HTMLButtonElement>("[data-voice-submit]");
+    const transcriptWrap = dialog.querySelector<HTMLDetailsElement>("[data-voice-transcript-wrap]");
+    const transcript = dialog.querySelector<HTMLElement>("[data-voice-transcript]");
+    if (!list || !count || !submit || !transcriptWrap || !transcript) return;
+    const selectedCount = draft.items.filter((item) => item.selected).length;
+    count.textContent = draft.pending
+      ? `${draft.items.length} + ${draft.pending} in Arbeit`
+      : `${draft.items.length}`;
+    submit.textContent = selectedCount
+      ? `${selectedCount} ${selectedCount === 1 ? "Produkt" : "Produkte"} hinzufügen`
+      : "Zur Einkaufsliste hinzufügen";
+    submit.disabled = selectedCount === 0 || draft.pending > 0;
+    transcriptWrap.hidden = !draft.lastTranscript;
+    transcript.textContent = draft.lastTranscript;
+    list.innerHTML = `${draft.items.map((item) => voiceDraftItemMarkup(listId, item)).join("")}${
+      draft.pending
+        ? Array.from(
+            { length: draft.pending },
+            () =>
+              `<div class="voice-processing"><span class="spinner dark" aria-hidden="true"></span><span>Aufnahme wird ausgewertet …</span></div>`,
+          ).join("")
+        : draft.items.length
+          ? ""
+          : `<div class="voice-draft-empty"><strong>Noch nichts aufgenommen</strong><span>Die erkannten Produkte erscheinen hier und bleiben für weitere Aufnahmen erhalten.</span></div>`
+    }`;
+    for (const row of list.querySelectorAll<HTMLElement>("[data-voice-item]")) {
+      const item = draft.items.find((candidate) => candidate.id === row.dataset.voiceItem);
+      if (!item) continue;
+      row
+        .querySelector<HTMLInputElement>("[name=selected]")
+        ?.addEventListener("change", (event) => {
+          item.selected = (event.currentTarget as HTMLInputElement).checked;
+          renderDraft();
+        });
+      for (const fieldName of ["name", "amount", "unit", "note"] as const) {
+        row
+          .querySelector<HTMLInputElement>(`[name=${fieldName}]`)
+          ?.addEventListener("input", (event) => {
+            item[fieldName] = (event.currentTarget as HTMLInputElement).value;
+          });
+      }
+      row
+        .querySelector<HTMLButtonElement>("[data-remove-voice-item]")
+        ?.addEventListener("click", () => {
+          draft.items.splice(draft.items.indexOf(item), 1);
+          renderDraft();
+        });
+    }
+  };
+
+  const updateRecordingUi = (): void => {
+    const active = recorder?.state === "recording" || recorder?.state === "paused";
+    dialog.classList.toggle("is-recording", Boolean(active));
+    if (toggle) {
+      const label = toggle.querySelector("strong");
+      if (label) {
+        label.textContent =
+          recordingMode === "locked" && active ? "Aufnahme stoppen" : "Aufnahme starten";
+      }
+      toggle.disabled = recordingMode === "hold";
+    }
+    if (hold) hold.disabled = recordingMode === "locked";
+    if (pause) {
+      pause.hidden = recordingMode !== "locked" || !active;
+      pause.textContent = recorder?.state === "paused" ? "Weiter aufnehmen" : "Pause";
+    }
+    if (status) {
+      status.textContent =
+        recorder?.state === "paused"
+          ? "Pausiert – Gespräche werden nicht aufgenommen."
+          : active
+            ? "Ich höre zu …"
+            : draft.pending
+              ? "Die letzte Aufnahme wird ausgewertet. Du kannst schon weiter diktieren."
+              : "Bereit für dein Einkaufsdiktat.";
+    }
+  };
+
+  const syncDraft = (event: Event): void => {
+    if ((event as CustomEvent<string>).detail === listId) {
+      renderDraft();
+      updateRecordingUi();
+    }
+  };
+  window.addEventListener("voice-draft-updated", syncDraft);
+
+  const analyzeRecording = async (blob: Blob): Promise<void> => {
+    draft.pending += 1;
+    renderDraft();
+    updateRecordingUi();
+    try {
+      const extension = blob.type.includes("webm")
+        ? "webm"
+        : blob.type.includes("ogg")
+          ? "ogg"
+          : blob.type.includes("mpeg")
+            ? "mp3"
+            : blob.type.includes("wav")
+              ? "wav"
+              : "m4a";
+      const result = await apiFile<{
+        analysis: {
+          items: Array<{
+            amount: string | null;
+            name: string;
+            note: string | null;
+            unit: string | null;
+          }>;
+          transcript: string;
+        };
+      }>(
+        "/api/ai/voice-analysis",
+        new File([blob], `einkaufsdiktat.${extension}`, { type: blob.type }),
+      );
+      draft.lastTranscript = result.analysis.transcript;
+      mergeVoiceDraftItems(draft, result.analysis.items);
+      if (result.analysis.items.length === 0 && dialog.isConnected) {
+        setDialogError(dialog, "In dieser Aufnahme wurden keine fehlenden Produkte erkannt.");
+      } else if (dialog.isConnected) {
+        setDialogError(dialog, "");
+      }
+    } catch (error) {
+      if (dialog.isConnected) setDialogError(dialog, messageFromError(error));
+    } finally {
+      draft.pending -= 1;
+      window.dispatchEvent(new CustomEvent("voice-draft-updated", { detail: listId }));
+    }
+  };
+
+  const stopRecording = (discard = false): void => {
+    if (!recorder || recorder.state === "inactive") return;
+    discardRecording ||= discard;
+    recorder.stop();
+    if (maximumTimer !== null) window.clearTimeout(maximumTimer);
+    maximumTimer = null;
+  };
+
+  const startRecording = async (mode: "hold" | "locked"): Promise<void> => {
+    if (recorder && recorder.state !== "inactive") return;
+    setDialogError(dialog, "");
+    if (status) status.textContent = "Mikrofon wird geöffnet …";
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (!dialog.isConnected || (mode === "hold" && !holdPressed)) {
+        stream.getTracks().forEach((track) => {
+          track.stop();
+        });
+        stream = null;
+        updateRecordingUi();
+        return;
+      }
+      const mimeType = preferredRecordingMimeType();
+      recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      chunks = [];
+      discardRecording = false;
+      recordingMode = mode;
+      recorder.addEventListener("dataavailable", (event) => {
+        if (event.data.size) chunks.push(event.data);
+      });
+      recorder.addEventListener(
+        "stop",
+        () => {
+          const recordedType = recorder?.mimeType || mimeType || "audio/webm";
+          const blob = new Blob(chunks, { type: recordedType.split(";", 1)[0] });
+          stream?.getTracks().forEach((track) => {
+            track.stop();
+          });
+          recorder = null;
+          stream = null;
+          recordingMode = null;
+          chunks = [];
+          updateRecordingUi();
+          if (!discardRecording && blob.size > 0) void analyzeRecording(blob);
+        },
+        { once: true },
+      );
+      recorder.start();
+      maximumTimer = window.setTimeout(() => {
+        stopRecording();
+        if (dialog.isConnected) {
+          setDialogError(dialog, "Die Aufnahme wurde nach 90 Sekunden automatisch beendet.");
+        }
+      }, 90_000);
+      updateRecordingUi();
+    } catch (error) {
+      stream?.getTracks().forEach((track) => {
+        track.stop();
+      });
+      stream = null;
+      recorder = null;
+      recordingMode = null;
+      setDialogError(
+        dialog,
+        error instanceof DOMException && error.name === "NotAllowedError"
+          ? "Erlaube den Mikrofonzugriff, um den Voice Mode zu verwenden."
+          : "Das Mikrofon konnte nicht geöffnet werden.",
+      );
+      updateRecordingUi();
+    }
+  };
+
+  toggle?.addEventListener("click", () => {
+    if (recordingMode === "locked") stopRecording();
+    else void startRecording("locked");
+  });
+  hold?.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    holdPressed = true;
+    hold.setPointerCapture(event.pointerId);
+    void startRecording("hold");
+  });
+  const releaseHold = (): void => {
+    holdPressed = false;
+    if (recordingMode === "hold") stopRecording();
+  };
+  hold?.addEventListener("pointerup", releaseHold);
+  hold?.addEventListener("pointercancel", releaseHold);
+  pause?.addEventListener("click", () => {
+    if (!recorder || recordingMode !== "locked") return;
+    if (recorder.state === "recording") recorder.pause();
+    else if (recorder.state === "paused") recorder.resume();
+    updateRecordingUi();
+  });
+  dialog.addEventListener("close", () => {
+    window.removeEventListener("voice-draft-updated", syncDraft);
+    holdPressed = false;
+    stopRecording(true);
+    stream?.getTracks().forEach((track) => {
+      track.stop();
+    });
+  });
+  dialog
+    .querySelector<HTMLFormElement>("[data-voice-form]")
+    ?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      void (async () => {
+        const selected = draft.items.filter((item) => item.selected);
+        if (!selected.length) return;
+        if (selected.some((item) => !item.name.trim())) {
+          setDialogError(dialog, "Jedes ausgewählte Produkt braucht einen Namen.");
+          return;
+        }
+        if (selected.some((item) => item.unit.trim() && !item.amount.trim())) {
+          setDialogError(dialog, "Gib zu jeder Einheit auch eine Menge ein.");
+          return;
+        }
+        const submit = dialog.querySelector<HTMLButtonElement>("[data-voice-submit]");
+        setBusy(submit, true);
+        try {
+          await api(`/api/lists/${encodeURIComponent(listId)}/voice-items`, {
+            body: {
+              clientInstanceId,
+              items: selected.map((item) => ({
+                amount: item.amount.trim() || null,
+                name: item.name.trim(),
+                note: item.note.trim() || null,
+                unit: item.unit.trim() || null,
+              })),
+            },
+            method: "POST",
+          });
+          voiceDrafts.delete(listId);
+          dialog.close();
+          await refreshState(false);
+          showToast(
+            `${selected.length} ${selected.length === 1 ? "Produkt" : "Produkte"} übernommen.`,
+          );
+        } catch (error) {
+          setDialogError(dialog, messageFromError(error));
+        } finally {
+          setBusy(submit, false);
+        }
+      })();
+    });
+  renderDraft();
+  dialog.showModal();
+}
+
+function voiceDraftItemMarkup(listId: string, item: VoiceDraftItem): string {
+  const list = currentState?.lists.find((candidate) => candidate.id === listId);
+  const existing = list?.items.find(
+    (candidate) => normalizeProductName(candidate.name) === normalizeProductName(item.name),
+  );
+  const existingLabel = existing
+    ? `<span class="voice-existing">${existing.completedAt ? "Bereits gekauft" : "Schon auf der Liste"}</span>`
+    : "";
+  return `<fieldset class="voice-draft-item" data-voice-item="${escapeHtml(item.id)}">
+    <div class="voice-item-top"><label class="ingredient-select"><input type="checkbox" name="selected" ${item.selected ? "checked" : ""}><span>Hinzufügen</span></label>${existingLabel}<button class="text-button danger-text" type="button" data-remove-voice-item>Entfernen</button></div>
+    <label>Produkt<input name="name" value="${escapeHtml(item.name)}" maxlength="120" required></label>
+    <div class="quantity-edit-row"><label>Menge<input name="amount" value="${escapeHtml(item.amount)}" inputmode="decimal"></label><label>Einheit<input name="unit" value="${escapeHtml(item.unit)}" maxlength="40"></label></div>
+    <label>Nur für diesen Einkauf<input name="note" value="${escapeHtml(item.note)}" maxlength="500"></label>
+  </fieldset>`;
+}
+
+function mergeVoiceDraftItems(
+  draft: VoiceDraftState,
+  incoming: ReadonlyArray<{
+    amount: string | null;
+    name: string;
+    note: string | null;
+    unit: string | null;
+  }>,
+): void {
+  for (const product of incoming) {
+    const exactDuplicate = draft.items.find(
+      (item) =>
+        normalizeProductName(item.name) === normalizeProductName(product.name) &&
+        item.amount === (product.amount || "") &&
+        normalizeProductName(item.unit) === normalizeProductName(product.unit || "") &&
+        item.note === (product.note || ""),
+    );
+    if (exactDuplicate) {
+      exactDuplicate.selected = true;
+      continue;
+    }
+    draft.items.push({
+      amount: product.amount || "",
+      id: window.crypto.randomUUID(),
+      name: product.name,
+      note: product.note || "",
+      selected: true,
+      unit: product.unit || "",
+    });
+  }
+}
+
+function preferredRecordingMimeType(): string {
+  for (const type of ["audio/webm;codecs=opus", "audio/mp4", "audio/ogg;codecs=opus"]) {
+    if (MediaRecorder.isTypeSupported(type)) return type;
+  }
+  return "";
 }
 
 async function analyzeRecipe(file: File, listId: string): Promise<void> {

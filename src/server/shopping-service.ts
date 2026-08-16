@@ -398,6 +398,38 @@ export class ShoppingService {
     );
   }
 
+  addVoiceItems(
+    user: AuthenticatedUser,
+    listId: string,
+    values: unknown,
+  ): Array<{
+    item: ShoppingItem;
+    merge: "created" | "increased" | "appended" | "reactivated" | "unchanged";
+  }> {
+    if (!Array.isArray(values) || values.length < 1 || values.length > 100) {
+      throw invalidInput("Wähle zwischen einem und 100 Produkten aus.");
+    }
+    return inTransaction(this.database, () =>
+      values.map((value) => {
+        if (!value || typeof value !== "object" || Array.isArray(value)) {
+          throw invalidInput("Ein gesprochenes Produkt ist ungültig.");
+        }
+        const product = value as Record<string, unknown>;
+        const amount = product.amount;
+        return this.addItem(user, listId, {
+          name: product.name,
+          ...(product.note === null || product.note === undefined || product.note === ""
+            ? {}
+            : { purchaseNote: product.note }),
+          quantities:
+            amount === null || amount === undefined || amount === ""
+              ? undefined
+              : [{ amount, unit: product.unit }],
+        });
+      }),
+    );
+  }
+
   getRecurringSuggestions(
     user: AuthenticatedUser,
     listId: string,

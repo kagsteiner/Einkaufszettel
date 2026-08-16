@@ -304,3 +304,38 @@ test("a recipe selection is applied atomically", () => {
     before,
   );
 });
+
+test("a voice selection is applied atomically and uses purchase-only notes", () => {
+  const [created] = shopping.addVoiceItems(owner.user, listId, [
+    { amount: "2", name: "Kefir", note: "Bio", unit: "Flasche" },
+  ]);
+
+  assert.equal(created?.item.purchaseNote, "Bio");
+  assert.equal(created?.item.persistentNote, null);
+  assert.deepEqual(
+    created?.item.quantities.map(({ amount, unit }) => ({ amount, unit })),
+    [{ amount: "2", unit: "Flasche" }],
+  );
+
+  const before = (
+    database.prepare("SELECT count(*) AS count FROM items WHERE list_id = ?").get(listId) as {
+      count: number;
+    }
+  ).count;
+  assert.throws(
+    () =>
+      shopping.addVoiceItems(owner.user, listId, [
+        { amount: null, name: "Möhren", note: null, unit: null },
+        { amount: "ungültig", name: "Fehler", note: null, unit: "kg" },
+      ]),
+    /Menge/,
+  );
+  assert.equal(
+    (
+      database.prepare("SELECT count(*) AS count FROM items WHERE list_id = ?").get(listId) as {
+        count: number;
+      }
+    ).count,
+    before,
+  );
+});

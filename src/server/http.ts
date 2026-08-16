@@ -37,7 +37,7 @@ export function applySecurityHeaders(response: ServerResponse, production = fals
   response.setHeader("Referrer-Policy", "no-referrer");
   response.setHeader("X-Content-Type-Options", "nosniff");
   response.setHeader("X-Frame-Options", "DENY");
-  response.setHeader("Permissions-Policy", "camera=(self), microphone=(), geolocation=()");
+  response.setHeader("Permissions-Policy", "camera=(self), microphone=(self), geolocation=()");
   if (production) {
     response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   }
