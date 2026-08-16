@@ -701,6 +701,7 @@ async function submitItem(event: SubmitEvent, listId: string): Promise<void> {
   }
   try {
     const result = await api<{
+      item: ShoppingItem;
       merge: "appended" | "created" | "increased" | "reactivated" | "unchanged";
     }>(`/api/lists/${encodeURIComponent(listId)}/items`, {
       body: {
@@ -720,10 +721,24 @@ async function submitItem(event: SubmitEvent, listId: string): Promise<void> {
       unchanged: "Das Produkt stand bereits auf dem Zettel.",
     };
     showToast(messages[result.merge]);
-    form.querySelector<HTMLInputElement>("[name=name]")?.focus();
+    app
+      .querySelector<HTMLInputElement>('[data-add-item] [name="name"]')
+      ?.focus({ preventScroll: true });
+    scrollItemIntoView(result.item.id);
   } catch (error) {
     showToast(messageFromError(error), "error");
   }
+}
+
+function scrollItemIntoView(itemId: string): void {
+  const item = app.querySelector<HTMLElement>(
+    `.shopping-items [data-item-id="${CSS.escape(itemId)}"]`,
+  );
+  item?.scrollIntoView({
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    block: "center",
+    inline: "nearest",
+  });
 }
 
 async function toggleItem(row: HTMLElement | null): Promise<void> {
@@ -744,6 +759,9 @@ async function toggleItem(row: HTMLElement | null): Promise<void> {
     );
     replaceItemInCurrentState(result.item);
     syncActiveListItems();
+    if (item.completedAt && !result.item.completedAt) {
+      scrollItemIntoView(result.item.id);
+    }
   } catch (error) {
     row?.classList.remove("leaving");
     showToast(messageFromError(error), "error");
@@ -1007,6 +1025,9 @@ function openItemDialog(item: ShoppingItem): void {
         }
         dialog.close();
         await refreshState(false);
+        if (item.completedAt) {
+          scrollItemIntoView(item.id);
+        }
       } catch (error) {
         setDialogError(dialog, messageFromError(error));
       }

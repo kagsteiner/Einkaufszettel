@@ -171,8 +171,22 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   await page.getByLabel("Produkt", { exact: true }).fill("Hafermilch");
   await page.getByLabel("Menge", { exact: true }).fill("2");
   await page.getByLabel("Einheit", { exact: true }).fill("l");
+  await captureItemScroll(page);
   await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();
   await expect(page.getByText("2 l", { exact: true })).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (
+            window as Window & {
+              lastItemScroll?: Record<string, string>;
+            }
+          ).lastItemScroll,
+      ),
+    )
+    .toEqual({ behavior: "smooth", block: "center", inline: "nearest", name: "Hafermilch" });
+  await expect(page.getByLabel("Produkt", { exact: true })).toBeFocused();
   await expect(page.getByLabel("Produkt", { exact: true })).toHaveValue("");
   await expect(page.getByLabel("Menge", { exact: true })).toHaveValue("");
   await expect(page.getByLabel("Einheit", { exact: true })).toHaveValue("");
@@ -270,9 +284,22 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   await completedCreamRow.locator(".item-copy").click();
   itemDialog = page.getByRole("dialog");
   await expect(itemDialog.getByRole("button", { name: "Speichern" })).toHaveCount(0);
+  await captureItemScroll(page);
   await itemDialog.getByRole("button", { name: "Erneut kaufen" }).click();
   creamRow = page.locator(".shopping-items .shopping-row").filter({ hasText: "Schlagsahne" });
   await expect(creamRow).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (
+            window as Window & {
+              lastItemScroll?: { name?: string };
+            }
+          ).lastItemScroll?.name,
+      ),
+    )
+    .toBe("Schlagsahne");
   await expect(page.locator(".completed-items")).toHaveCount(0);
   await creamRow.getByRole("button", { name: "Als erledigt markieren" }).click();
   await expect(page.getByText("Bereits gekauft (1)", { exact: true })).toBeVisible();
@@ -467,4 +494,26 @@ async function register(page: import("@playwright/test").Page, name: string, ema
   await page.getByLabel("Passwort", { exact: true }).fill("Ein langes Browser-Testpasswort");
   await page.getByRole("button", { name: "Loslegen" }).click();
   await expect(page.getByRole("heading", { name: "Dein erster Zettel" })).toBeVisible();
+}
+
+async function captureItemScroll(page: import("@playwright/test").Page): Promise<void> {
+  await page.evaluate(() => {
+    const captureWindow = window as Window & {
+      lastItemScroll?: {
+        behavior?: ScrollBehavior;
+        block?: ScrollLogicalPosition;
+        inline?: ScrollLogicalPosition;
+        name?: string;
+      };
+    };
+    Element.prototype.scrollIntoView = function (options?: boolean | ScrollIntoViewOptions) {
+      const scrollOptions = typeof options === "object" ? options : {};
+      captureWindow.lastItemScroll = {
+        behavior: scrollOptions.behavior,
+        block: scrollOptions.block,
+        inline: scrollOptions.inline,
+        name: this.querySelector("strong")?.textContent || undefined,
+      };
+    };
+  });
 }
