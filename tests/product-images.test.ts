@@ -188,6 +188,7 @@ test("household-product aliases resolve to their chosen visual product", async (
     spülmaschinensalz: "karton",
     toilettenreiniger: "kloente",
     wasserenthärter: "karton",
+    viennetta: "viennetta",
     "wc-ente": "kloente",
     "wc-reiniger": "kloente",
     weichspüler: "waschmittel",

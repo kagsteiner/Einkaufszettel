@@ -1022,6 +1022,10 @@
       "file": "images/products/veggiefleisch.jpg"
     },
     {
+      "id": "viennetta",
+      "file": "images/products/viennetta.jpg"
+    },
+    {
       "id": "waffeleis",
       "file": "images/products/waffeleis.jpg"
     },
@@ -2825,6 +2829,11 @@
       "id": "veggiefleisch",
       "names": ["veggiefleisch", "veganes fleisch", "fleischersatz"],
       "image": "veggiefleisch"
+    },
+    {
+      "id": "viennetta",
+      "names": ["viennetta", "viennettas"],
+      "image": "viennetta"
     },
     {
       "id": "wacholderschinken",
