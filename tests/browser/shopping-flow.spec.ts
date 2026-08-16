@@ -269,7 +269,8 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
     .filter({ hasText: "Schlagsahne" });
   await completedCreamRow.locator(".item-copy").click();
   itemDialog = page.getByRole("dialog");
-  await itemDialog.getByRole("button", { name: "Speichern" }).click();
+  await expect(itemDialog.getByRole("button", { name: "Speichern" })).toHaveCount(0);
+  await itemDialog.getByRole("button", { name: "Erneut kaufen" }).click();
   creamRow = page.locator(".shopping-items .shopping-row").filter({ hasText: "Schlagsahne" });
   await expect(creamRow).toBeVisible();
   await expect(page.locator(".completed-items")).toHaveCount(0);

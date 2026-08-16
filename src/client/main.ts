@@ -960,7 +960,7 @@ function openItemDialog(item: ShoppingItem): void {
       ${item.imageId ? `<label class="check-label"><input type="checkbox" name="removeImage"> Vorhandenes Foto entfernen</label>` : ""}
       <fieldset><legend>Mengen</legend>${quantityInputs}</fieldset>
       <p class="form-error" role="alert"></p>
-      <div class="dialog-actions"><button class="danger-button" type="button" data-delete-item>Löschen</button><button class="primary-button" type="submit">Speichern</button></div>
+      <div class="dialog-actions"><button class="danger-button" type="button" data-delete-item>Löschen</button><button class="primary-button" type="submit">${item.completedAt ? "Erneut kaufen" : "Speichern"}</button></div>
     </form>`);
   dialog.querySelector<HTMLFormElement>("[data-item-form]")?.addEventListener("submit", (event) => {
     event.preventDefault();
