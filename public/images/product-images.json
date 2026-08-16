@@ -270,6 +270,10 @@
       "file": "images/products/fleischsalat.jpg"
     },
     {
+      "id": "fluessigseife",
+      "file": "images/products/fluessigseife.jpg"
+    },
+    {
       "id": "fonds",
       "file": "images/products/fonds.jpg"
     },
@@ -478,6 +482,10 @@
       "file": "images/products/klobuerste.jpg"
     },
     {
+      "id": "kloente",
+      "file": "images/products/kloente.jpg"
+    },
+    {
       "id": "klopapier",
       "file": "images/products/klopapier.jpg"
     },
@@ -516,6 +524,10 @@
     {
       "id": "krabbensalat",
       "file": "images/products/krabbensalat.jpg"
+    },
+    {
+      "id": "kraeuterbutterbaguette",
+      "file": "images/products/kraeuterbutterbaguette.jpg"
     },
     {
       "id": "kraeuterseitling",
@@ -944,6 +956,10 @@
     {
       "id": "suelze",
       "file": "images/products/suelze.jpg"
+    },
+    {
+      "id": "tab",
+      "file": "images/products/tab.jpg"
     },
     {
       "id": "tee",
@@ -1494,6 +1510,11 @@
       "image": "fleischsalat"
     },
     {
+      "id": "fluessigseife",
+      "names": ["flüssigseife", "flüssigseifen"],
+      "image": "fluessigseife"
+    },
+    {
       "id": "fonds",
       "names": ["fonds", "fond"],
       "image": "fonds"
@@ -1586,7 +1607,7 @@
     {
       "id": "geschirrspueltab",
       "names": ["geschirrspültab", "geschirrspültabs", "spülmaschinentab", "spülmaschinentabs"],
-      "image": "geschirrspueltab"
+      "imageFallback": "tab"
     },
     {
       "id": "gewuerze",
@@ -1847,6 +1868,11 @@
       "imageFallback": "buerste"
     },
     {
+      "id": "kloente",
+      "names": ["kloente", "wc-ente", "wc ente", "toilettenreiniger", "kloreiniger", "wc-reiniger"],
+      "image": "kloente"
+    },
+    {
       "id": "klopapier",
       "names": ["klopapier", "toilettenpapier"],
       "image": "klopapier"
@@ -1906,6 +1932,16 @@
       "id": "kraeuter",
       "names": ["kräuter", "küchenkräuter"],
       "image": "petersilie"
+    },
+    {
+      "id": "kraeuterbutterbaguette",
+      "names": [
+        "kräuterbutterbaguette",
+        "kräuterbutterbaguettes",
+        "knoblauchbutterbaguette",
+        "knoblauchbutterbaguettes"
+      ],
+      "image": "kraeuterbutterbaguette"
     },
     {
       "id": "kraeuterseitling",
@@ -2320,7 +2356,7 @@
     },
     {
       "id": "reiniger",
-      "names": ["reiniger", "putzmittel", "wc-reiniger", "toilettenreiniger"],
+      "names": ["reiniger", "putzmittel"],
       "image": "reiniger"
     },
     {
@@ -2644,6 +2680,11 @@
       "id": "suppenhuhn",
       "names": ["suppenhuhn", "suppenhühner"],
       "imageFallback": "haehnchen"
+    },
+    {
+      "id": "tab",
+      "names": ["tab", "tabs"],
+      "image": "tab"
     },
     {
       "id": "tee",
