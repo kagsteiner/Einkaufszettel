@@ -1,6 +1,17 @@
 # Zettel
 
-Mobile, gemeinsame Einkaufszettel für einen Haushalt – als kleine TypeScript-Web-App mit Node.js, SQLite, Echtzeit-Updates und optionaler Rezeptanalyse über OpenAI.
+Nach langen Jahren mit Bring!, das schon funktioniert, aber nicht die Features hat, die ich im täglichen Leben brauche, musste eine selbstgeschriebene App her.
+
+## Features
+
+- Entweder wie ein richtiger Einkaufszettel oder in einer Kachelansicht.
+- Unterstützung von Haushalten: Mehrere Personen können gemeinsam die Listen des Haushalts bearbeiten.
+- Realistischere Produktfotos von über 200 Produkten.
+- Fotografiere jedes Rezept und verwandle es automatisch in Einträge im Einkaufszettel (nachbearbeitbar).
+- Auch z. B. englische Rezepte funktionieren und werden in deutsche Produkte und Mengeneinheiten umgerechnet.
+- Voice Mode: Wenn du vor dem Kühlschrank stehst, diktiere einfach, was fehlt. Die App macht daraus Einträge im Einkaufszettel (auch nachbearbeitbar).
+- Die App analysiert regelmäßige Käufe und bietet sie als Vorschlagsliste an.
+- Änderbare Liste von Dingen, die man zu Hause hat (Salz, Zucker, Pfeffer, …).
 
 ## Lokal starten
 
@@ -76,3 +87,9 @@ Katalog, bricht er ohne Änderung ab. Anschließend muss `npm run check` ausgef�
 Setze mindestens `APP_ENV=production`, eine HTTPS-`APP_ORIGIN`, `DATABASE_PATH`, `UPLOAD_DIRECTORY` und `APP_ENCRYPTION_KEY`. Für einen Betrieb unter einem Unterpfad wie `/zettel` setze zusätzlich `APP_BASE_PATH=/zettel`. Der Server erwartet HTTPS-Terminierung durch einen Reverse Proxy. `TRUST_PROXY=true` ist nur korrekt, wenn der Proxy eingehende `X-Forwarded-For`-Header zuverlässig ersetzt.
 
 SQLite-Migrationen laufen beim Start. Sichere Datenbank und Upload-Verzeichnis gemeinsam und teste die Wiederherstellung. Es gibt absichtlich keinen cache-basierten Service Worker; HTML und API bleiben `no-store`, während gehashte Assets langfristig gecacht werden dürfen.
+
+## Warum nicht veröffentlicht?
+
+Einerseits würde ich die App gerne veröffentlichen. Aber kostenlos geht es nicht: Die Rezepterkennung und der Voice Mode verwenden OpenAI-Modelle (Terra, Luna und Transcribe). Ein Einkauf kostet mich nur ein paar Cent, bei vielen Benutzern würde es aber zu teuer. Und kostenpflichtig? Daran glaube ich nicht. Als Alternative müsste jeder Benutzer einen eigenen OpenAI API Key erzeugen. Das halte ich nicht für etwas, das Nichtentwickler tun möchten.
+
+Darum: nur hier auf GitHub.
