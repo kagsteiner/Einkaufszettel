@@ -826,36 +826,46 @@ h2 {
   padding-left: 0.3rem;
   font-size: 0.65rem;
 }
-.product-completion {
+.product-completions {
   position: absolute;
   bottom: calc(100% + 0.6rem);
   left: 0;
-  display: flex;
-  max-width: min(24rem, calc(100vw - 2rem));
-  align-items: baseline;
-  gap: 0.55rem;
-  overflow: hidden;
+  width: min(24rem, calc(100vw - 2rem));
+  max-height: min(18rem, calc(100dvh - 8rem));
+  display: grid;
+  overflow: auto;
   border: 1px solid rgb(37 56 46 / 18%);
   border-radius: 0.75rem;
-  padding: 0.55rem 0.75rem;
+  padding: 0.25rem;
   color: var(--ink);
   background: #fffdf8;
   box-shadow: 0 0.45rem 1.4rem rgb(25 39 31 / 18%);
-  cursor: pointer;
 }
-.product-completion[hidden] {
+.product-completions[hidden] {
   display: none;
 }
-.product-completion span {
+.product-completions button {
+  min-width: 0;
+  min-height: 2.65rem;
+  display: flex;
+  align-items: center;
+  border: 0;
+  border-radius: 0.55rem;
+  padding: 0.55rem 0.7rem;
+  color: var(--ink);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.product-completions button:hover,
+.product-completions button[aria-selected="true"] {
+  background: var(--green-light);
+}
+.product-completions span {
   overflow: hidden;
   font-weight: 750;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.product-completion small {
-  flex: none;
-  color: var(--muted);
-  font-size: 0.7rem;
 }
 .quick-add input {
   min-height: 2.65rem;

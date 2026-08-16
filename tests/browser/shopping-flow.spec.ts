@@ -322,14 +322,38 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   await expect(oatTile).toBeVisible();
   await page.getByRole("button", { name: "Listenansicht" }).click();
 
+  for (const product of [
+    "Haferflocken",
+    "Hafersahne",
+    "Haferdrink",
+    "Haferjoghurt",
+    "Haferkekse",
+    "Haferkleie",
+  ]) {
+    await page.getByLabel("Produkt", { exact: true }).fill(product);
+    await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();
+    await expect(
+      page.locator(".shopping-items .shopping-row").filter({ hasText: product }),
+    ).toBeVisible();
+    await expect(page.getByLabel("Produkt", { exact: true })).toHaveValue("");
+  }
   await page.getByLabel("Produkt", { exact: true }).fill("Haf");
-  const productCompletion = page.getByRole("button", { name: "Hafermilch vervollständigen" });
-  await expect(productCompletion).toBeVisible();
-  await page.getByLabel("Produkt", { exact: true }).fill("Hafersahne");
-  await expect(productCompletion).toBeHidden();
+  const productOptions = page.getByRole("option");
+  await expect(productOptions).toHaveCount(5);
+  const visibleSuggestions = await productOptions.allTextContents();
+  expect(visibleSuggestions.every((name) => name.startsWith("Hafer"))).toBe(true);
+  await page.getByLabel("Produkt", { exact: true }).press("ArrowDown");
+  const keyboardSelection = await productOptions.nth(1).textContent();
+  await page.getByLabel("Produkt", { exact: true }).press("Enter");
+  await expect(page.getByLabel("Produkt", { exact: true })).toHaveValue(keyboardSelection || "");
+
+  await page.getByLabel("Produkt", { exact: true }).fill("Haferk");
+  await expect(productOptions).toHaveCount(2);
+  await page.getByRole("option", { name: "Haferkekse vervollständigen" }).click();
+  await expect(page.getByLabel("Produkt", { exact: true })).toHaveValue("Haferkekse");
   await page.getByLabel("Produkt", { exact: true }).fill("Haf");
-  await productCompletion.click();
-  await expect(page.getByLabel("Produkt", { exact: true })).toHaveValue("Hafermilch");
+  await page.getByLabel("Produkt", { exact: true }).press("Escape");
+  await expect(page.getByRole("listbox", { name: "Passende Produkte" })).toBeHidden();
 
   await page.getByLabel("Produkt", { exact: true }).fill("Schlagsahne");
   await page.getByRole("button", { name: "Zum Zettel hinzufügen" }).click();

@@ -386,7 +386,7 @@ function listMarkup(list: ShoppingList): string {
           : ""
       }
       <form class="quick-add" data-add-item>
-        <div class="product-field quick-product-field"><label for="quick-product-name">Produkt</label><input id="quick-product-name" name="name" maxlength="120" placeholder="Was fehlt?" autocomplete="off" aria-autocomplete="inline" aria-controls="quick-product-suggestion" aria-expanded="false" required><button class="product-completion" id="quick-product-suggestion" type="button" hidden></button></div>
+        <div class="product-field quick-product-field"><label for="quick-product-name">Produkt</label><input id="quick-product-name" name="name" maxlength="120" placeholder="Was fehlt?" autocomplete="off" aria-autocomplete="list" aria-controls="quick-product-suggestions" aria-expanded="false" required><div class="product-completions" id="quick-product-suggestions" role="listbox" aria-label="Passende Produkte" hidden></div></div>
         <label class="amount-field"><span>Menge</span><input name="amount" inputmode="decimal" placeholder="2"></label>
         <label class="unit-field"><span>Einheit</span><input name="unit" maxlength="40" placeholder="Stück"></label>
         <button class="round-add" type="submit" aria-label="Zum Zettel hinzufügen">＋</button>
@@ -611,30 +611,42 @@ function bindItemEvents(root: ParentNode): void {
 
 function bindProductCompletion(): void {
   const input = app.querySelector<HTMLInputElement>('[data-add-item] [name="name"]');
-  const completion = app.querySelector<HTMLButtonElement>("[data-add-item] .product-completion");
-  if (!input || !completion || !currentState) {
+  const completionList = app.querySelector<HTMLElement>("[data-add-item] .product-completions");
+  if (!input || !completionList || !currentState) {
     return;
   }
 
-  let suggestedName: string | null = null;
+  let suggestions: string[] = [];
+  let activeIndex = 0;
   let dismissedValue: string | null = null;
   const updateCompletion = () => {
     const query = normalizeProductName(input.value);
-    suggestedName =
+    suggestions =
       query && query !== dismissedValue
-        ? currentState?.productSuggestions.find((candidate) => {
-            const candidateName = normalizeProductName(candidate.name);
-            return candidateName.startsWith(query) && candidateName !== query;
-          })?.name || null
-        : null;
-    completion.hidden = !suggestedName;
-    input.setAttribute("aria-expanded", String(Boolean(suggestedName)));
-    if (suggestedName) {
-      completion.innerHTML = `<span>${escapeHtml(suggestedName)}</span><small>vervollständigen</small>`;
-      completion.setAttribute("aria-label", `${suggestedName} vervollständigen`);
-    }
+        ? (currentState?.productSuggestions || [])
+            .filter((candidate) => {
+              const candidateName = normalizeProductName(candidate.name);
+              return candidateName.startsWith(query) && candidateName !== query;
+            })
+            .slice(0, 5)
+            .map((candidate) => candidate.name)
+        : [];
+    activeIndex = Math.min(activeIndex, Math.max(0, suggestions.length - 1));
+    completionList.hidden = suggestions.length === 0;
+    input.setAttribute("aria-expanded", String(suggestions.length > 0));
+    input.setAttribute(
+      "aria-activedescendant",
+      suggestions.length ? `quick-product-suggestion-${activeIndex}` : "",
+    );
+    completionList.innerHTML = suggestions
+      .map(
+        (name, index) =>
+          `<button id="quick-product-suggestion-${index}" type="button" role="option" aria-selected="${index === activeIndex}" data-completion-index="${index}" aria-label="${escapeHtml(name)} vervollständigen"><span>${escapeHtml(name)}</span></button>`,
+      )
+      .join("");
   };
-  const acceptCompletion = () => {
+  const acceptCompletion = (index = activeIndex) => {
+    const suggestedName = suggestions[index];
     if (!suggestedName) {
       return;
     }
@@ -647,21 +659,44 @@ function bindProductCompletion(): void {
 
   input.addEventListener("input", () => {
     dismissedValue = null;
+    activeIndex = 0;
     updateCompletion();
+  });
+  input.addEventListener("focus", updateCompletion);
+  input.addEventListener("blur", () => {
+    completionList.hidden = true;
+    input.setAttribute("aria-expanded", "false");
   });
   input.addEventListener("keydown", (event) => {
     const acceptsWithArrow =
       event.key === "ArrowRight" && input.selectionStart === input.value.length;
-    if (suggestedName && (event.key === "Tab" || acceptsWithArrow)) {
+    if (suggestions.length && event.key === "ArrowDown") {
+      event.preventDefault();
+      activeIndex = (activeIndex + 1) % suggestions.length;
+      updateCompletion();
+    } else if (suggestions.length && event.key === "ArrowUp") {
+      event.preventDefault();
+      activeIndex = (activeIndex - 1 + suggestions.length) % suggestions.length;
+      updateCompletion();
+    } else if (
+      suggestions.length &&
+      (event.key === "Enter" || event.key === "Tab" || acceptsWithArrow)
+    ) {
       event.preventDefault();
       acceptCompletion();
-    } else if (suggestedName && event.key === "Escape") {
+    } else if (suggestions.length && event.key === "Escape") {
       dismissedValue = normalizeProductName(input.value);
       updateCompletion();
     }
   });
-  completion.addEventListener("pointerdown", (event) => event.preventDefault());
-  completion.addEventListener("click", acceptCompletion);
+  completionList.addEventListener("pointerdown", (event) => event.preventDefault());
+  completionList.addEventListener("click", (event) => {
+    const option = (event.target as Element).closest<HTMLElement>("[data-completion-index]");
+    const index = Number(option?.dataset.completionIndex);
+    if (Number.isInteger(index)) {
+      acceptCompletion(index);
+    }
+  });
   updateCompletion();
 }
 
