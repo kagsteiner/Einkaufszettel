@@ -24,6 +24,11 @@ try {
     printUsers([user]);
     console.info(`Einmal-Link (gültig bis ${reset.expiresAt}):\n${url}`);
     console.info("Der Link ist vertraulich und wird ungültig, sobald das Passwort geändert wurde.");
+  } else if (command === "set-password" && identifier && option && !confirmation) {
+    const user = adminService.findUser(identifier);
+    await authService.setPassword(user.id, option);
+    console.info(`Das Passwort für ${user.email} wurde geändert.`);
+    console.info("Alle bestehenden Sitzungen und Reset-Links dieses Benutzers sind ungültig.");
   } else if (command === "delete" && identifier) {
     const user = adminService.findUser(identifier);
     printUsers([user]);
@@ -104,6 +109,7 @@ function printUsage(): void {
   console.info(`Benutzerverwaltung:
   npm run admin:users -- list
   npm run admin:users -- reset-password <E-Mail-oder-ID>
+  npm run admin:users -- set-password <E-Mail-oder-ID> <neues-Passwort>
   npm run admin:users -- delete <E-Mail-oder-ID>
   npm run admin:users -- delete <E-Mail-oder-ID> --confirm <exakte-E-Mail>`);
 }

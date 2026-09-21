@@ -118,6 +118,35 @@ test("a one-time password reset changes the password and invalidates all session
   );
 });
 
+test("an administrator can directly set a password and invalidate existing credentials", async () => {
+  const user = database
+    .prepare("SELECT id FROM users WHERE email_normalized = ?")
+    .get("anna@example.com") as { id: string };
+  const existingSession = await authService.login({
+    email: "anna@example.com",
+    password: "ein ganz neues Passwort",
+  });
+  const pendingReset = authService.createPasswordReset(user.id);
+
+  await authService.setPassword(user.id, "direkt gesetztes Passwort");
+
+  assert.throws(
+    () => authService.authenticate(existingSession.sessionToken),
+    /Bitte melde dich an/,
+  );
+  await assert.rejects(
+    authService.login({ email: "anna@example.com", password: "ein ganz neues Passwort" }),
+    /nicht korrekt/,
+  );
+  await assert.doesNotReject(
+    authService.login({ email: "anna@example.com", password: "direkt gesetztes Passwort" }),
+  );
+  await assert.rejects(
+    authService.resetPassword(pendingReset.token, "noch ein anderes Passwort"),
+    /ungültig oder bereits abgelaufen/,
+  );
+});
+
 test("email uniqueness is case-independent", async () => {
   await assert.rejects(
     authService.register({

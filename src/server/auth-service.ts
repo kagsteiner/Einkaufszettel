@@ -211,6 +211,21 @@ export class AuthService {
     });
   }
 
+  async setPassword(userId: string, passwordValue: unknown): Promise<void> {
+    const password = validatePassword(passwordValue);
+    const passwordHash = await hashPassword(password);
+    inTransaction(this.database, () => {
+      const result = this.database
+        .prepare("UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?")
+        .run(passwordHash, new Date().toISOString(), userId);
+      if (result.changes !== 1) {
+        throw new AppError(404, "user_not_found", "Dieser Benutzer wurde nicht gefunden.");
+      }
+      this.database.prepare("DELETE FROM sessions WHERE user_id = ?").run(userId);
+      this.database.prepare("DELETE FROM password_reset_tokens WHERE user_id = ?").run(userId);
+    });
+  }
+
   private getUserById(userId: string): UserRow {
     const row = this.database.prepare(`${userQuery} WHERE u.id = ?`).get(userId) as
       | UserRow
