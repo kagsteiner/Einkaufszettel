@@ -185,6 +185,8 @@ test("household-product aliases resolve to their chosen visual product", async (
     putenschnitzel: "putensteak",
     scheuermilch: "shampoo",
     salz: "salz",
+    süppchen: "suppe",
+    katzensuppe: "suppe",
     spülbalsam: "duschgel",
     spülmaschinensalz: "karton",
     toilettenreiniger: "kloente",

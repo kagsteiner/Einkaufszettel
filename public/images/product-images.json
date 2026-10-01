@@ -1882,14 +1882,7 @@
     },
     {
       "id": "katzenfutter",
-      "names": [
-        "katzenfutter",
-        "katzennahrung",
-        "katzensuppe",
-        "katzensuppen",
-        "katzensüppchen",
-        "stängli"
-      ],
+      "names": ["katzenfutter", "katzennahrung", "katzensuppen", "katzensüppchen", "stängli"],
       "image": "katzenfutter"
     },
     {
@@ -2745,7 +2738,7 @@
     },
     {
       "id": "suppe",
-      "names": ["suppe", "suppen"],
+      "names": ["suppe", "suppen", "süppchen", "katzensuppe"],
       "image": "suppe"
     },
     {
