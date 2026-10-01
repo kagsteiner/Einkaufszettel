@@ -49,6 +49,7 @@ test("German compounds use the longest safe catalog suffix", () => {
   const catalog = createProductImageCatalog({
     images: [
       { file: "images/products/buttermilch.jpg", id: "buttermilch" },
+      { file: "images/products/creme.jpg", id: "creme" },
       { file: "images/products/ei.jpg", id: "ei" },
       { file: "images/products/milch.jpg", id: "milch" },
       { file: "images/products/reis.jpg", id: "reis" },
@@ -57,6 +58,7 @@ test("German compounds use the longest safe catalog suffix", () => {
     ],
     products: [
       { id: "buttermilch", image: "buttermilch", names: ["Buttermilch"] },
+      { id: "creme", image: "creme", names: ["Creme"] },
       { id: "ei", image: "ei", names: ["Ei"] },
       { id: "milch", image: "milch", names: ["Milch"] },
       { id: "reis", image: "reis", names: ["Reis"] },
@@ -69,6 +71,7 @@ test("German compounds use the longest safe catalog suffix", () => {
   assert.equal(productImageFile(catalog, "Frischmilch"), "images/products/milch.jpg");
   assert.equal(productImageFile(catalog, "Jodsalz"), "images/products/salz.jpg");
   assert.equal(productImageFile(catalog, "BioButtermilch"), "images/products/buttermilch.jpg");
+  assert.equal(productImageFile(catalog, "Nachtcreme"), "images/products/creme.jpg");
   assert.equal(productImageFile(catalog, "Frischmilch Salz"), "images/products/milch.jpg");
   assert.equal(productImageFile(catalog, "Spiegelei"), unknownProductImageFile);
   assert.equal(productImageFile(catalog, "Preis"), unknownProductImageFile);

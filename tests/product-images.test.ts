@@ -174,6 +174,7 @@ test("household-product aliases resolve to their chosen visual product", async (
     citronensäure: "aroma",
     elektrolyte: "elektrolyte",
     entkalker: "shampoo",
+    erbsendrink: "erbsendrink",
     flüssigseife: "fluessigseife",
     frischhaltefolie: "tiefkuehlbeutel",
     handspülmittel: "duschgel",

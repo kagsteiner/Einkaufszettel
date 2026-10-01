@@ -170,6 +170,10 @@
       "file": "images/products/cracker.jpg"
     },
     {
+      "id": "creme",
+      "file": "images/products/creme.jpg"
+    },
+    {
       "id": "croissant",
       "file": "images/products/croissant.jpg"
     },
@@ -242,6 +246,10 @@
       "file": "images/products/erbsen.jpg"
     },
     {
+      "id": "erbsendrink",
+      "file": "images/products/erbsendrink.jpg"
+    },
+    {
       "id": "erdbeere",
       "file": "images/products/erdbeere.jpg"
     },
@@ -296,6 +304,10 @@
     {
       "id": "garnele",
       "file": "images/products/garnele.jpg"
+    },
+    {
+      "id": "geld",
+      "file": "images/products/geld.jpg"
     },
     {
       "id": "gemischtersalat",
@@ -750,6 +762,10 @@
       "file": "images/products/putzschwamm.jpg"
     },
     {
+      "id": "quark",
+      "file": "images/products/quark.jpg"
+    },
+    {
       "id": "radieschen",
       "file": "images/products/radieschen.jpg"
     },
@@ -966,6 +982,10 @@
       "file": "images/products/suelze.jpg"
     },
     {
+      "id": "suppe",
+      "file": "images/products/suppe.jpg"
+    },
+    {
       "id": "tab",
       "file": "images/products/tab.jpg"
     },
@@ -1000,6 +1020,10 @@
     {
       "id": "tomatensaft",
       "file": "images/products/tomatensaft.jpg"
+    },
+    {
+      "id": "tortillas",
+      "file": "images/products/tortillas.jpg"
     },
     {
       "id": "traubenblau",
@@ -1348,6 +1372,11 @@
       "image": "cracker"
     },
     {
+      "id": "creme",
+      "names": ["creme", "cremes"],
+      "image": "creme"
+    },
+    {
       "id": "croissant",
       "names": ["croissant", "croissants"],
       "image": "croissant"
@@ -1464,6 +1493,11 @@
       "image": "erbsen"
     },
     {
+      "id": "erbsendrink",
+      "names": ["erbsendrink", "erbsendrinks"],
+      "image": "erbsendrink"
+    },
+    {
       "id": "erdbeere",
       "names": ["erdbeere", "erdbeeren"],
       "image": "erdbeere"
@@ -1573,6 +1607,11 @@
       "id": "gelatine",
       "names": ["blattgelatine", "gelatine"],
       "imageFallback": "packung"
+    },
+    {
+      "id": "geld",
+      "names": ["geld"],
+      "image": "geld"
     },
     {
       "id": "geliermittel",
@@ -2351,6 +2390,11 @@
       "image": "putzschwamm"
     },
     {
+      "id": "quark",
+      "names": ["quark"],
+      "image": "quark"
+    },
+    {
       "id": "radieschen",
       "names": ["radieschen"],
       "image": "radieschen"
@@ -2700,6 +2744,11 @@
       "image": "suelze"
     },
     {
+      "id": "suppe",
+      "names": ["suppe", "suppen"],
+      "image": "suppe"
+    },
+    {
       "id": "suppenhuhn",
       "names": ["suppenhuhn", "suppenhühner"],
       "imageFallback": "haehnchen"
@@ -2771,6 +2820,11 @@
       "id": "tortenguss-weiss",
       "names": ["tortenguss weiss", "tortenguss weiß", "weißer tortenguss", "weisser tortenguss"],
       "imageFallback": "tortenguss"
+    },
+    {
+      "id": "tortillas",
+      "names": ["tortilla", "tortillas"],
+      "image": "tortillas"
     },
     {
       "id": "trauben",
