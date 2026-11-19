@@ -29,11 +29,13 @@ void boot();
 
 async function boot() {
   bindEvents();
-  await Promise.all([loadHealth(), loadJobs()]);
+  await Promise.all([loadHealth(), loadJobs(), loadBacklog()]);
   schedulePoll();
 }
 
 function bindEvents() {
+  form.elements.provider.addEventListener("change", updateProvider);
+  document.querySelector("[data-backlog-file]").addEventListener("change", importBacklog);
   form.addEventListener("submit", (event) => void submitJob(event));
   referenceInput.addEventListener("change", () => {
     addReferenceFiles([...referenceInput.files]);
@@ -66,6 +68,10 @@ function bindEvents() {
 async function loadHealth() {
   try {
     const health = await api("/api/health");
+    form.elements.provider.querySelector('[value="openai"]').disabled = !health.openAiAvailable;
+    form.elements.provider.title = health.openAiAvailable
+      ? ""
+      : "OPENAI_API_KEY fehlt in der Studio-Startumgebung.";
     engineState.classList.add("ready");
     engineState.querySelector("span:last-child").textContent =
       `${shortModelName(health.model)} · ${health.device.toUpperCase()}`;
@@ -149,9 +155,12 @@ async function submitJob(event) {
     const seedValue = String(values.get("seed") || "").trim();
     const payload = {
       productName: values.get("productName"),
+      provider: values.get("provider"),
+      model: values.get("model"),
+      quality: values.get("quality"),
       direction: values.get("direction"),
       variantCount: Number(values.get("variantCount")),
-      imageSize: Number(values.get("imageSize")),
+      imageSize: form.elements.provider.value === "openai" ? 1024 : Number(values.get("imageSize")),
       referenceImages,
     };
     if (seedValue) {
@@ -164,6 +173,7 @@ async function submitJob(event) {
     jobs = [response.job, ...jobs.filter((job) => job.id !== response.job.id)];
     renderJobs();
     form.reset();
+    updateProvider();
     referenceFiles = [];
     renderReferences();
     form.querySelector('select[name="variantCount"]').value = "4";
@@ -201,6 +211,17 @@ function renderJobs() {
     error.textContent = job.error || "";
     error.hidden = !job.error;
 
+    const adopt = fragment.querySelector("[data-adopt-job]");
+    adopt.hidden = job.status !== "completed";
+    adopt.disabled = job.selectedIndex === null || job.adoptedIndex === job.selectedIndex;
+    if (job.adoptedIndex !== null && job.adoptedIndex === job.selectedIndex)
+      adopt.textContent = "Lokal übernommen";
+    adopt.addEventListener("click", async () => {
+      adopt.disabled = true;
+      await performJobAction(job.id, "adopt");
+      await loadBacklog();
+      await loadJobs();
+    });
     const cancel = fragment.querySelector("[data-cancel-job]");
     cancel.hidden = !["queued", "running"].includes(job.status);
     cancel.addEventListener("click", () => void performJobAction(job.id, "cancel"));
@@ -236,7 +257,9 @@ function jobMeta(job) {
   const pieces = [
     `${job.variantCount} ${job.variantCount === 1 ? "variant" : "variants"}`,
     `${job.imageSize} px`,
-    `Seed ${job.seed}`,
+    job.provider === "openai"
+      ? `OpenAI · ${job.model} · ${job.quality}`
+      : `FLUX · Seed ${job.seed}`,
   ];
   if (job.referenceCount) {
     pieces.push(
@@ -360,4 +383,104 @@ function safeFilename(value) {
 
 function messageFromError(error) {
   return error instanceof Error ? error.message : "Unknown error";
+}
+
+function updateProvider() {
+  const openai = form.elements.provider.value === "openai";
+  for (const element of document.querySelectorAll("[data-openai-options], [data-openai-notice]"))
+    element.hidden = !openai;
+  form.elements.imageSize.disabled = openai;
+  form.elements.seed.disabled = openai;
+  if (openai) form.elements.imageSize.value = "1024";
+  else form.elements.imageSize.value = "768";
+  submitButton.querySelector("span").textContent = openai
+    ? "Kostenpflichtig generieren"
+    : "Add to queue";
+}
+
+async function loadBacklog() {
+  try {
+    renderBacklog(await api("/api/backlog"));
+  } catch (error) {
+    document.querySelector("[data-backlog-message]").textContent = messageFromError(error);
+  }
+}
+
+async function importBacklog(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const message = document.querySelector("[data-backlog-message]");
+  try {
+    if (file.size > 4 * 1024 * 1024) throw new Error("Backlog darf höchstens 4 MB groß sein.");
+    const response = await api("/api/backlog/import", { method: "POST", body: await file.text() });
+    renderBacklog(response);
+    message.textContent = "Backlog importiert. Wiederholte Exporte erzeugen keine Duplikate.";
+  } catch (error) {
+    message.textContent = messageFromError(error);
+  } finally {
+    event.target.value = "";
+  }
+}
+
+function renderBacklog(payload) {
+  const list = document.querySelector("[data-backlog-list]");
+  list.replaceChildren();
+  if (!payload.products.length) {
+    list.textContent = "Noch kein Backlog importiert.";
+    return;
+  }
+  for (const product of payload.products) {
+    const card = document.createElement("article");
+    card.className = "backlog-card";
+    const image = document.createElement("img");
+    image.src = `/catalog/${product.localImage.split("/").at(-1)}?v=${Date.now()}`;
+    image.alt = "Aktuelles lokales Bild";
+    image.loading = "lazy";
+    const title = document.createElement("h3");
+    title.textContent = product.name;
+    const info = document.createElement("p");
+    info.textContent = `${product.occurrences} Sichtungen · ${product.reason === "reported" ? "Bild gemeldet" : "Bild fehlt"} · ${product.resolvedLocally ? "Lokal erledigt · Deployment separat" : "Offen"}`;
+    const generate = document.createElement("button");
+    generate.type = "button";
+    generate.className = "quiet-button";
+    generate.textContent = "Generieren / neu versuchen";
+    generate.addEventListener("click", () => {
+      form.elements.productName.value = product.name;
+      form.scrollIntoView({ behavior: "smooth", block: "start" });
+      form.elements.productName.focus();
+    });
+    const label = document.createElement("label");
+    label.textContent = "Vorhandenes Bild zuordnen";
+    const select = document.createElement("select");
+    select.append(new Option("Bild auswählen …", ""));
+    for (const available of payload.images) {
+      if (available.id !== "unbekannt") select.append(new Option(available.id, available.id));
+    }
+    select.addEventListener("change", () => {
+      const chosen = payload.images.find((entry) => entry.id === select.value);
+      image.src = `/catalog/${(chosen?.file || product.localImage).split("/").at(-1)}?v=${Date.now()}`;
+    });
+    label.append(select);
+    const assign = document.createElement("button");
+    assign.className = "quiet-button";
+    assign.type = "button";
+    assign.textContent = "Zuordnung übernehmen";
+    assign.addEventListener("click", async () => {
+      if (!select.value) return;
+      assign.disabled = true;
+      try {
+        renderBacklog(
+          await api("/api/backlog/assign", {
+            method: "POST",
+            body: JSON.stringify({ name: product.name, imageId: select.value }),
+          }),
+        );
+      } catch (error) {
+        document.querySelector("[data-backlog-message]").textContent = messageFromError(error);
+        assign.disabled = false;
+      }
+    });
+    card.append(image, title, info, generate, label, assign);
+    list.append(card);
+  }
 }

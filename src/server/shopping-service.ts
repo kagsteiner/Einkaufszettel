@@ -9,6 +9,7 @@ import type { AuthenticatedUser } from "./auth-service.ts";
 import type { AppDatabase } from "./database.ts";
 import { inTransaction } from "./database.ts";
 import { AppError, invalidInput } from "./errors.ts";
+import type { ProductImageBacklog } from "./product-image-backlog.ts";
 import { combineAmounts, type NormalizedQuantity, normalizeQuantity } from "./quantity.ts";
 import { cleanRequiredText, normalizeComparableText } from "./text.ts";
 
@@ -68,7 +69,10 @@ export type ProductSuggestion = Readonly<{
 export class ShoppingService {
   private readonly database: AppDatabase;
 
-  constructor(database: AppDatabase) {
+  private readonly imageBacklog?: ProductImageBacklog;
+
+  constructor(database: AppDatabase, imageBacklog?: ProductImageBacklog) {
+    this.imageBacklog = imageBacklog;
     this.database = database;
   }
 
@@ -287,6 +291,7 @@ export class ShoppingService {
         .prepare("SELECT * FROM items WHERE list_id = ? AND normalized_name = ?")
         .get(listId, normalizeComparableText(name)) as ItemRow | undefined;
       const now = new Date().toISOString();
+      if (!existing?.image_id) this.imageBacklog?.record(name);
 
       if (!existing) {
         const itemId = randomUUID();
@@ -598,11 +603,17 @@ export class ShoppingService {
           this.insertQuantity(itemId, quantity, now);
         }
       }
+      if (name !== existing.name && !existing.image_id) this.imageBacklog?.record(name);
       if (category !== existing.category) {
         this.rememberProductCategory(user.householdId, name, category, now);
       }
       return this.getItem(user, itemId);
     });
+  }
+
+  reportItemImage(user: AuthenticatedUser, itemId: string): void {
+    const item = this.assertItemAccess(user, itemId);
+    this.imageBacklog?.record(item.name, true);
   }
 
   setItemImage(user: AuthenticatedUser, itemId: string, imageId: unknown): ShoppingItem {

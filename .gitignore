@@ -26,3 +26,5 @@ tools/product-image-studio/results/
 
 # Operating-system metadata
 .DS_Store
+
+product-image-backlog*.json

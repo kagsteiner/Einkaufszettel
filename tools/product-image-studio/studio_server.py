@@ -5,11 +5,11 @@ import base64
 import binascii
 import json
 import mimetypes
+import os
 import secrets
 import shutil
 import signal
 import threading
-import traceback
 import uuid
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -17,10 +17,11 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
 
-import torch
-from PIL import Image, ImageOps, UnidentifiedImageError
 
-from flux_runtime import MODEL_ID, MODEL_REVISION, prepare_pipeline
+from bridge import PROJECT_ROOT, call_bridge
+
+from model_config import MODEL_ID, MODEL_REVISION
+OPENAI_MODELS = {"gpt-image-1.5", "gpt-image-2", "chatgpt-image-latest"}
 from job_store import JobStore
 
 
@@ -92,6 +93,10 @@ def public_job(job: dict[str, Any]) -> dict[str, Any]:
         "variantCount": job["variant_count"],
         "imageSize": job["image_size"],
         "seed": job["seed"],
+        "provider": job["provider"],
+        "model": job["model"],
+        "quality": job["quality"],
+        "adoptedIndex": job["adopted_index"],
         "status": job["status"],
         "progress": job["progress"],
         "referenceCount": len(job["reference_paths"]),
@@ -133,6 +138,7 @@ class GenerationWorker(threading.Thread):
     def _ensure_pipeline(self) -> Any:
         if self.pipeline is None:
             print("Lade FLUX für die Generierungsqueue …", flush=True)
+            from flux_runtime import prepare_pipeline
             self.pipeline = prepare_pipeline(self.cache_directory)
             print("FLUX ist bereit.", flush=True)
         return self.pipeline
@@ -140,8 +146,13 @@ class GenerationWorker(threading.Thread):
     def _process(self, job: dict[str, Any]) -> None:
         job_id = str(job["id"])
         result_names: list[str] = list(job["results"])
-        references: list[Image.Image] = []
+        references: list[Any] = []
         try:
+            if job["provider"] == "openai":
+                self._process_openai(job, result_names)
+                return
+            import torch
+            from PIL import Image
             pipeline = self._ensure_pipeline()
             for reference_path in job["reference_paths"]:
                 with Image.open(reference_path) as source:
@@ -176,15 +187,45 @@ class GenerationWorker(threading.Thread):
 
             self.store.complete(job_id, result_names)
         except Exception as error:
-            traceback.print_exc()
-            self.store.fail(job_id, f"{type(error).__name__}: {error}")
+            if self.store.is_cancel_requested(job_id):
+                self.store.cancel_running(job_id, result_names)
+            else:
+                self.store.fail(job_id, str(error) if job["provider"] == "openai" else "Lokale Generierung fehlgeschlagen; Modell und Speicher prüfen.")
         finally:
             for reference in references:
                 reference.close()
 
+    def _process_openai(self, job: dict[str, Any], results: list[str]) -> None:
+        from PIL import Image
+        job_id = job["id"]
+        directory = self.jobs_directory / job_id / "results"
+        directory.mkdir(parents=True, exist_ok=True)
+        for index in range(len(results), job["variant_count"]):
+            if self.stop_event.is_set() or self.store.is_cancel_requested(job_id):
+                self.store.cancel_running(job_id, results)
+                return
+            response = call_bridge(job, openai=True, cancelled=lambda: self.stop_event.is_set() or self.store.is_cancel_requested(job_id))
+            raw = base64.b64decode(response["image"], validate=True)
+            filename = f"variant-{index + 1:02d}.png"
+            path = directory / filename
+            path.write_bytes(raw)
+            try:
+                with Image.open(path) as image:
+                    image.verify()
+            except Exception:
+                path.unlink(missing_ok=True)
+                raise ValueError("OpenAI lieferte kein lesbares Bild.") from None
+            results.append(filename)
+            self.store.update_progress(job_id, round(len(results) / job["variant_count"] * 100), results)
+        if self.store.is_cancel_requested(job_id):
+            self.store.cancel_running(job_id, results)
+        else:
+            self.store.complete(job_id, results)
+
 
 class StudioApplication:
     def __init__(self, runtime_directory: Path, cache_directory: Path) -> None:
+        self.catalog_lock = threading.Lock()
         self.runtime_directory = runtime_directory
         self.jobs_directory = runtime_directory / "jobs"
         self.jobs_directory.mkdir(parents=True, exist_ok=True)
@@ -201,8 +242,8 @@ class StudioApplication:
 
     def create_job(self, payload: dict[str, Any]) -> dict[str, Any]:
         product_name = str(payload.get("productName", "")).strip()
-        if not product_name or len(product_name) > 80:
-            raise ValueError("The product name must be between 1 and 80 characters long.")
+        if not product_name or len(product_name) > 120:
+            raise ValueError("The product name must be between 1 and 120 characters long.")
 
         direction = str(payload.get("direction", "")).strip()
         if len(direction) > 600:
@@ -221,6 +262,18 @@ class StudioApplication:
         if seed < 0 or seed > 2_147_483_637:
             raise ValueError("The seed must be between 0 and 2147483637.")
 
+        provider = payload.get("provider", "local")
+        model = payload.get("model", "gpt-image-1.5")
+        quality = payload.get("quality", "medium")
+        if (not isinstance(provider, str) or not isinstance(model, str) or not isinstance(quality, str)
+                or provider not in {"local", "openai"} or model not in OPENAI_MODELS or quality not in {"low", "medium", "high"}):
+            raise ValueError("Ungültiger Anbieter, Modell oder Qualität.")
+        if provider == "openai":
+            if not os.environ.get("OPENAI_API_KEY"):
+                raise ValueError("OPENAI_API_KEY fehlt in der Startumgebung des Studios.")
+            if image_size != 1024:
+                raise ValueError("OpenAI-Aufträge verwenden 1024 Pixel.")
+
         references = payload.get("referenceImages", [])
         if not isinstance(references, list) or len(references) > 4:
             raise ValueError("You can use up to four reference images.")
@@ -237,12 +290,18 @@ class StudioApplication:
             image_size=image_size,
             seed=seed,
             reference_paths=reference_paths,
+            provider=provider,
+            model=model,
+            quality=quality,
         )
         self.worker.wake()
         return public_job(job)
 
     @staticmethod
     def _save_references(directory: Path, references: list[Any]) -> list[str]:
+        if not references:
+            return []
+        from PIL import Image, ImageOps, UnidentifiedImageError
         saved_paths: list[str] = []
         try:
             for index, reference in enumerate(references):
@@ -281,6 +340,68 @@ class StudioApplication:
             raise
         return saved_paths
 
+    def import_backlog(self, payload: dict[str, Any]) -> dict[str, Any]:
+        from datetime import UTC, datetime
+        if payload.get("version") != 1 or payload.get("kind") != "product-image-backlog":
+            raise ValueError("Bitte einen Produktbild-Backlog der Version 1 importieren.")
+        products = payload.get("products")
+        if not isinstance(products, list) or len(products) > 10000:
+            raise ValueError("Ungültiger oder zu großer Backlog.")
+        cleaned_products = []
+        for product in products:
+            if (not isinstance(product, dict) or not isinstance(product.get("name"), str)
+                or not product["name"].strip() or len(product["name"]) > 120
+                or product.get("reason") not in ("missing", "reported")
+                or type(product.get("occurrences")) is not int or product["occurrences"] < 1
+                or not isinstance(product.get("imageSignature"), str)
+                or len(product["imageSignature"]) > 100):
+                raise ValueError("Ungültiger Backlog-Eintrag.")
+            clean = {key: product[key] for key in ("name", "reason", "occurrences", "imageSignature")}
+            for field in ("firstSeen", "lastSeen"):
+                value = product.get(field)
+                if not isinstance(value, str) or len(value) > 40:
+                    raise ValueError("Ungültiges Sichtungsdatum.")
+                try:
+                    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                    if parsed.tzinfo is None:
+                        raise ValueError("Zeitzone fehlt.")
+                    clean[field] = parsed.astimezone(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+                except ValueError:
+                    raise ValueError("Ungültiges Sichtungsdatum.") from None
+            if clean["firstSeen"] > clean["lastSeen"]:
+                raise ValueError("Ungültiger Sichtungszeitraum.")
+            cleaned_products.append(clean)
+        self.store.import_backlog(cleaned_products)
+        return self.backlog()
+
+    def backlog(self) -> dict[str, Any]:
+        products = self.store.list_backlog()
+        catalog = call_bridge({"action": "catalog", "names": [product["name"] for product in products]})
+        for product, local in zip(products, catalog["products"]):
+            product["localImage"] = local["file"]
+            product["resolvedLocally"] = (local["signature"] != "unknown" if product["reason"] == "missing"
+                                          else local["signature"] != product["imageSignature"])
+        return {"products": products, "images": catalog["images"]}
+
+    def adopt(self, job_id: str) -> None:
+        with self.catalog_lock:
+            job = self.store.get(job_id)
+            if not job or job["status"] != "completed" or job["selected_index"] is None:
+                raise ValueError("Bitte zuerst eine fertige Variante auswählen.")
+            index = job["selected_index"]
+            if index == job["adopted_index"]:
+                return
+            source = self.jobs_directory / job_id / "results" / job["results"][index]
+            call_bridge({"action": "adopt", "name": job["product_name"], "source": str(source)})
+            self.store.mark_adopted(job_id, index)
+
+    def assign(self, payload: dict[str, Any]) -> None:
+        name, image_id = payload.get("name"), payload.get("imageId")
+        if not isinstance(name, str) or not name.strip() or len(name) > 120 or not isinstance(image_id, str):
+            raise ValueError("Ungültige Zuordnung.")
+        with self.catalog_lock:
+            call_bridge({"action": "assign", "name": name, "imageId": image_id})
+
     def delete_job(self, job_id: str) -> bool:
         if not self.store.delete(job_id):
             return False
@@ -318,6 +439,8 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
         super().end_headers()
 
     def do_GET(self) -> None:
+        if not self._allow_request():
+            return
         path = unquote(urlparse(self.path).path)
         if path == "/api/health":
             self._send_json(
@@ -327,8 +450,23 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
                     "model": MODEL_ID,
                     "modelRevision": MODEL_REVISION,
                     "device": "mps",
+                    "openAiAvailable": bool(os.environ.get("OPENAI_API_KEY")),
+                    "openAiModels": sorted(OPENAI_MODELS),
                 },
             )
+            return
+        if path == "/api/backlog":
+            try:
+                self._send_json(HTTPStatus.OK, self.application.backlog())
+            except ValueError as error:
+                self._send_error(HTTPStatus.BAD_REQUEST, str(error))
+            return
+        if path.startswith("/catalog/"):
+            filename = path.removeprefix("/catalog/")
+            if Path(filename).name != filename or not filename.endswith(".jpg"):
+                self._send_error(HTTPStatus.NOT_FOUND, "Bild nicht gefunden.")
+                return
+            self._serve_file(PROJECT_ROOT / "public/images/products" / filename, "image/jpeg", "no-store")
             return
         if path == "/api/jobs":
             self._send_json(
@@ -350,7 +488,21 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
         self._serve_static(path)
 
     def do_POST(self) -> None:
+        if not self._allow_request():
+            return
         path = unquote(urlparse(self.path).path)
+        if path in {"/api/backlog/import", "/api/backlog/assign"}:
+            try:
+                payload = self._read_json()
+                if path.endswith("/import"):
+                    result = self.application.import_backlog(payload)
+                else:
+                    self.application.assign(payload)
+                    result = self.application.backlog()
+                self._send_json(HTTPStatus.OK, result)
+            except ValueError as error:
+                self._send_error(HTTPStatus.BAD_REQUEST, str(error))
+            return
         if path == "/api/jobs":
             try:
                 job = self.application.create_job(self._read_json())
@@ -378,6 +530,14 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
                 updated = self.application.store.get(job_id)
                 self._send_json(HTTPStatus.OK, {"job": public_job(updated or job)})
                 return
+            if action == "adopt":
+                try:
+                    self.application.adopt(job_id)
+                    updated = self.application.store.get(job_id)
+                    self._send_json(HTTPStatus.OK, {"job": public_job(updated or job)})
+                except ValueError as error:
+                    self._send_error(HTTPStatus.BAD_REQUEST, str(error))
+                return
             if action == "select":
                 try:
                     selected_index = int(self._read_json().get("selectedIndex"))
@@ -396,6 +556,8 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
         self._send_error(HTTPStatus.NOT_FOUND, "Not found.")
 
     def do_DELETE(self) -> None:
+        if not self._allow_request():
+            return
         path = unquote(urlparse(self.path).path)
         if path == "/api/jobs":
             deleted = self.application.delete_all_jobs()
@@ -421,6 +583,15 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
             self._send_json(HTTPStatus.OK, {"deleted": True})
             return
         self._send_error(HTTPStatus.NOT_FOUND, "Not found.")
+
+    def _allow_request(self) -> bool:
+        host = self.headers.get("Host", "")
+        allowed = {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}
+        origin = self.headers.get("Origin")
+        if host not in allowed or (origin and origin != f"http://{host}") or self.headers.get("Sec-Fetch-Site") == "cross-site":
+            self._send_error(HTTPStatus.FORBIDDEN, "Nur lokale Studio-Anfragen sind erlaubt.")
+            return False
+        return True
 
     def _read_json(self) -> dict[str, Any]:
         try:
@@ -506,7 +677,7 @@ class StudioHttpServer(ThreadingHTTPServer):
 
 def main() -> None:
     arguments = parse_arguments()
-    if arguments.host not in {"127.0.0.1", "localhost", "::1"}:
+    if arguments.host not in {"127.0.0.1", "localhost"}:
         raise SystemExit("Das Product Image Studio darf nur an localhost gebunden werden.")
     if arguments.port < 1024 or arguments.port > 65535:
         raise SystemExit("--port muss zwischen 1024 und 65535 liegen.")

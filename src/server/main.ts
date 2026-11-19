@@ -9,6 +9,7 @@ import { EventHub } from "./event-hub.ts";
 import { HouseholdService } from "./household-service.ts";
 import { applySecurityHeaders, sendJson, serveAppShell, servePublicFile } from "./http.ts";
 import { ImageService } from "./image-service.ts";
+import { ProductImageBacklog } from "./product-image-backlog.ts";
 import { RateLimiter } from "./rate-limiter.ts";
 import { RecipeService } from "./recipe-service.ts";
 import { SettingsService } from "./settings-service.ts";
@@ -19,7 +20,10 @@ const config = loadConfig();
 const database = await openDatabase(config.databasePath);
 const authService = new AuthService(database, config);
 const householdService = new HouseholdService(database);
-const shoppingService = new ShoppingService(database);
+const shoppingService = new ShoppingService(
+  database,
+  new ProductImageBacklog(database, config.publicDirectory),
+);
 const settingsService = new SettingsService(database, config);
 const imageService = new ImageService(database, config);
 const recipeService = new RecipeService(database, imageService, settingsService);

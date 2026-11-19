@@ -372,6 +372,9 @@ test("a household can maintain a live mobile shopping list", async ({ page }, te
   await creamRow.locator(".item-copy").click();
   itemDialog = page.getByRole("dialog");
   await expect(itemDialog.locator(".item-detail-photo img")).toBeVisible();
+  await itemDialog.getByRole("button", { name: "Bild fehlt / passt nicht" }).click();
+  await expect(itemDialog.getByRole("button", { name: "Bildwunsch vorgemerkt" })).toBeDisabled();
+
   await expect(itemDialog.getByLabel("Immer merken")).toHaveValue("Das ist meine Sorte");
   await expect(itemDialog.getByLabel("Nur für diesen Einkauf")).toHaveValue("");
   await itemDialog.getByRole("button", { name: "Schließen" }).click();

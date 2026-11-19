@@ -17,7 +17,7 @@
         <span class="brand-mark" aria-hidden="true">✦</span>
         <span>
           <strong>Product Image Studio</strong>
-          <small>Local FLUX workshop</small>
+          <small>FLUX & OpenAI workshop</small>
         </span>
       </a>
       <div class="engine-state" data-engine-state>
@@ -27,6 +27,16 @@
     </header>
 
     <main>
+      <section class="backlog-section" aria-labelledby="backlog-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">Aus der produktiven App</p><h2 id="backlog-title">Fehlende und unpassende Bilder</h2></div>
+          <label class="quiet-button">Backlog importieren<input type="file" accept="application/json,.json" data-backlog-file></label>
+        </div>
+        <p>Export vom VPS importieren, Produkt auswählen und ein Bild erzeugen oder ein vorhandenes zuordnen.
+          „Lokal erledigt“ bestätigt die Bildersammlung auf diesem Mac. Produktiv verfügbar werden Änderungen nach Commit und Deployment.</p>
+        <p data-backlog-message role="status"></p>
+        <div class="backlog-list" data-backlog-list></div>
+      </section>
       <section class="composer" aria-labelledby="composer-title">
         <div class="composer-copy">
           <p class="eyebrow">New subject</p>
@@ -43,7 +53,7 @@
             <input
               name="productName"
               placeholder="e.g. milk carton"
-              maxlength="80"
+              maxlength="120"
               autocomplete="off"
               required
             >
@@ -59,6 +69,12 @@
             ></textarea>
           </label>
 
+          <div class="generation-options">
+            <label class="field"><span>Generierung</span><select name="provider"><option value="local">Lokal · FLUX</option><option value="openai">OpenAI · API (kostenpflichtig)</option></select></label>
+            <label class="field" data-openai-options hidden><span>OpenAI-Modell</span><select name="model"><option value="gpt-image-1.5">GPT Image 1.5</option><option value="gpt-image-2">GPT Image 2</option><option value="chatgpt-image-latest">ChatGPT Image Latest</option></select></label>
+            <label class="field" data-openai-options hidden><span>Qualität</span><select name="quality"><option value="low">Niedrig</option><option value="medium" selected>Mittel</option><option value="high">Hoch</option></select></label>
+          </div>
+          <p data-openai-notice hidden>OpenAI erhält Produktbeschreibung und gewählte Stilreferenzen. Jede Variante erzeugt einen kostenpflichtigen API-Aufruf mit 1024 × 1024 Pixeln. Abbruch kann bereits laufende Kosten nicht zurücknehmen. Keine automatischen Wiederholungen.</p>
           <fieldset class="references-field">
             <legend>Style references <small>optional, up to 4</small></legend>
             <label class="reference-drop" data-reference-drop>
@@ -71,7 +87,7 @@
               <span class="reference-plus" aria-hidden="true">＋</span>
               <strong>Choose images or drop them here</strong>
               <small>
-                FLUX will follow their color, shape language, and lighting — not their subject.
+                The generator will follow their color, shape language, and lighting — not their subject.
               </small>
             </label>
             <div class="reference-preview" data-reference-preview></div>
@@ -147,6 +163,7 @@
             <p data-job-meta></p>
           </div>
           <div class="job-actions">
+            <button class="quiet-button" type="button" data-adopt-job>In Bildersammlung übernehmen</button>
             <button class="quiet-button danger" type="button" data-cancel-job>Cancel</button>
             <button class="icon-button" type="button" data-delete-job aria-label="Delete job">×</button>
           </div>

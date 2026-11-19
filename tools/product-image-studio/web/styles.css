@@ -663,11 +663,87 @@ h2 {
     gap: 12px;
   }
 
-  .job-actions .quiet-button {
-    display: none;
+  .job-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .job-actions {
+    flex-wrap: wrap;
   }
 
   .result-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+.backlog-section {
+  margin: 0 0 40px;
+}
+.backlog-section > p {
+  color: var(--muted);
+  max-width: 80ch;
+}
+.backlog-section input[type="file"] {
+  display: block;
+  max-width: 240px;
+  margin-top: 8px;
+}
+.backlog-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+.backlog-card {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+}
+.backlog-card > img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+.backlog-card label {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+.backlog-card select {
+  width: 100%;
+}
+body [hidden] {
+  display: none;
+}
+
+.backlog-section .section-heading {
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.backlog-section h2 {
+  font-size: clamp(26px, 4vw, 44px);
+  overflow-wrap: anywhere;
+}
+.backlog-section .quiet-button {
+  max-width: 100%;
+}
+.backlog-section input[type="file"] {
+  width: 100%;
+}
+.backlog-list {
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+}
+.backlog-card {
+  min-width: 0;
+}
+.job-title-row {
+  flex-wrap: wrap;
+}
+.job-header > div {
+  min-width: 0;
+}
+.job-header h3 {
+  overflow-wrap: anywhere;
 }

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -20,12 +21,17 @@ class JobStore:
         database_path.parent.mkdir(parents=True, exist_ok=True)
         self._initialize()
 
-    def _connect(self) -> sqlite3.Connection:
+    @contextmanager
+    def _connect(self):
         connection = sqlite3.connect(self.database_path, timeout=10)
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA journal_mode = WAL")
         connection.execute("PRAGMA foreign_keys = ON")
-        return connection
+        try:
+            with connection:
+                yield connection
+        finally:
+            connection.close()
 
     def _initialize(self) -> None:
         with self._connect() as connection:
@@ -50,6 +56,21 @@ class JobStore:
                 )
                 """
             )
+            columns = {row["name"] for row in connection.execute("PRAGMA table_info(generation_jobs)")}
+            for name, definition in {
+                "provider": "TEXT NOT NULL DEFAULT 'local'",
+                "model": "TEXT NOT NULL DEFAULT 'gpt-image-1.5'",
+                "quality": "TEXT NOT NULL DEFAULT 'medium'",
+                "adopted_index": "INTEGER",
+            }.items():
+                if name not in columns:
+                    connection.execute(f"ALTER TABLE generation_jobs ADD COLUMN {name} {definition}")
+            connection.execute("""CREATE TABLE IF NOT EXISTS image_backlog (
+                normalized_name TEXT PRIMARY KEY, payload TEXT NOT NULL
+            )""")
+            connection.execute("""UPDATE generation_jobs SET status = 'failed',
+                error = 'OpenAI-Auftrag unterbrochen; Nutzung vor einem erneuten Start prüfen.'
+                WHERE status = 'running' AND provider = 'openai'""")
             connection.execute(
                 """
                 CREATE INDEX IF NOT EXISTS generation_jobs_queue_idx
@@ -86,6 +107,9 @@ class JobStore:
         image_size: int,
         seed: int,
         reference_paths: list[str],
+        provider: str = "local",
+        model: str = "gpt-image-1.5",
+        quality: str = "medium",
     ) -> dict[str, Any]:
         timestamp = utc_now()
         with self._connect() as connection:
@@ -93,8 +117,8 @@ class JobStore:
                 """
                 INSERT INTO generation_jobs (
                     id, product_name, prompt, variant_count, image_size, seed,
-                    status, reference_paths, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, 'queued', ?, ?, ?)
+                    status, reference_paths, created_at, updated_at, provider, model, quality
+                ) VALUES (?, ?, ?, ?, ?, ?, 'queued', ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     job_id,
@@ -106,6 +130,9 @@ class JobStore:
                     json.dumps(reference_paths),
                     timestamp,
                     timestamp,
+                    provider,
+                    model,
+                    quality,
                 ),
             )
         job = self.get(job_id)
@@ -260,3 +287,22 @@ class JobStore:
             rows = connection.execute("SELECT id FROM generation_jobs").fetchall()
             connection.execute("DELETE FROM generation_jobs")
         return [str(row["id"]) for row in rows]
+
+    def mark_adopted(self, job_id: str, index: int) -> None:
+        with self._connect() as connection:
+            connection.execute("UPDATE generation_jobs SET adopted_index = ? WHERE id = ?", (index, job_id))
+
+    def import_backlog(self, products: list[dict[str, Any]]) -> None:
+        import unicodedata
+        with self._connect() as connection:
+            for product in products:
+                name = " ".join(unicodedata.normalize("NFKC", product["name"]).split()).lower()
+                old = connection.execute("SELECT payload FROM image_backlog WHERE normalized_name = ?", (name,)).fetchone()
+                if old and json.loads(old["payload"])["lastSeen"] > product["lastSeen"]:
+                    continue
+                connection.execute("INSERT INTO image_backlog VALUES (?, ?) ON CONFLICT(normalized_name) DO UPDATE SET payload = excluded.payload", (name, json.dumps(product)))
+
+    def list_backlog(self) -> list[dict[str, Any]]:
+        with self._connect() as connection:
+            rows = connection.execute("SELECT payload FROM image_backlog").fetchall()
+        return sorted([json.loads(row["payload"]) for row in rows], key=lambda item: -item["occurrences"])

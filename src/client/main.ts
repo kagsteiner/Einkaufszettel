@@ -1036,12 +1036,32 @@ function openItemDialog(item: ShoppingItem): void {
             `<option value="${escapeHtml(value)}" ${item.category === value ? "selected" : ""}>${escapeHtml(label)}</option>`,
         )
         .join("")}</select></label>
+      <button class="secondary-button" type="button" data-report-product-image>Bild fehlt / passt nicht</button>
       <label>Foto<input name="image" type="file" accept="image/*,.heic,.heif"></label>
       ${item.imageId ? `<label class="check-label"><input type="checkbox" name="removeImage"> Vorhandenes Foto entfernen</label>` : ""}
       <fieldset><legend>Mengen</legend>${quantityInputs}</fieldset>
       <p class="form-error" role="alert"></p>
       <div class="dialog-actions"><button class="danger-button" type="button" data-delete-item>Löschen</button><button class="primary-button" type="submit">${item.completedAt ? "Erneut kaufen" : "Speichern"}</button></div>
     </form>`);
+  dialog
+    .querySelector<HTMLButtonElement>("[data-report-product-image]")
+    ?.addEventListener("click", (event) => {
+      const button = event.currentTarget as HTMLButtonElement;
+      button.disabled = true;
+      void api(`/api/items/${item.id}/image-report`, { method: "POST", body: {} })
+        .then(() => {
+          button.textContent = "Bildwunsch vorgemerkt";
+        })
+        .catch((error: unknown) => {
+          button.disabled = false;
+          const message = dialog.querySelector<HTMLElement>(".form-error");
+          if (message)
+            message.textContent =
+              error instanceof Error
+                ? error.message
+                : "Bildwunsch konnte nicht gespeichert werden.";
+        });
+    });
   dialog.querySelector<HTMLFormElement>("[data-item-form]")?.addEventListener("submit", (event) => {
     event.preventDefault();
     void (async () => {

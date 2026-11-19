@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import signal
 import subprocess
 import sys
 import venv
@@ -120,6 +121,7 @@ def run_server(python: Path, runtime_directory: Path, port: int) -> None:
         ],
         cwd=PROJECT_ROOT,
     )
+    previous_handler = signal.signal(signal.SIGTERM, lambda _signum, _frame: process.terminate())
     try:
         return_code = process.wait()
     except KeyboardInterrupt:
@@ -129,7 +131,9 @@ def run_server(python: Path, runtime_directory: Path, port: int) -> None:
         except subprocess.TimeoutExpired:
             process.terminate()
             return_code = process.wait(timeout=5)
-    if return_code not in {0, -2, 130}:
+    finally:
+        signal.signal(signal.SIGTERM, previous_handler)
+    if return_code not in {0, -2, -15, 130}:
         raise subprocess.CalledProcessError(return_code, process.args)
 
 

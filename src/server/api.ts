@@ -339,6 +339,15 @@ export async function handleApiRequest(
       return true;
     }
 
+    const imageReportMatch = pathname.match(/^\/api\/items\/([^/]+)\/image-report$/);
+    if (request.method === "POST" && imageReportMatch?.[1]) {
+      const user = authenticateWrite(request, authService, sessionToken, config);
+      rateLimiter.consume(`image-report:${user.id}`, 60, 60 * 60 * 1_000);
+      shoppingService.reportItemImage(user, imageReportMatch[1]);
+      sendJson(response, 200, { ok: true });
+      return true;
+    }
+
     const itemImageMatch = pathname.match(/^\/api\/items\/([^/]+)\/image$/);
     if (request.method === "PUT" && itemImageMatch?.[1]) {
       const user = authenticateWrite(request, authService, sessionToken, config);

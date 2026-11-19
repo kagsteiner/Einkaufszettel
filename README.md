@@ -96,3 +96,13 @@ SQLite-Migrationen laufen beim Start. Sichere Datenbank und Upload-Verzeichnis g
 Einerseits würde ich die App gerne veröffentlichen. Aber kostenlos geht es nicht: Die Rezepterkennung und der Voice Mode verwenden OpenAI-Modelle (Terra, Luna und Transcribe). Ein Einkauf kostet mich nur ein paar Cent, bei vielen Benutzern würde es aber zu teuer. Und kostenpflichtig? Daran glaube ich nicht. Als Alternative müsste jeder Benutzer einen eigenen OpenAI API Key erzeugen. Das halte ich nicht für etwas, das Nichtentwickler tun möchten.
 
 Darum: nur hier auf GitHub.
+
+## Produktbilder pflegen
+
+Fehlende oder gemeldete Produktbilder werden auf dem VPS gesammelt. Export, manueller Transfer,
+OpenAI-/FLUX-Generierung und direkte Übernahme sind im
+[Product Image Studio](tools/product-image-studio/README.md#fehlende-bilder-aus-der-produktiven-app-bearbeiten) beschrieben.
+
+```bash
+npm run product-images:studio
+```

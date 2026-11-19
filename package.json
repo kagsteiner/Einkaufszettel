@@ -24,7 +24,8 @@
     "icons:generate": "tsx scripts/generate-product-icons.ts",
     "product-images:setup": "python3 tools/product-image-studio/bootstrap.py",
     "product-images:smoke": "python3 tools/product-image-studio/bootstrap.py --run-smoke",
-    "product-images:studio": "python3 tools/product-image-studio/bootstrap.py --run-server",
+    "product-images:studio": "tsx --env-file-if-exists=.env scripts/start-product-image-studio.ts",
+    "product-images:export": "tsx scripts/export-product-image-backlog.ts",
     "product-images:import": "tsx scripts/import-product-images.ts",
     "product-images:test": "python3 -m unittest discover -s tools/product-image-studio/tests -p 'test_*.py'",
     "check": "npm run typecheck && npm run product-images:test && npm test && npm run lint && npm run test:browser && npm run build"
