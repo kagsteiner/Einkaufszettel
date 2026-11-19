@@ -98,6 +98,10 @@
       "file": "images/products/brie.jpg"
     },
     {
+      "id": "broetchen",
+      "file": "images/products/broetchen.jpg"
+    },
+    {
       "id": "brokkoli",
       "file": "images/products/brokkoli.jpg"
     },
@@ -106,12 +110,12 @@
       "file": "images/products/brot.jpg"
     },
     {
-      "id": "broetchen",
-      "file": "images/products/broetchen.jpg"
-    },
-    {
       "id": "buchstabennudeln",
       "file": "images/products/buchstabennudeln.jpg"
+    },
+    {
+      "id": "buerste",
+      "file": "images/products/buerste.jpg"
     },
     {
       "id": "burgerbun",
@@ -120,10 +124,6 @@
     {
       "id": "burgerpatty",
       "file": "images/products/burgerpatty.jpg"
-    },
-    {
-      "id": "buerste",
-      "file": "images/products/buerste.jpg"
     },
     {
       "id": "butter",
@@ -224,6 +224,10 @@
     {
       "id": "eiersalat",
       "file": "images/products/eiersalat.jpg"
+    },
+    {
+      "id": "ein-einzelner-runder-lebkuchen-mit-oblate",
+      "file": "images/products/ein-einzelner-runder-lebkuchen-mit-oblate.jpg"
     },
     {
       "id": "eis",
@@ -362,14 +366,6 @@
       "file": "images/products/hackfleisch.jpg"
     },
     {
-      "id": "haferdrink",
-      "file": "images/products/haferdrink.jpg"
-    },
-    {
-      "id": "haferflocken",
-      "file": "images/products/haferflocken.jpg"
-    },
-    {
       "id": "haehnchen",
       "file": "images/products/haehnchen.jpg"
     },
@@ -380,6 +376,14 @@
     {
       "id": "haehnchenschenkel",
       "file": "images/products/haehnchenschenkel.jpg"
+    },
+    {
+      "id": "haferdrink",
+      "file": "images/products/haferdrink.jpg"
+    },
+    {
+      "id": "haferflocken",
+      "file": "images/products/haferflocken.jpg"
     },
     {
       "id": "haselnuss",
@@ -430,6 +434,10 @@
       "file": "images/products/joghurt.jpg"
     },
     {
+      "id": "kaese",
+      "file": "images/products/kaese.jpg"
+    },
+    {
       "id": "kaffee",
       "file": "images/products/kaffee.jpg"
     },
@@ -464,10 +472,6 @@
     {
       "id": "karton",
       "file": "images/products/karton.jpg"
-    },
-    {
-      "id": "kaese",
-      "file": "images/products/kaese.jpg"
     },
     {
       "id": "katze",
@@ -658,6 +662,10 @@
       "file": "images/products/muellbeutel.jpg"
     },
     {
+      "id": "muesli",
+      "file": "images/products/muesli.jpg"
+    },
+    {
       "id": "multivitaminsaft",
       "file": "images/products/multivitaminsaft.jpg"
     },
@@ -670,16 +678,16 @@
       "file": "images/products/muskatnuss.jpg"
     },
     {
-      "id": "muesli",
-      "file": "images/products/muesli.jpg"
-    },
-    {
       "id": "nagelfeile",
       "file": "images/products/nagelfeile.jpg"
     },
     {
       "id": "nutella",
       "file": "images/products/nutella.jpg"
+    },
+    {
+      "id": "nuts-and-raisins",
+      "file": "images/products/nuts-and-raisins.jpg"
     },
     {
       "id": "oliveoil",
@@ -806,12 +814,12 @@
       "file": "images/products/roehrchen.jpg"
     },
     {
-      "id": "rosmarin",
-      "file": "images/products/rosmarin.jpg"
-    },
-    {
       "id": "roesti",
       "file": "images/products/roesti.jpg"
+    },
+    {
+      "id": "rosmarin",
+      "file": "images/products/rosmarin.jpg"
     },
     {
       "id": "rotebeete",
@@ -1022,6 +1030,10 @@
       "file": "images/products/tomatensaft.jpg"
     },
     {
+      "id": "toothpaste",
+      "file": "images/products/toothpaste.jpg"
+    },
+    {
       "id": "tortillas",
       "file": "images/products/tortillas.jpg"
     },
@@ -1050,6 +1062,10 @@
       "file": "images/products/viennetta.jpg"
     },
     {
+      "id": "waescheklammer",
+      "file": "images/products/waescheklammer.jpg"
+    },
+    {
       "id": "waffeleis",
       "file": "images/products/waffeleis.jpg"
     },
@@ -1060,10 +1076,6 @@
     {
       "id": "wasabi",
       "file": "images/products/wasabi.jpg"
-    },
-    {
-      "id": "waescheklammer",
-      "file": "images/products/waescheklammer.jpg"
     },
     {
       "id": "waschmittel",
@@ -1458,6 +1470,11 @@
       "id": "eiersalat",
       "names": ["eiersalat", "eiersalate"],
       "image": "eiersalat"
+    },
+    {
+      "id": "ein-einzelner-runder-lebkuchen-mit-oblate",
+      "names": ["Ein einzelner runder Lebkuchen mit Oblate"],
+      "image": "ein-einzelner-runder-lebkuchen-mit-oblate"
     },
     {
       "id": "eis",
@@ -1912,6 +1929,11 @@
       "image": "kiwi"
     },
     {
+      "id": "klarspueler",
+      "names": ["Klarspüler"],
+      "image": "waschmittel"
+    },
+    {
       "id": "klobuerste",
       "names": ["klobürste", "klobürsten", "toilettenbürste", "toilettenbürsten"],
       "image": "klobuerste",
@@ -2064,6 +2086,11 @@
       "id": "laugenstange",
       "names": ["laugenstange", "laugenstangen"],
       "image": "laugenstange"
+    },
+    {
+      "id": "lebkuchen",
+      "names": ["Lebkuchen"],
+      "image": "ein-einzelner-runder-lebkuchen-mit-oblate"
     },
     {
       "id": "like-chicken",
@@ -2243,6 +2270,11 @@
       "id": "nutella",
       "names": ["nutella"],
       "image": "nutella"
+    },
+    {
+      "id": "nuts-and-raisins",
+      "names": ["nuts and raisins"],
+      "image": "nuts-and-raisins"
     },
     {
       "id": "oatly",
@@ -2732,6 +2764,11 @@
       "image": "steinpilz"
     },
     {
+      "id": "studentenfutter",
+      "names": ["Studentenfutter"],
+      "image": "nuts-and-raisins"
+    },
+    {
       "id": "suelze",
       "names": ["sülze", "sülzen"],
       "image": "suelze"
@@ -2798,6 +2835,11 @@
       "id": "tomatensaft",
       "names": ["tomatensaft", "tomatensäfte"],
       "image": "tomatensaft"
+    },
+    {
+      "id": "toothpaste",
+      "names": ["toothpaste"],
+      "image": "toothpaste"
     },
     {
       "id": "tortenguss",
@@ -2942,6 +2984,11 @@
       "names": ["wurst", "würste"],
       "image": "wurst",
       "imageFallback": "fleisch"
+    },
+    {
+      "id": "zahnpasta",
+      "names": ["Zahnpasta"],
+      "image": "toothpaste"
     },
     {
       "id": "zimt",
