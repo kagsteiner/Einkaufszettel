@@ -162,6 +162,10 @@
       "file": "images/products/cola.jpg"
     },
     {
+      "id": "colorful-balloons",
+      "file": "images/products/colorful-balloons.jpg"
+    },
+    {
       "id": "couscous",
       "file": "images/products/couscous.jpg"
     },
@@ -228,6 +232,10 @@
     {
       "id": "ein-einzelner-runder-lebkuchen-mit-oblate",
       "file": "images/products/ein-einzelner-runder-lebkuchen-mit-oblate.jpg"
+    },
+    {
+      "id": "ein-roter-gummibaer",
+      "file": "images/products/ein-roter-gummibaer.jpg"
     },
     {
       "id": "eis",
@@ -600,6 +608,10 @@
     {
       "id": "laugenstange",
       "file": "images/products/laugenstange.jpg"
+    },
+    {
+      "id": "leberkaese",
+      "file": "images/products/leberkaese.jpg"
     },
     {
       "id": "limette",
@@ -1050,6 +1062,10 @@
       "file": "images/products/unbekannt.jpg"
     },
     {
+      "id": "uncolored-brown-chocolate-sprinkles",
+      "file": "images/products/uncolored-brown-chocolate-sprinkles.jpg"
+    },
+    {
       "id": "vanilleschote",
       "file": "images/products/vanilleschote.jpg"
     },
@@ -1096,6 +1112,10 @@
     {
       "id": "wurst",
       "file": "images/products/wurst.jpg"
+    },
+    {
+      "id": "zahnstocher",
+      "file": "images/products/zahnstocher.jpg"
     },
     {
       "id": "zimt",
@@ -1374,6 +1394,11 @@
       "image": "cola"
     },
     {
+      "id": "colorful-balloons",
+      "names": ["colorful balloons"],
+      "image": "colorful-balloons"
+    },
+    {
       "id": "couscous",
       "names": ["couscous"],
       "image": "couscous"
@@ -1457,6 +1482,11 @@
       "image": "duschgel"
     },
     {
+      "id": "duschreinigerkonzentrat",
+      "names": ["Duschreinigerkonzentrat"],
+      "image": "reiniger"
+    },
+    {
       "id": "edamer",
       "names": ["edamer"],
       "imageFallback": "kaese"
@@ -1475,6 +1505,11 @@
       "id": "ein-einzelner-runder-lebkuchen-mit-oblate",
       "names": ["Ein einzelner runder Lebkuchen mit Oblate"],
       "image": "ein-einzelner-runder-lebkuchen-mit-oblate"
+    },
+    {
+      "id": "ein-roter-gummibaer",
+      "names": ["ein roter Gummibär"],
+      "image": "ein-roter-gummibaer"
     },
     {
       "id": "eis",
@@ -1731,6 +1766,11 @@
       "names": ["grünerpfeffer", "grüner pfeffer", "grüne pfefferkörner"],
       "image": "gruenerpfeffer",
       "imageFallback": "pfeffer"
+    },
+    {
+      "id": "gummibaerchen",
+      "names": ["Gummibärchen"],
+      "image": "ein-roter-gummibaer"
     },
     {
       "id": "gurke",
@@ -2088,6 +2128,11 @@
       "image": "laugenstange"
     },
     {
+      "id": "leberkaese",
+      "names": ["Leberkäse"],
+      "image": "leberkaese"
+    },
+    {
       "id": "lebkuchen",
       "names": ["Lebkuchen"],
       "image": "ein-einzelner-runder-lebkuchen-mit-oblate"
@@ -2128,6 +2173,11 @@
       "names": ["lorbeer", "lorbeerblatt", "lorbeerblätter"],
       "image": "lorbeer",
       "imageFallback": "kraeuter"
+    },
+    {
+      "id": "luftballons",
+      "names": ["Luftballons"],
+      "image": "colorful-balloons"
     },
     {
       "id": "maasdamer",
@@ -2563,6 +2613,11 @@
       "imageFallback": "kraeuter"
     },
     {
+      "id": "salsa",
+      "names": ["Salsa"],
+      "image": "ketchup"
+    },
+    {
       "id": "salz",
       "names": ["salz", "salze"],
       "image": "salz"
@@ -2610,6 +2665,11 @@
       "id": "schokopudding",
       "names": ["schokopudding", "schokopuddings"],
       "image": "schokopudding"
+    },
+    {
+      "id": "schokostreusel",
+      "names": ["Schokostreusel"],
+      "image": "uncolored-brown-chocolate-sprinkles"
     },
     {
       "id": "schupfnudel",
@@ -2895,6 +2955,11 @@
       "image": "unbekannt"
     },
     {
+      "id": "uncolored-brown-chocolate-sprinkles",
+      "names": ["uncolored brown chocolate sprinkles"],
+      "image": "uncolored-brown-chocolate-sprinkles"
+    },
+    {
       "id": "vanillearoma",
       "names": ["vanillearoma"],
       "imageFallback": "aroma"
@@ -2989,6 +3054,11 @@
       "id": "zahnpasta",
       "names": ["Zahnpasta"],
       "image": "toothpaste"
+    },
+    {
+      "id": "zahnstocher",
+      "names": ["Zahnstocher"],
+      "image": "zahnstocher"
     },
     {
       "id": "zimt",
